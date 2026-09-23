@@ -23,15 +23,15 @@ const PropertyBigCard = (props: PropertyBigCardProps) => {
 	const router = useRouter();
 
 	/** HANDLERS **/
-	const goPropertyDetatilPage = (propertyId: string) => {
+	const goPropertyDetailPage = (propertyId: string) => {
 		router.push(`/property/detail?id=${propertyId}`);
 	};
 
 	if (device === 'mobile') {
-		return <div>APARTMEND BIG CARD</div>;
+		return <div>APARTMENT BIG CARD</div>;
 	} else {
 		return (
-			<Stack className="property-big-card-box" onClick={() => goPropertyDetatilPage(property?._id)}>
+			<Stack className="property-big-card-box" onClick={() => goPropertyDetailPage(property?._id)}>
 				<Box
 					component={'div'}
 					className={'card-img'}
