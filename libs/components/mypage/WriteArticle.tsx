@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { Stack, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
+//@ts-ignore
 const TuiEditor = dynamic(() => import('../community/Teditor'), { ssr: false });
 
 const WriteArticle: NextPage = () => {
