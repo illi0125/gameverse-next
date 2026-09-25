@@ -1,5 +1,6 @@
 import numeral from 'numeral';
 import { sweetMixinErrorAlert } from './sweetAlert';
+import { FollowInquiry } from './types/follow/follow.input';
 
 export const formatterStr = (value: number | undefined): string => {
 	return numeral(value).format('0,0') != '0' ? numeral(value).format('0,0') : '';
@@ -31,7 +32,12 @@ export const likeTargetBoardArticleHandler = async (likeTargetBoardArticle: any,
 	}
 };
 
-export const likeTargetMemberHandler = async (likeTargetMember: any, id: string) => {
+export const likeTargetMemberHandler = async (
+	likeTargetMember: any,
+	getMemberFollowersRefetch: unknown,
+	followInquiry: FollowInquiry,
+	id: string,
+) => {
 	try {
 		await likeTargetMember({
 			variables: {
