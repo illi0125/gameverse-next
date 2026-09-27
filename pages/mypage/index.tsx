@@ -63,7 +63,7 @@ const MyPage: NextPage = () => {
 			if (!user._id) throw new Error(Messages.error2);
 
 			await unsubscribe({ variables: { input: id } });
-			await sweetTopSmallSuccessAlert('Subscribed!', 800);
+			await sweetTopSmallSuccessAlert('Unsubscribed!', 800);
 			await refetch({ input: query });
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
