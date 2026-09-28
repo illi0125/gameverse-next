@@ -139,7 +139,7 @@ export const PropertyPanelList = (props: PropertyPanelListType) => {
 					{/*@ts-ignore*/}
 					<EnhancedTableHead />
 					<TableBody>
-						{properties.length === 0 && (
+						{properties?.length === 0 && (
 							<TableRow>
 								<TableCell align="center" colSpan={8}>
 									<span className={'no-data'}>data not found!</span>
@@ -147,24 +147,33 @@ export const PropertyPanelList = (props: PropertyPanelListType) => {
 							</TableRow>
 						)}
 
-						{properties.length !== 0 &&
-							properties.map((property: Property, index: number) => {
+						{properties?.length !== 0 &&
+							properties?.map((property: Property, index: number) => {
 								const propertyImage = `${REACT_APP_API_URL}/${property?.propertyImages[0]}`;
 
 								return (
 									<TableRow hover key={property?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
 										<TableCell align="left">{property._id}</TableCell>
 										<TableCell align="left" className={'name'}>
-											<Stack direction={'row'}>
-												<Link href={`/property/detail?id=${property?._id}`}>
+											{property.propertyStatus === PropertyStatus.ACTIVE ? (
+												<Stack direction={'row'}>
+													<Link href={`/property/detail?id=${property?._id}`}>
+														<div>
+															<Avatar alt="Remy Sharp" src={propertyImage} sx={{ ml: '2px', mr: '10px' }} />
+														</div>
+													</Link>
+													<Link href={`/property/detail?id=${property?._id}`}>
+														<div>{property.propertyTitle}</div>
+													</Link>
+												</Stack>
+											) : (
+												<Stack direction={'row'}>
 													<div>
 														<Avatar alt="Remy Sharp" src={propertyImage} sx={{ ml: '2px', mr: '10px' }} />
 													</div>
-												</Link>
-												<Link href={`/property/detail?id=${property?._id}`}>
-													<div>{property.propertyTitle}</div>
-												</Link>
-											</Stack>
+													<div style={{ marginTop: '10px' }}>{property.propertyTitle}</div>
+												</Stack>
+											)}
 										</TableCell>
 										<TableCell align="center">{property.propertyPrice}</TableCell>
 										<TableCell align="center">{property.memberData?.memberNick}</TableCell>
