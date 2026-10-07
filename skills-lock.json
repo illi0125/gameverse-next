@@ -13,6 +13,12 @@
       "skillPath": "skills/hyperframes-animation/SKILL.md",
       "computedHash": "90be8b12d647ccb58f89a34de9da2ca3187371b905ff2c973d836ebaf9db9a36"
     },
+    "shadcn": {
+      "source": "shadcn-ui/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "f615de216e085a84e31593ad0fa9062232adc40cd87b7c7ab2b8e49abf6500be"
+    },
     "swiftui-expert-skill": {
       "source": "avdlee/swiftui-agent-skill",
       "sourceType": "github",
