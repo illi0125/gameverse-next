@@ -1,91 +1,121 @@
 import React from 'react';
-import { Stack, Box, Divider, Typography } from '@mui/material';
-import IconButton from '@mui/material/IconButton';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import Link from 'next/link';
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
+import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { Game } from '../../types/game/game';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { REACT_APP_API_URL, topGameRank } from '../../config';
-import { useRouter } from 'next/router';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
-import { formatEnumLabel, formatGamePrice } from '../../utils';
+import { formatEnumLabel, formatGameOriginalPrice, formatGamePrice, hasGameDiscount } from '../../utils';
 
 interface HomeGameCardProps {
 	game: Game;
 	variant: 'trend' | 'popular' | 'top';
 	likeGameHandler?: any;
+	feature?: boolean;
+	rank?: number;
 }
 
-/** Shared card for the Trend, Popular and Top homepage sections (desktop and mobile share markup) **/
+/** Homepage game presentation: cover card (trend/popular, optional feature size) or ranked row (top) **/
 const HomeGameCard = (props: HomeGameCardProps) => {
-	const { game, variant, likeGameHandler } = props;
-	const router = useRouter();
+	const { game, variant, likeGameHandler, feature = false, rank } = props;
 	const user = useReactiveVar(userVar);
-	const imagePath = game?.gameImages?.[0] ? `${REACT_APP_API_URL}/${game.gameImages[0]}` : '/img/gameverse/game-placeholder.svg';
-	const showBadges = variant === 'popular';
+	const imagePath = game?.gameImages?.[0]
+		? `${REACT_APP_API_URL}/${game.gameImages[0]}`
+		: '/img/gameverse/game-placeholder.svg';
+	const detailHref = { pathname: '/game/detail', query: { id: game?._id } };
+	const isLiked = Boolean(game?.meLiked?.[0]?.myFavorite);
+	const showTopBadge = variant === 'popular' && !game?.isUpcoming && game?.gameRank >= topGameRank;
 
-	/** HANDLERS **/
-	const pushDetailHandler = async (gameId: string) => {
-		await router.push({ pathname: '/game/detail', query: { id: gameId } });
-	};
+	const price = (
+		<span className="gv-price">
+			{hasGameDiscount(game) && <s className="gv-price__was">{formatGameOriginalPrice(game)}</s>}
+			<span className="gv-price__now">{formatGamePrice(game)}</span>
+		</span>
+	);
+
+	const stats = (
+		<span className="gv-stats">
+			<span className="gv-stat" aria-label={`${game?.gameViews ?? 0} views`}>
+				<VisibilityOutlinedIcon aria-hidden />
+				{game?.gameViews ?? 0}
+			</span>
+			{likeGameHandler && (
+				<button
+					type="button"
+					className={`gv-like ${isLiked ? 'is-liked' : ''}`}
+					aria-pressed={isLiked}
+					aria-label={`${isLiked ? 'Unlike' : 'Like'} ${game?.gameTitle}, ${game?.gameLikes ?? 0} likes`}
+					onClick={() => likeGameHandler(user, game?._id)}
+				>
+					{isLiked ? <FavoriteRoundedIcon aria-hidden /> : <FavoriteBorderRoundedIcon aria-hidden />}
+					{game?.gameLikes ?? 0}
+				</button>
+			)}
+		</span>
+	);
+
+	if (variant === 'top') {
+		return (
+			<article className="gv-rank-row">
+				<span className="gv-rank-row__rank" aria-label={`Rank ${rank}`}>
+					{rank}
+				</span>
+				<div className="gv-rank-row__cover">
+					<img src={imagePath} alt="" width={160} height={100} loading="lazy" decoding="async" />
+				</div>
+				<div className="gv-rank-row__body">
+					<h3 className="gv-rank-row__title">
+						<Link href={detailHref} className="gv-stretched">
+							{game?.gameTitle}
+						</Link>
+					</h3>
+					<p className="gv-rank-row__desc">{game?.gameDescription}</p>
+					<p className="gv-rank-row__meta">
+						{game?.gameGenres?.slice(0, 2).map(formatEnumLabel).join(', ')}
+						<span className="gv-sep" aria-hidden />
+						{game?.gamePlatforms?.map(formatEnumLabel).join(', ')}
+					</p>
+				</div>
+				<div className="gv-rank-row__side">
+					{price}
+					{stats}
+				</div>
+			</article>
+		);
+	}
 
 	return (
-		<Stack className={`${variant}-card-box`}>
-			<Box
-				component={'div'}
-				className={'card-img'}
-				style={{ backgroundImage: `url(${imagePath})` }}
-				onClick={() => pushDetailHandler(game._id)}
-			>
-				{showBadges && game?.isUpcoming && (
-					<div className={'status upcoming'}>
-						<span>upcoming</span>
-					</div>
-				)}
-				{showBadges && !game?.isUpcoming && game?.gameRank >= topGameRank && (
-					<div className={'status'}>
-						<img src="/img/icons/electricity.svg" alt="" />
-						<span>top</span>
-					</div>
-				)}
-				<div className={showBadges ? 'price' : undefined}>{formatGamePrice(game)}</div>
-			</Box>
-			<Box component={'div'} className={'info'}>
-				<strong className={'title'} onClick={() => pushDetailHandler(game._id)}>
-					{game?.gameTitle}
-				</strong>
-				<p className={'desc'}>{game?.gameDescription}</p>
-				<div className={'options game-chips'}>
+		<article className={`gv-card ${feature ? 'gv-card--feature' : ''}`}>
+			<div className="gv-card__cover">
+				<img src={imagePath} alt="" width={640} height={400} loading="lazy" decoding="async" />
+				<span className="gv-card__flags">
+					{game?.isUpcoming && <span className="gv-flag gv-flag--upcoming">Upcoming</span>}
+					{showTopBadge && <span className="gv-flag gv-flag--top">Top</span>}
+				</span>
+			</div>
+			<div className="gv-card__body">
+				<h3 className="gv-card__title">
+					<Link href={detailHref} className="gv-stretched">
+						{game?.gameTitle}
+					</Link>
+				</h3>
+				<p className="gv-card__genres">{game?.gameGenres?.slice(0, 2).map(formatEnumLabel).join(', ')}</p>
+				<p className="gv-card__desc">{game?.gameDescription}</p>
+				<ul className="gv-chips" aria-label="Platforms">
 					{game?.gamePlatforms?.slice(0, 3).map((platform: string) => (
-						<div key={platform}>
-							<span>{formatEnumLabel(platform)}</span>
-						</div>
+						<li className="gv-chip" key={platform}>
+							{formatEnumLabel(platform)}
+						</li>
 					))}
+				</ul>
+				<div className="gv-card__foot">
+					{price}
+					{stats}
 				</div>
-				<Divider sx={{ mt: '15px', mb: '17px' }} />
-				<div className={'bott'}>
-					<p>{game?.gameGenres?.slice(0, 2).map(formatEnumLabel).join(' / ')}</p>
-					<div className="view-like-box">
-						<IconButton color={'default'}>
-							<RemoveRedEyeIcon />
-						</IconButton>
-						<Typography className="view-cnt">{game?.gameViews}</Typography>
-						{likeGameHandler && (
-							<>
-								<IconButton color={'default'} onClick={() => likeGameHandler(user, game?._id)}>
-									{game?.meLiked && game?.meLiked[0]?.myFavorite ? (
-										<FavoriteIcon style={{ color: 'red' }} />
-									) : (
-										<FavoriteIcon />
-									)}
-								</IconButton>
-								<Typography className="view-cnt">{game?.gameLikes}</Typography>
-							</>
-						)}
-					</div>
-				</div>
-			</Box>
-		</Stack>
+			</div>
+		</article>
 	);
 };
 

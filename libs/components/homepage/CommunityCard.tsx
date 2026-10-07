@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Box } from '@mui/material';
+import { formatEnumLabel } from '../../utils';
 import Moment from 'react-moment';
 import { BoardArticle } from '../../types/board-article/board-article';
 
@@ -20,37 +20,46 @@ const CommunityCard = (props: CommunityCardProps) => {
 
 	if (device === 'mobile') {
 		return <div>COMMUNITY CARD (MOBILE)</div>;
-	} else {
-		if (vertical) {
-			return (
-				<Link href={`/community/detail?articleCategory=${article?.articleCategory}&id=${article?._id}`}>
-					<Box component={'div'} className={'vertical-card'}>
-						<div className={'community-img'} style={{ backgroundImage: `url(${articleImage})` }}>
-							<div>{index + 1}</div>
-						</div>
-						<strong>{article?.articleTitle}</strong>
-						<span>Free Board</span>
-					</Box>
-				</Link>
-			);
-		} else {
-			return (
-				<>
-					<Link href={`/community/detail?articleCategory=${article?.articleCategory}&id=${article?._id}`}>
-						<Box component={'div'} className="horizontal-card">
-							<img src={articleImage} alt="" />
-							<div>
-								<strong>{article.articleTitle}</strong>
-								<span>
-									<Moment format="DD.MM.YY">{article?.createdAt}</Moment>
-								</span>
-							</div>
-						</Box>
-					</Link>
-				</>
-			);
-		}
 	}
+
+	const href = `/community/detail?articleCategory=${article?.articleCategory}&id=${article?._id}`;
+
+	if (vertical) {
+		return (
+			<article className="gv-post">
+				<div className="gv-post__cover">
+					<img src={articleImage} alt="" width={480} height={300} loading="lazy" decoding="async" />
+					<span className="gv-post__rank" aria-label={`Most read number ${index + 1}`}>
+						{index + 1}
+					</span>
+				</div>
+				<h4 className="gv-post__title">
+					<Link href={href} className="gv-stretched">
+						{article?.articleTitle}
+					</Link>
+				</h4>
+				<span className="gv-post__meta">{formatEnumLabel(article?.articleCategory)}</span>
+			</article>
+		);
+	}
+
+	return (
+		<article className="gv-post gv-post--row">
+			<div className="gv-post__thumb">
+				<img src={articleImage} alt="" width={160} height={120} loading="lazy" decoding="async" />
+			</div>
+			<div className="gv-post__text">
+				<h4 className="gv-post__title">
+					<Link href={href} className="gv-stretched">
+						{article?.articleTitle}
+					</Link>
+				</h4>
+				<span className="gv-post__meta">
+					<Moment format="DD.MM.YY">{article?.createdAt}</Moment>
+				</span>
+			</div>
+		</article>
+	);
 };
 
 export default CommunityCard;

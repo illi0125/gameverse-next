@@ -4,15 +4,13 @@ import Head from 'next/head';
 import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
+import HomeHero from '../homepage/HomeHero';
 import FiberContainer from '../common/FiberContainer';
 import HeaderFilter from '../homepage/HeaderFilter';
 import { userVar } from '../../../apollo/store';
 import { useReactiveVar } from '@apollo/client';
 import { getJwtToken, updateUserInfo } from '../../auth';
 import Chat from '../Chat';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 
 const withLayoutMain = (Component: any) => {
 	return (props: any) => {
@@ -39,7 +37,8 @@ const withLayoutMain = (Component: any) => {
 							<Top />
 						</Stack>
 
-						<Stack id={'main'}>
+						<Stack id={'main'} className={'gv-home'}>
+							<HomeHero />
 							<Component {...props} />
 						</Stack>
 
@@ -61,14 +60,8 @@ const withLayoutMain = (Component: any) => {
 							<Top />
 						</Stack>
 
-						<Stack className={'header-main'}>
-							<FiberContainer />
-							<Stack className={'container'}>
-								<HeaderFilter />
-							</Stack>
-						</Stack>
-
-						<Stack id={'main'}>
+						<Stack id={'main'} className={'gv-home'}>
+							<HomeHero search={<HeaderFilter />} visual={<FiberContainer />} />
 							<Component {...props} />
 						</Stack>
 

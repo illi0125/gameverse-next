@@ -1,41 +1,27 @@
 import React from 'react';
-import { useRouter } from 'next/router';
-import { Stack } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
+import Link from 'next/link';
 import { Member } from '../../types/member/member';
+import { formatEnumLabel } from '../../utils';
 
 interface TopAgentProps {
 	agent: Member;
 }
+
 const TopAgentCard = (props: TopAgentProps) => {
 	const { agent } = props;
-	const device = useDeviceDetect();
-	const router = useRouter();
 	const agentImage = agent?.memberImage
 		? `${process.env.REACT_APP_API_URL}/${agent?.memberImage}`
 		: '/img/profile/defaultUser.svg';
 
-	/** HANDLERS **/
-
-	if (device === 'mobile') {
-		return (
-			<Stack className="top-agent-card">
-				<img src={agentImage} alt="" />
-
-				<strong>{agent?.memberNick}</strong>
-				<span>{agent?.memberType}</span>
-			</Stack>
-		);
-	} else {
-		return (
-			<Stack className="top-agent-card">
-				<img src={agentImage} alt="" />
-
-				<strong>{agent?.memberNick}</strong>
-				<span>{agent?.memberType}</span>
-			</Stack>
-		);
-	}
+	return (
+		<Link href={`/agent/detail?agentId=${agent?._id}`} className="gv-agent">
+			<span className="gv-agent__avatar">
+				<img src={agentImage} alt="" width={96} height={96} loading="lazy" decoding="async" />
+			</span>
+			<span className="gv-agent__name">{agent?.memberNick}</span>
+			<span className="gv-agent__role">{formatEnumLabel(agent?.memberType)}</span>
+		</Link>
+	);
 };
 
 export default TopAgentCard;

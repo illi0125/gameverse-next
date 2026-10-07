@@ -171,7 +171,14 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 			<>
 				<Stack className={'search-box'}>
 					<Stack className={'select-box'}>
-						<Box component={'div'} className={`box ${openPlatform ? 'on' : ''}`} onClick={platformStateChangeHandler}>
+						<Box
+							component={'button'}
+							type="button"
+							aria-haspopup="true"
+							aria-expanded={openPlatform}
+							className={`box ${openPlatform ? 'on' : ''}`}
+							onClick={platformStateChangeHandler}
+						>
 							<span>
 								{searchFilter?.search?.platformList
 									? formatEnumLabel(searchFilter.search.platformList[0])
@@ -179,13 +186,27 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 							</span>
 							<ExpandMoreIcon />
 						</Box>
-						<Box className={`box ${openGenre ? 'on' : ''}`} onClick={genreStateChangeHandler}>
+						<Box
+							component={'button'}
+							type="button"
+							aria-haspopup="true"
+							aria-expanded={openGenre}
+							className={`box ${openGenre ? 'on' : ''}`}
+							onClick={genreStateChangeHandler}
+						>
 							<span>
 								{searchFilter?.search?.genreList ? formatEnumLabel(searchFilter.search.genreList[0]) : t('Genre')}
 							</span>
 							<ExpandMoreIcon />
 						</Box>
-						<Box className={`box ${openType ? 'on' : ''}`} onClick={typeStateChangeHandler}>
+						<Box
+							component={'button'}
+							type="button"
+							aria-haspopup="true"
+							aria-expanded={openType}
+							className={`box ${openType ? 'on' : ''}`}
+							onClick={typeStateChangeHandler}
+						>
 							<span>
 								{searchFilter?.search?.typeList ? formatEnumLabel(searchFilter.search.typeList[0]) : t('Pricing')}
 							</span>
@@ -193,37 +214,37 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 						</Box>
 					</Stack>
 					<Stack className={'search-box-other'}>
-						<Box className={'advanced-filter'} onClick={() => advancedFilterHandler(true)}>
-							<img src="/img/icons/tune.svg" alt="" />
+						<Box component={'button'} type="button" className={'advanced-filter'} onClick={() => advancedFilterHandler(true)}>
+							<img src="/img/icons/tune.svg" alt="" aria-hidden />
 							<span>{t('Advanced')}</span>
 						</Box>
-						<Box className={'search-btn'} onClick={pushSearchHandler}>
-							<img src="/img/icons/search_white.svg" alt="" />
+						<Box component={'button'} type="button" className={'search-btn'} aria-label="Search games" onClick={pushSearchHandler}>
+							<img src="/img/icons/search_white.svg" alt="" aria-hidden />
 						</Box>
 					</Stack>
 
 					{/*MENU */}
 					<div className={`filter-rooms ${openPlatform ? 'on' : ''}`} ref={platformRef}>
 						{Object.values(GamePlatform).map((platform: GamePlatform) => (
-							<span onClick={() => platformSelectHandler(platform)} key={platform}>
+							<button type="button" onClick={() => platformSelectHandler(platform)} key={platform}>
 								{formatEnumLabel(platform)}
-							</span>
+							</button>
 						))}
 					</div>
 
 					<div className={`filter-rooms wrap ${openGenre ? 'on' : ''}`} ref={genreRef}>
 						{Object.values(GameGenre).map((genre: GameGenre) => (
-							<span onClick={() => genreSelectHandler(genre)} key={genre}>
+							<button type="button" onClick={() => genreSelectHandler(genre)} key={genre}>
 								{formatEnumLabel(genre)}
-							</span>
+							</button>
 						))}
 					</div>
 
 					<div className={`filter-rooms ${openType ? 'on' : ''}`} ref={typeRef}>
 						{Object.values(GameType).map((type: GameType) => (
-							<span onClick={() => typeSelectHandler(type)} key={type}>
+							<button type="button" onClick={() => typeSelectHandler(type)} key={type}>
 								{formatEnumLabel(type)}
-							</span>
+							</button>
 						))}
 					</div>
 				</Stack>
@@ -396,7 +417,7 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 									<span>Reset all filters</span>
 								</div>
 								<Button
-									startIcon={<img src={'/img/icons/search.svg'} />}
+									startIcon={<img src={'/img/icons/search.svg'} alt="" />}
 									className={'search-btn'}
 									onClick={pushSearchHandler}
 								>

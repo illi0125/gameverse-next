@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Stack, Typography } from '@mui/material';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import HomeSection from './HomeSection';
 import CommunityCard from './CommunityCard';
 import { BoardArticle } from '../../types/board-article/board-article';
 import { useQuery } from '@apollo/client';
@@ -53,41 +54,52 @@ const CommunityBoards = () => {
 		return <div>COMMUNITY BOARDS (MOBILE)</div>;
 	} else {
 		return (
-			<Stack className={'community-board'}>
-				<Stack className={'container'}>
-					<Stack>
-						<Typography variant={'h1'}>COMMUNITY BOARD HIGHLIGHTS</Typography>
-					</Stack>
-					<Stack className="community-main">
-						<Stack className={'community-left'}>
-							<Stack className={'content-top'}>
-								<Link href={'/community?articleCategory=NEWS'}>
-									<span>News</span>
-								</Link>
-								<img src="/img/icons/arrowBig.svg" alt="" />
-							</Stack>
-							<Stack className={'card-wrap'}>
-								{newsArticles.map((article, index) => {
-									return <CommunityCard vertical={true} article={article} index={index} key={article?._id} />;
-								})}
-							</Stack>
-						</Stack>
-						<Stack className={'community-right'}>
-							<Stack className={'content-top'}>
-								<Link href={'/community?articleCategory=FREE'}>
-									<span>Free</span>
-								</Link>
-								<img src="/img/icons/arrowBig.svg" alt="" />
-							</Stack>
-							<Stack className={'card-wrap vertical'}>
-								{freeArticles.map((article, index) => {
-									return <CommunityCard vertical={false} article={article} index={index} key={article?._id} />;
-								})}
-							</Stack>
-						</Stack>
-					</Stack>
-				</Stack>
-			</Stack>
+			<HomeSection
+				id="community"
+				title="From the community"
+				description="The most read posts on the news and free boards."
+			>
+				<div className="gv-community">
+					<div className="gv-board">
+						<h3 className="gv-board__title">
+							<Link href={'/community?articleCategory=NEWS'} className="gv-link">
+								News
+								<ArrowForwardRoundedIcon aria-hidden />
+							</Link>
+						</h3>
+						{newsArticles.length === 0 ? (
+							<p className="gv-empty">No news posts yet.</p>
+						) : (
+							<ol className="gv-board__grid" aria-label="Most read news">
+								{newsArticles.map((article, index) => (
+									<li key={article?._id}>
+										<CommunityCard vertical={true} article={article} index={index} />
+									</li>
+								))}
+							</ol>
+						)}
+					</div>
+					<div className="gv-board gv-board--list">
+						<h3 className="gv-board__title">
+							<Link href={'/community?articleCategory=FREE'} className="gv-link">
+								Free board
+								<ArrowForwardRoundedIcon aria-hidden />
+							</Link>
+						</h3>
+						{freeArticles.length === 0 ? (
+							<p className="gv-empty">No free board posts yet.</p>
+						) : (
+							<ul className="gv-board__list" aria-label="Most read free board posts">
+								{freeArticles.map((article, index) => (
+									<li key={article?._id}>
+										<CommunityCard vertical={false} article={article} index={index} />
+									</li>
+								))}
+							</ul>
+						)}
+					</div>
+				</div>
+			</HomeSection>
 		);
 	}
 };

@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
-import { Stack, Box } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import WestIcon from '@mui/icons-material/West';
-import EastIcon from '@mui/icons-material/East';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Navigation, Pagination } from 'swiper';
 import HomeGameCard from './HomeGameCard';
+import HomeSection from './HomeSection';
 import { GamesInquiry } from '../../types/game/game.input';
 import { Game } from '../../types/game/game';
 import { useMutation, useQuery } from '@apollo/client';
@@ -21,7 +16,6 @@ interface TopGamesProps {
 
 const TopGames = (props: TopGamesProps) => {
 	const { initialInput } = props;
-	const device = useDeviceDetect();
 	const [topGames, setTopGames] = useState<Game[]>([]);
 
 	/** APOLLO REQUESTS **/
@@ -55,77 +49,25 @@ const TopGames = (props: TopGamesProps) => {
 		}
 	};
 
-	if (device === 'mobile') {
-		return (
-			<Stack className={'top-games'}>
-				<Stack className={'container'}>
-					<Stack className={'info-box'}>
-						<span>Top Games</span>
-					</Stack>
-					<Stack className={'card-box'}>
-						<Swiper
-							className={'top-game-swiper'}
-							slidesPerView={'auto'}
-							centeredSlides={true}
-							spaceBetween={15}
-							modules={[Autoplay]}
-						>
-							{topGames.map((game: Game) => {
-								return (
-									<SwiperSlide className={'top-game-slide'} key={game?._id}>
-										<HomeGameCard game={game} variant={'top'} likeGameHandler={likeGameHandler} />
-									</SwiperSlide>
-								);
-							})}
-						</Swiper>
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	} else {
-		return (
-			<Stack className={'top-games'}>
-				<Stack className={'container'}>
-					<Stack className={'info-box'}>
-						<Box component={'div'} className={'left'}>
-							<span>Top Games</span>
-							<p>Highest ranked by views, likes and reviews</p>
-						</Box>
-						<Box component={'div'} className={'right'}>
-							<div className={'pagination-box'}>
-								<WestIcon className={'swiper-top-prev'} />
-								<div className={'swiper-top-pagination'}></div>
-								<EastIcon className={'swiper-top-next'} />
-							</div>
-						</Box>
-					</Stack>
-					<Stack className={'card-box'}>
-						<Swiper
-							className={'top-game-swiper'}
-							slidesPerView={'auto'}
-							spaceBetween={15}
-							modules={[Autoplay, Navigation, Pagination]}
-							navigation={{
-								nextEl: '.swiper-top-next',
-								prevEl: '.swiper-top-prev',
-							}}
-							pagination={{
-								el: '.swiper-top-pagination',
-							}}
-						>
-							{topGames.map((game: Game) => {
-								return (
-									<SwiperSlide className={'top-game-slide'} key={game?._id}>
-										<HomeGameCard game={game} variant={'top'} likeGameHandler={likeGameHandler} />
-									</SwiperSlide>
-								);
-							})}
-						</Swiper>
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	}
+	return (
+		<HomeSection
+			id="top-games"
+			title="Top ranked"
+			description="Ranked by views, likes and reviews."
+		>
+			{topGames.length === 0 ? (
+				<p className="gv-empty">No ranked games yet.</p>
+			) : (
+				<ol className="gv-ranks" aria-label="Top ranked games">
+					{topGames.map((game: Game, index: number) => (
+						<li key={game._id}>
+							<HomeGameCard game={game} variant={'top'} rank={index + 1} likeGameHandler={likeGameHandler} />
+						</li>
+					))}
+				</ol>
+			)}
+		</HomeSection>
+	);
 };
 
 TopGames.defaultProps = {
