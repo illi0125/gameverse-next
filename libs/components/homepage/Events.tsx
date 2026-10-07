@@ -10,30 +10,28 @@ interface EventData {
 }
 const eventsData: EventData[] = [
 	{
-		eventTitle: 'Paradise City Theme Park',
-		city: 'Incheon',
-		description:
-			'Experience magic and wonder in Incheon with a visit to the night-themed indoor theme park Wonderbox at Paradise City!',
-		imageSrc: '/img/events/INCHEON.webp',
+		eventTitle: 'Indie Showcase',
+		city: 'Online',
+		description: 'Discover upcoming indie games from small studios and add them to your favorites before release.',
+		imageSrc: '/img/gameverse/event-1.svg',
 	},
 	{
-		eventTitle: 'Taebaeksan Snow Festival',
-		city: 'Seoul',
-		description: 'If you have the opportunity to travel to South Korea, do not miss the Taebaeksan Snow Festival!',
-		imageSrc: '/img/events/SEOUL.webp',
+		eventTitle: 'Co-op Weekend',
+		city: 'Community',
+		description: 'Team up with friends and explore co-op and multiplayer games picked by the community.',
+		imageSrc: '/img/gameverse/event-2.svg',
 	},
 	{
-		eventTitle: 'Suseong Lake Event',
-		city: 'Daegu',
-		description: 'The Suseong Lake Festival is a culture and arts festival held alongside Suseongmot Lake!',
-		imageSrc: '/img/events/DAEGU.webp',
+		eventTitle: 'Retro Game Night',
+		city: 'Community',
+		description: 'Share your favorite classics and talk about the games that started it all.',
+		imageSrc: '/img/gameverse/event-3.svg',
 	},
 	{
-		eventTitle: 'Sand Festival',
-		city: 'Busan',
-		description:
-			'Haeundae Sand Festival, the nation’s largest eco-friendly exhibition on sand, is held at Haeundae Beach!',
-		imageSrc: '/img/events/BUSAN.webp',
+		eventTitle: 'Speedrun Marathon',
+		city: 'Online',
+		description: 'Watch fast runs of popular titles and post your own personal bests in the community.',
+		imageSrc: '/img/gameverse/event-4.svg',
 	},
 ];
 

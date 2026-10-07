@@ -1,4 +1,5 @@
 import React from 'react';
+import SportsEsportsOutlinedIcon from '@mui/icons-material/SportsEsportsOutlined';
 import { NextPage } from 'next';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
@@ -15,33 +16,31 @@ const About: NextPage = () => {
 				<Stack className={'intro'}>
 					<Stack className={'container'}>
 						<Stack className={'left'}>
-							<strong>We're on a Mission to Change View of Real Estate Field.</strong>
+							<strong>We're on a Mission to Make Finding Your Next Game Simple.</strong>
 						</Stack>
 						<Stack className={'right'}>
 							<p>
-								It doesn’t matter how organized you are — a surplus of toys will always ensure your house is a mess
-								waiting to happen. Fortunately, getting kids on board with the idea of ditching their stuff is a lot
-								easier than it sounds.
+								Gameverse brings PC, console and mobile games together in one catalog, so you can compare platforms,
+								genres, game modes and prices without jumping between stores.
 								<br />
 								<br />
-								Maecenas quis viverra metus, et efficitur ligula. Nam congue augue et ex congue, sed luctus lectus
-								congue. Integer convallis condimentum sem. Duis elementum tortor eget condimentum tempor. Praesent
-								sollicitudin lectus ut pharetra pulvinar.
+								Agents keep listings up to date with release dates, system requirements and media, while players
+								follow trends, save favorites and share their opinions with the community.
 							</p>
 							<Stack className={'boxes'}>
 								<div className={'box'}>
 									<div>
-										<img src="/img/icons/garden.svg" alt="" />
+										<SportsEsportsOutlinedIcon sx={{ color: '#181a20' }} />
 									</div>
-									<span>Modern Villa</span>
-									<p>Nullam sollicitudin blandit Nullam maximus.</p>
+									<span>Every Platform</span>
+									<p>PC, PlayStation, Xbox, Nintendo and mobile in one place.</p>
 								</div>
 								<div className={'box'}>
 									<div>
 										<img src="/img/icons/securePayment.svg" alt="" />
 									</div>
-									<span>Secure Payment</span>
-									<p>Nullam sollicitudin blandit Nullam maximus.</p>
+									<span>Honest Pricing</span>
+									<p>Clear prices and discounts on every listing.</p>
 								</div>
 							</Stack>
 						</Stack>
@@ -50,28 +49,28 @@ const About: NextPage = () => {
 				<Stack className={'statistics'}>
 					<Stack className={'container'}>
 						<Stack className={'banner'}>
-							<img src="/img/banner/header1.svg" alt="" />
+							<img src="/img/gameverse/hero.svg" alt="" />
 						</Stack>
 						<Stack className={'info'}>
 							<Box component={'div'}>
-								<strong>4M</strong>
-								<p>Award Winning</p>
+								<strong>5</strong>
+								<p>Platforms</p>
 							</Box>
 							<Box component={'div'}>
-								<strong>12K</strong>
-								<p>Property Ready</p>
+								<strong>10</strong>
+								<p>Genres</p>
 							</Box>
 							<Box component={'div'}>
-								<strong>20M</strong>
-								<p>Happy Customer</p>
+								<strong>3</strong>
+								<p>Game Modes</p>
 							</Box>
 						</Stack>
 					</Stack>
 				</Stack>
 				<Stack className={'agents'}>
 					<Stack className={'container'}>
-						<span className={'title'}>Our Exclusive Agetns</span>
-						<p className={'desc'}>Aliquam lacinia diam quis lacus euismod</p>
+						<span className={'title'}>Our Exclusive Agents</span>
+						<p className={'desc'}>Meet the agents who curate our catalog</p>
 						<Stack className={'wrap'}>
 							{/*{[1, 2, 3, 4, 5].map(() => {*/}
 							{/*	return <AgentCard />;*/}
@@ -80,16 +79,16 @@ const About: NextPage = () => {
 					</Stack>
 				</Stack>
 				<Stack className={'options'}>
-					<img src="/img/banner/aboutBanner.svg" alt="" className={'about-banner'} />
+					<img src="/img/gameverse/about.svg" alt="" className={'about-banner'} />
 					<Stack className={'container'}>
-						<strong>Let’s find the right selling option for you</strong>
+						<strong>Let’s get your games in front of players</strong>
 						<Stack>
 							<div className={'icon-box'}>
 								<img src="/img/icons/security.svg" alt="" />
 							</div>
 							<div className={'text-box'}>
-								<span>Property Management</span>
-								<p>Nullam sollicitudin blandit eros eu pretium. Nullam maximus ultricies auctor.</p>
+								<span>List Your Games</span>
+								<p>Publish games with media, platforms, pricing and system requirements.</p>
 							</div>
 						</Stack>
 						<Stack>
@@ -97,8 +96,8 @@ const About: NextPage = () => {
 								<img src="/img/icons/keywording.svg" alt="" />
 							</div>
 							<div className={'text_-box'}>
-								<span>Property Management</span>
-								<p>Nullam sollicitudin blandit eros eu pretium. Nullam maximus ultricies auctor.</p>
+								<span>Reach Players</span>
+								<p>Get discovered through trending, popular and top-ranked sections.</p>
 							</div>
 						</Stack>
 						<Stack>
@@ -106,8 +105,8 @@ const About: NextPage = () => {
 								<img src="/img/icons/investment.svg" alt="" />
 							</div>
 							<div className={'text-box'}>
-								<span>Property Management</span>
-								<p>Nullam sollicitudin blandit eros eu pretium. Nullam maximus ultricies auctor.</p>
+								<span>Grow Your Audience</span>
+								<p>Collect likes, views and comments, and build followers as an agent.</p>
 							</div>
 						</Stack>
 						<Stack className={'btn'}>
@@ -118,7 +117,7 @@ const About: NextPage = () => {
 				</Stack>
 				<Stack className={'partners'}>
 					<Stack className={'container'}>
-						<span>Trusted bu the world's best</span>
+						<span>Trusted by the world's best</span>
 						<Stack className={'wrap'}>
 							<img src="/img/icons/brands/amazon.svg" alt="" />
 							<img src="/img/icons/brands/amd.svg" alt="" />
@@ -132,7 +131,7 @@ const About: NextPage = () => {
 					<Stack className={'container'}>
 						<Box component={'div'} className={'left'}>
 							<strong>Need help? Talk to our expert.</strong>
-							<p>Talk to our experts or Browse through more properties.</p>
+							<p>Talk to our team or browse through more games.</p>
 						</Box>
 						<Box component={'div'} className={'right'}>
 							<div className={'white'}>

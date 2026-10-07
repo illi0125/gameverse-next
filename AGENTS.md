@@ -16,7 +16,7 @@ This client project is being migrated from nestar-next to gameverse-next
 Before making any changes, read:
 
 - docs/ai/BACKEND_MIGRATION.md
-- docs/ai/DECIONS.md
+- docs/ai/DECISIONS.md
 - docs/ai/FRONTEND_MIGRATION.md
   and etc inside of gameverse/docs/ai
 

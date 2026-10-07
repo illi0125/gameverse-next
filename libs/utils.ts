@@ -8,19 +8,6 @@ export const formatterStr = (value: number | undefined): string => {
 	return numeral(value).format('0,0') != '0' ? numeral(value).format('0,0') : '';
 };
 
-export const likeTargetPropertyHandler = async (likeTargetProperty: any, id: string) => {
-	try {
-		await likeTargetProperty({
-			variables: {
-				input: id,
-			},
-		});
-	} catch (err: any) {
-		console.log('ERROR, likeTargetPropertyHandler:', err.message);
-		sweetMixinErrorAlert(err.message).then();
-	}
-};
-
 export const likeTargetGameHandler = async (likeTargetGame: any, id: string) => {
 	try {
 		await likeTargetGame({

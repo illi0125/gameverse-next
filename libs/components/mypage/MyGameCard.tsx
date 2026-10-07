@@ -32,7 +32,7 @@ export const MyGameCard = (props: MyGameCardProps) => {
 	const open = Boolean(anchorEl);
 	const canManage = !memberPage && game.gameStatus !== GameStatus.DELETE;
 	const nextStatus = game.gameStatus === GameStatus.ACTIVE ? GameStatus.UPCOMING : GameStatus.ACTIVE;
-	const imagePath = game?.gameImages?.[0] ? `${REACT_APP_API_URL}/${game.gameImages[0]}` : '/img/banner/header1.svg';
+	const imagePath = game?.gameImages?.[0] ? `${REACT_APP_API_URL}/${game.gameImages[0]}` : '/img/gameverse/game-placeholder.svg';
 
 	/** HANDLERS **/
 	const pushEditGame = async (id: string) => {

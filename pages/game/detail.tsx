@@ -3,7 +3,7 @@ import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material'
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import { NextPage } from 'next';
-import Review from '../../libs/components/property/Review';
+import Review from '../../libs/components/game/Review';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import SwiperCore, { Autoplay, Navigation, Pagination } from 'swiper';
 import GameBigCard from '../../libs/components/common/GameBigCard';
@@ -275,7 +275,7 @@ const GameDetail: NextPage = ({ initialComment, ...props }: any) => {
 							<Stack className={'images'}>
 								<Stack className={'main-image'}>
 									<img
-										src={slideImage ? `${REACT_APP_API_URL}/${slideImage}` : '/img/banner/header1.svg'}
+										src={slideImage ? `${REACT_APP_API_URL}/${slideImage}` : '/img/gameverse/game-placeholder.svg'}
 										alt={game.gameTitle}
 									/>
 								</Stack>

@@ -5,6 +5,9 @@ import TwitterIcon from '@mui/icons-material/Twitter';
 import useDeviceDetect from '../hooks/useDeviceDetect';
 import { Stack, Box } from '@mui/material';
 import moment from 'moment';
+import Link from 'next/link';
+import { GamePlatform } from '../enums/game.enum';
+import { formatEnumLabel } from '../utils';
 
 const Footer = () => {
 	const device = useDeviceDetect();
@@ -40,8 +43,12 @@ const Footer = () => {
 						<Box component={'div'} className={'bottom'}>
 							<div>
 								<strong>Popular Search</strong>
-								<span>Property for Rent</span>
-								<span>Property Low to hide</span>
+								<Link href={'/game?input={"page":1,"limit":9,"sort":"createdAt","direction":"DESC","search":{"typeList":["FREE"]}}'}>
+									<span>Free Games</span>
+								</Link>
+								<Link href={'/game?input={"page":1,"limit":9,"sort":"gameRank","direction":"DESC","search":{}}'}>
+									<span>Top Ranked</span>
+								</Link>
 							</div>
 							<div>
 								<strong>Quick Links</strong>
@@ -54,16 +61,20 @@ const Footer = () => {
 							</div>
 							<div>
 								<strong>Discover</strong>
-								<span>Seoul</span>
-								<span>Gyeongido</span>
-								<span>Busan</span>
-								<span>Jejudo</span>
+								{[GamePlatform.PC, GamePlatform.PLAYSTATION, GamePlatform.XBOX, GamePlatform.NINTENDO].map((platform) => (
+									<Link
+										key={platform}
+										href={`/game?input=${JSON.stringify({ page: 1, limit: 9, sort: 'createdAt', direction: 'DESC', search: { platformList: [platform] } })}`}
+									>
+										<span>{formatEnumLabel(platform)}</span>
+									</Link>
+								))}
 							</div>
 						</Box>
 					</Stack>
 				</Stack>
 				<Stack className={'second'}>
-					<span>© Nestar - All rights reserved. Nestar {moment().year()}</span>
+					<span>© Gameverse - All rights reserved. Gameverse {moment().year()}</span>
 				</Stack>
 			</Stack>
 		);
@@ -105,8 +116,12 @@ const Footer = () => {
 						<Box component={'div'} className={'bottom'}>
 							<div>
 								<strong>Popular Search</strong>
-								<span>Property for Rent</span>
-								<span>Property Low to hide</span>
+								<Link href={'/game?input={"page":1,"limit":9,"sort":"createdAt","direction":"DESC","search":{"typeList":["FREE"]}}'}>
+									<span>Free Games</span>
+								</Link>
+								<Link href={'/game?input={"page":1,"limit":9,"sort":"gameRank","direction":"DESC","search":{}}'}>
+									<span>Top Ranked</span>
+								</Link>
 							</div>
 							<div>
 								<strong>Quick Links</strong>
@@ -119,16 +134,20 @@ const Footer = () => {
 							</div>
 							<div>
 								<strong>Discover</strong>
-								<span>Seoul</span>
-								<span>Gyeongido</span>
-								<span>Busan</span>
-								<span>Jejudo</span>
+								{[GamePlatform.PC, GamePlatform.PLAYSTATION, GamePlatform.XBOX, GamePlatform.NINTENDO].map((platform) => (
+									<Link
+										key={platform}
+										href={`/game?input=${JSON.stringify({ page: 1, limit: 9, sort: 'createdAt', direction: 'DESC', search: { platformList: [platform] } })}`}
+									>
+										<span>{formatEnumLabel(platform)}</span>
+									</Link>
+								))}
 							</div>
 						</Box>
 					</Stack>
 				</Stack>
 				<Stack className={'second'}>
-					<span>© Nestar - All rights reserved. Nestar {moment().year()}</span>
+					<span>© Gameverse - All rights reserved. Gameverse {moment().year()}</span>
 					<span>Privacy · Terms · Sitemap</span>
 				</Stack>
 			</Stack>

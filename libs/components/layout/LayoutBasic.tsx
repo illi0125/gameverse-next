@@ -31,53 +31,53 @@ const withLayoutBasic = (Component: any) => {
 				case '/game':
 					title = 'Game Search';
 					desc = 'We are glad to see you again!';
-					bgImage = '/img/banner/properties.png';
-					break;
-				case '/property':
-					title = 'Property Search';
-					desc = 'We are glad to see you again!';
-					bgImage = '/img/banner/properties.png';
+					bgImage = '/img/gameverse/banner-games.svg';
 					break;
 				case '/agent':
 					title = 'Agents';
-					desc = 'Home / For Rent';
-					bgImage = '/img/banner/agents.webp';
+					desc = 'Meet the agents behind our catalog';
+					bgImage = '/img/gameverse/banner-agents.svg';
 					break;
 				case '/agent/detail':
 					title = 'Agent Page';
-					desc = 'Home / For Rent';
-					bgImage = '/img/banner/header2.svg';
+					desc = 'Games and reviews from this agent';
+					bgImage = '/img/gameverse/banner-agents.svg';
 					break;
 				case '/mypage':
 					title = 'my page';
-					desc = 'Home / For Rent';
-					bgImage = '/img/banner/header1.svg';
+					desc = 'Manage your games, favorites and profile';
+					bgImage = '/img/gameverse/banner-account.svg';
 					break;
 				case '/community':
 					title = 'Community';
-					desc = 'Home / For Rent';
-					bgImage = '/img/banner/header2.svg';
+					desc = 'Share news, tips and reviews with players';
+					bgImage = '/img/gameverse/banner-community.svg';
 					break;
 				case '/community/detail':
 					title = 'Community Detail';
-					desc = 'Home / For Rent';
-					bgImage = '/img/banner/header2.svg';
+					desc = 'Share news, tips and reviews with players';
+					bgImage = '/img/gameverse/banner-community.svg';
 					break;
 				case '/cs':
 					title = 'CS';
 					desc = 'We are glad to see you again!';
-					bgImage = '/img/banner/header2.svg';
+					bgImage = '/img/gameverse/banner-community.svg';
 					break;
 				case '/account/join':
 					title = 'Login/Signup';
 					desc = 'Authentication Process';
-					bgImage = '/img/banner/header2.svg';
+					bgImage = '/img/gameverse/banner-account.svg';
 					setAuthHeader(true);
+					break;
+				case '/about':
+					title = 'About Us';
+					desc = 'Learn more about Gameverse';
+					bgImage = '/img/gameverse/banner-games.svg';
 					break;
 				case '/member':
 					title = 'Member Page';
-					desc = 'Home / For Rent';
-					bgImage = '/img/banner/header1.svg';
+					desc = 'Games, articles and followers';
+					bgImage = '/img/gameverse/banner-agents.svg';
 					break;
 				default:
 					break;
@@ -98,8 +98,8 @@ const withLayoutBasic = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>Nestar</title>
-						<meta name={'title'} content={`Nestar`} />
+						<title>Gameverse</title>
+						<meta name={'title'} content={`Gameverse`} />
 					</Head>
 					<Stack id="mobile-wrap">
 						<Stack id={'top'}>
@@ -120,8 +120,8 @@ const withLayoutBasic = (Component: any) => {
 			return (
 				<>
 					<Head>
-						<title>Nestar</title>
-						<meta name={'title'} content={`Nestar`} />
+						<title>Gameverse</title>
+						<meta name={'title'} content={`Gameverse`} />
 					</Head>
 					<Stack id="pc-wrap">
 						<Stack id={'top'}>

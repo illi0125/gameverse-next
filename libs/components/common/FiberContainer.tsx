@@ -35,11 +35,11 @@ function Pages() {
 
 	return (
 		<>
-			<Page position={[width * 0, 0, 0]} urls={['/img/fiber/img7.jpg', '/img/fiber/img8.jpg', '/img/fiber/img1.jpg']} />
-			<Page position={[width * 1, 0, 0]} urls={['/img/fiber/img4.jpg', '/img/fiber/img5.jpg', '/img/fiber/img6.jpg']} />
-			<Page position={[width * 2, 0, 0]} urls={['/img/fiber/img2.jpg', '/img/fiber/img3.jpg', '/img/fiber/img4.jpg']} />
-			<Page position={[width * 3, 0, 0]} urls={['/img/fiber/img7.jpg', '/img/fiber/img8.jpg', '/img/fiber/img1.jpg']} />
-			<Page position={[width * 4, 0, 0]} urls={['/img/fiber/img4.jpg', '/img/fiber/img5.jpg', '/img/fiber/img6.jpg']} />
+			<Page position={[width * 0, 0, 0]} urls={['/img/gameverse/tile-7.jpg', '/img/gameverse/tile-8.jpg', '/img/gameverse/tile-1.jpg']} />
+			<Page position={[width * 1, 0, 0]} urls={['/img/gameverse/tile-4.jpg', '/img/gameverse/tile-5.jpg', '/img/gameverse/tile-6.jpg']} />
+			<Page position={[width * 2, 0, 0]} urls={['/img/gameverse/tile-2.jpg', '/img/gameverse/tile-3.jpg', '/img/gameverse/tile-4.jpg']} />
+			<Page position={[width * 3, 0, 0]} urls={['/img/gameverse/tile-7.jpg', '/img/gameverse/tile-8.jpg', '/img/gameverse/tile-1.jpg']} />
+			<Page position={[width * 4, 0, 0]} urls={['/img/gameverse/tile-4.jpg', '/img/gameverse/tile-5.jpg', '/img/gameverse/tile-6.jpg']} />
 		</>
 	);
 }

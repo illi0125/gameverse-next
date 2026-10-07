@@ -4,11 +4,9 @@
 
 @import '/scss/pc/homepage/homepage';
 
-@import '/scss/pc/property/property';
 @import '/scss/pc/game/game.scss';
 @import '/scss/pc/game/detail.scss';
 @import '/scss/pc/game/gameBigCard.scss';
-@import '/scss/pc/property/detail.scss';
 
 @import '/scss/pc/agent/agent';
 @import '/scss/pc/agent/detail.scss';
@@ -178,7 +176,7 @@ body::-webkit-scrollbar {
 		position: relative;
 		width: 100%;
 		height: 860px;
-		background-image: url('/img/banner/header1.svg');
+		background-image: url('/img/gameverse/hero.svg');
 		background-size: cover;
 		.container {
 			position: relative;
@@ -686,7 +684,7 @@ body::-webkit-scrollbar {
 						display: flex;
 						flex-direction: column;
 						.logo {
-							width: 128px;
+							width: auto;
 							height: 52px;
 							cursor: pointer;
 						}

@@ -21,7 +21,7 @@ const GameBigCard = (props: GameBigCardProps) => {
 	const device = useDeviceDetect();
 	const user = useReactiveVar(userVar);
 	const router = useRouter();
-	const imagePath = game?.gameImages?.[0] ? `${REACT_APP_API_URL}/${game.gameImages[0]}` : '/img/banner/header1.svg';
+	const imagePath = game?.gameImages?.[0] ? `${REACT_APP_API_URL}/${game.gameImages[0]}` : '/img/gameverse/game-placeholder.svg';
 
 	/** HANDLERS **/
 	const goGameDetailPage = (gameId: string) => {

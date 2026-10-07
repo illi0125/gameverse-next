@@ -45,7 +45,6 @@ const Top = () => {
 
 	useEffect(() => {
 		switch (router.pathname) {
-			case '/property/detail':
 			case '/game/detail':
 				setBgColor(true);
 				break;

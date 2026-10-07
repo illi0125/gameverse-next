@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="557" viewBox="0 0 1920 557">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0B0C1A"/><stop offset="0.55" stop-color="#141433"/><stop offset="1" stop-color="#1E1240"/></linearGradient>
+<radialGradient id="g1" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#3E5BF6" stop-opacity="0.55"/><stop offset="1" stop-color="#3E5BF6" stop-opacity="0"/></radialGradient>
+<radialGradient id="g2" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#8B5CF6" stop-opacity="0.45"/><stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M 80 0 L 0 0 0 80" fill="none" stroke="#FFFFFF" stroke-opacity="0.05" stroke-width="1"/></pattern>
+</defs>
+<rect width="1920" height="557" fill="url(#bg)"/>
+<rect width="1920" height="557" fill="url(#grid)"/>
+<circle cx="1703" cy="267" r="1440" fill="url(#g1)"/>
+<circle cx="129" cy="300" r="1152" fill="url(#g2)"/>
+<circle cx="1413" cy="373" r="76" fill="none" stroke="#8B5CF6" stroke-width="9" opacity="0.18"/>
+<polygon points="69,343 104,407 33,407" fill="none" stroke="#8B5CF6" stroke-width="4" opacity="0.27" stroke-linejoin="round"/>
+<rect x="1578" y="210" width="148" height="148" rx="11" fill="none" stroke="#8B5CF6" stroke-width="9" opacity="0.25"/>
+<g stroke="#3E5BF6" stroke-width="6" opacity="0.2" stroke-linecap="round"><line x1="474" y1="-21" x2="556" y2="61"/><line x1="556" y1="-21" x2="474" y2="61"/></g>
+<circle cx="1743" cy="236" r="82" fill="none" stroke="#FFFFFF" stroke-width="10" opacity="0.16"/>
+<polygon points="443,64 476,124 410,124" fill="none" stroke="#3E5BF6" stroke-width="4" opacity="0.15" stroke-linejoin="round"/>
+<rect x="1862" y="320" width="111" height="111" rx="8" fill="none" stroke="#3E5BF6" stroke-width="7" opacity="0.35"/>
+<g stroke="#8B5CF6" stroke-width="6" opacity="0.3" stroke-linecap="round"><line x1="755" y1="252" x2="837" y2="334"/><line x1="837" y1="252" x2="755" y2="334"/></g>
+<circle cx="1883" cy="536" r="45" fill="none" stroke="#3E5BF6" stroke-width="5" opacity="0.34"/>
+<polygon points="1418,316 1465,401 1371,401" fill="none" stroke="#3E5BF6" stroke-width="6" opacity="0.23" stroke-linejoin="round"/>
+<rect x="880" y="382" width="163" height="163" rx="12" fill="none" stroke="#8B5CF6" stroke-width="10" opacity="0.27"/>
+<g stroke="#FFFFFF" stroke-width="6" opacity="0.33" stroke-linecap="round"><line x1="1693" y1="154" x2="1776" y2="237"/><line x1="1776" y1="154" x2="1693" y2="237"/></g>
+<circle cx="934" cy="124" r="69" fill="none" stroke="#8B5CF6" stroke-width="8" opacity="0.31"/>
+<polygon points="1683,267 1757,400 1610,400" fill="none" stroke="#8B5CF6" stroke-width="9" opacity="0.19" stroke-linejoin="round"/>
+<rect x="1272" y="197" width="167" height="167" rx="13" fill="none" stroke="#FFFFFF" stroke-width="10" opacity="0.24"/>
+<g stroke="#8B5CF6" stroke-width="7" opacity="0.24" stroke-linecap="round"><line x1="731" y1="357" x2="830" y2="457"/><line x1="830" y1="357" x2="731" y2="457"/></g>
+</svg>

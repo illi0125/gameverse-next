@@ -25,7 +25,7 @@ const GameCard = (props: GameCardType) => {
 	const user = useReactiveVar(userVar);
 	const imagePath: string = game?.gameImages?.[0]
 		? `${REACT_APP_API_URL}/${game?.gameImages[0]}`
-		: '/img/banner/header1.svg';
+		: '/img/gameverse/game-placeholder.svg';
 	const detailHref = { pathname: '/game/detail', query: { id: game?._id } };
 
 	if (device === 'mobile') {
