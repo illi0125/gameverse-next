@@ -19,7 +19,7 @@ export const SIGN_UP = gql`
 			memberDesc
 			memberWarnings
 			memberBlocks
-			memberProperties
+			memberGames
 			memberRank
 			memberArticles
 			memberPoints
@@ -48,7 +48,7 @@ export const LOGIN = gql`
 			memberDesc
 			memberWarnings
 			memberBlocks
-			memberProperties
+			memberGames
 			memberRank
 			memberPoints
 			memberLikes
@@ -74,7 +74,7 @@ export const UPDATE_MEMBER = gql`
 			memberImage
 			memberAddress
 			memberDesc
-			memberProperties
+			memberGames
 			memberRank
 			memberArticles
 			memberPoints
@@ -105,7 +105,7 @@ export const LIKE_TARGET_MEMBER = gql`
 			memberDesc
 			memberWarnings
 			memberBlocks
-			memberProperties
+			memberGames
 			memberRank
 			memberPoints
 			memberLikes
@@ -203,6 +203,133 @@ export const LIKE_TARGET_PROPERTY = gql`
 			soldAt
 			deletedAt
 			constructedAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+/**************************
+ *          GAME          *
+ *************************/
+
+export const CREATE_GAME = gql`
+	mutation CreateGame($input: GameInput!) {
+		createGame(input: $input) {
+			_id
+			gameStatus
+			gameType
+			gameTitle
+			gameSlug
+			gameDescription
+			gameOverview
+			gameReleaseDate
+			gameDeveloper
+			gamePublisher
+			gameGenres
+			gamePlatforms
+			gameModes
+			gamePrice
+			gameDiscountPrice
+			gameImages
+			gameVideos
+			gameSystemRequirements {
+				platform
+				minimum
+				recommended
+			}
+			gameRatings
+			gameReviews
+			gameComments
+			gameViews
+			gameLikes
+			gameRank
+			memberId
+			isFeatured
+			isUpcoming
+			deletedAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const UPDATE_GAME = gql`
+	mutation UpdateGame($input: GameUpdate!) {
+		updateGame(input: $input) {
+			_id
+			gameStatus
+			gameType
+			gameTitle
+			gameSlug
+			gameDescription
+			gameOverview
+			gameReleaseDate
+			gameDeveloper
+			gamePublisher
+			gameGenres
+			gamePlatforms
+			gameModes
+			gamePrice
+			gameDiscountPrice
+			gameImages
+			gameVideos
+			gameSystemRequirements {
+				platform
+				minimum
+				recommended
+			}
+			gameRatings
+			gameReviews
+			gameComments
+			gameViews
+			gameLikes
+			gameRank
+			memberId
+			isFeatured
+			isUpcoming
+			deletedAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const LIKE_TARGET_GAME = gql`
+	mutation LikeTargetGame($input: String!) {
+		likeTargetGame(gameId: $input) {
+			_id
+			gameStatus
+			gameType
+			gameTitle
+			gameSlug
+			gameDescription
+			gameOverview
+			gameReleaseDate
+			gameDeveloper
+			gamePublisher
+			gameGenres
+			gamePlatforms
+			gameModes
+			gamePrice
+			gameDiscountPrice
+			gameImages
+			gameVideos
+			gameSystemRequirements {
+				platform
+				minimum
+				recommended
+			}
+			gameRatings
+			gameReviews
+			gameComments
+			gameViews
+			gameLikes
+			gameRank
+			memberId
+			isFeatured
+			isUpcoming
+			deletedAt
 			createdAt
 			updatedAt
 		}

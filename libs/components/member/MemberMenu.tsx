@@ -88,26 +88,26 @@ const MemberMenu = (props: MemberMenuProps) => {
 						</Typography>
 						<List className={'sub-section'}>
 							{member?.memberType === 'AGENT' && (
-								<ListItem className={category === 'properties' ? 'focus' : ''}>
+								<ListItem className={category === 'games' ? 'focus' : ''}>
 									<Link
 										href={{
 											pathname: '/member',
-											query: { ...router.query, category: 'properties' },
+											query: { ...router.query, category: 'games' },
 										}}
 										scroll={false}
 										style={{ width: '100%' }}
 									>
 										<div className={'flex-box'}>
-											{category === 'properties' ? (
+											{category === 'games' ? (
 												<img className={'com-icon'} src={'/img/icons/homeWhite.svg'} alt={'com-icon'} />
 											) : (
 												<img className={'com-icon'} src={'/img/icons/home.svg'} alt={'com-icon'} />
 											)}
 											<Typography className={'sub-title'} variant={'subtitle1'} component={'p'}>
-												Properties
+												Games
 											</Typography>
 											<Typography className="count-title" variant="subtitle1">
-												{member?.memberProperties}
+												{member?.memberGames}
 											</Typography>
 										</div>
 									</Link>

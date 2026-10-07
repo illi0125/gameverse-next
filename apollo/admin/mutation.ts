@@ -17,7 +17,7 @@ export const UPDATE_MEMBER_BY_ADMIN = gql`
 			memberImage
 			memberAddress
 			memberDesc
-			memberProperties
+			memberGames
 			memberRank
 			memberArticles
 			memberPoints
@@ -89,6 +89,92 @@ export const REMOVE_PROPERTY_BY_ADMIN = gql`
 			soldAt
 			deletedAt
 			constructedAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+/**************************
+ *          GAME          *
+ *************************/
+
+export const UPDATE_GAME_BY_ADMIN = gql`
+	mutation UpdateGameByAdmin($input: AdminGameUpdate!) {
+		updateGameByAdmin(input: $input) {
+			_id
+			gameStatus
+			gameType
+			gameTitle
+			gameSlug
+			gameDescription
+			gameOverview
+			gameReleaseDate
+			gameDeveloper
+			gamePublisher
+			gameGenres
+			gamePlatforms
+			gameModes
+			gamePrice
+			gameDiscountPrice
+			gameImages
+			gameVideos
+			gameSystemRequirements {
+				platform
+				minimum
+				recommended
+			}
+			gameRatings
+			gameReviews
+			gameComments
+			gameViews
+			gameLikes
+			gameRank
+			memberId
+			isFeatured
+			isUpcoming
+			deletedAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const REMOVE_GAME_BY_ADMIN = gql`
+	mutation RemoveGameByAdmin($input: String!) {
+		removeGameByAdmin(gameId: $input) {
+			_id
+			gameStatus
+			gameType
+			gameTitle
+			gameSlug
+			gameDescription
+			gameOverview
+			gameReleaseDate
+			gameDeveloper
+			gamePublisher
+			gameGenres
+			gamePlatforms
+			gameModes
+			gamePrice
+			gameDiscountPrice
+			gameImages
+			gameVideos
+			gameSystemRequirements {
+				platform
+				minimum
+				recommended
+			}
+			gameRatings
+			gameReviews
+			gameComments
+			gameViews
+			gameLikes
+			gameRank
+			memberId
+			isFeatured
+			isUpcoming
+			deletedAt
 			createdAt
 			updatedAt
 		}

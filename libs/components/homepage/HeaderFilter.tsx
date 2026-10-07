@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Stack, Box, Modal, Divider, Button } from '@mui/material';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -6,11 +6,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { propertySquare, propertyYears } from '../../config';
-import { PropertyLocation, PropertyType } from '../../enums/property.enum';
-import { PropertiesInquiry } from '../../types/property/property.input';
+import { gamePriceMax, gameReleaseYears } from '../../config';
+import { GameGenre, GameMode, GamePlatform, GameType } from '../../enums/game.enum';
+import { GamesInquiry } from '../../types/game/game.input';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
+import { formatEnumLabel } from '../../utils';
 
 const style = {
 	position: 'absolute' as 'absolute',
@@ -32,44 +33,34 @@ const MenuProps = {
 	},
 };
 
-const thisYear = new Date().getFullYear();
+const priceSteps = [0, 10, 20, 30, 50, 70, 100, 200];
 
 interface HeaderFilterProps {
-	initialInput: PropertiesInquiry;
+	initialInput: GamesInquiry;
 }
 
 const HeaderFilter = (props: HeaderFilterProps) => {
 	const { initialInput } = props;
 	const device = useDeviceDetect();
 	const { t, i18n } = useTranslation('common');
-	const [searchFilter, setSearchFilter] = useState<PropertiesInquiry>(initialInput);
-	const locationRef: any = useRef();
+	const [searchFilter, setSearchFilter] = useState<GamesInquiry>(initialInput);
+	const platformRef: any = useRef();
+	const genreRef: any = useRef();
 	const typeRef: any = useRef();
-	const roomsRef: any = useRef();
 	const router = useRouter();
 	const [openAdvancedFilter, setOpenAdvancedFilter] = useState(false);
-	const [openLocation, setOpenLocation] = useState(false);
+	const [openPlatform, setOpenPlatform] = useState(false);
+	const [openGenre, setOpenGenre] = useState(false);
 	const [openType, setOpenType] = useState(false);
-	const [openRooms, setOpenRooms] = useState(false);
-	const [propertyLocation, setPropertyLocation] = useState<PropertyLocation[]>(Object.values(PropertyLocation));
-	const [propertyType, setPropertyType] = useState<PropertyType[]>(Object.values(PropertyType));
-	const [yearCheck, setYearCheck] = useState({ start: 1970, end: thisYear });
-	const [optionCheck, setOptionCheck] = useState('all');
+	const [yearCheck, setYearCheck] = useState<{ start: number | ''; end: number | '' }>({ start: '', end: '' });
+	const [priceCheck, setPriceCheck] = useState<{ start: number | ''; end: number | '' }>({ start: '', end: '' });
 
 	/** LIFECYCLES **/
 	useEffect(() => {
 		const clickHandler = (event: MouseEvent) => {
-			if (!locationRef?.current?.contains(event.target)) {
-				setOpenLocation(false);
-			}
-
-			if (!typeRef?.current?.contains(event.target)) {
-				setOpenType(false);
-			}
-
-			if (!roomsRef?.current?.contains(event.target)) {
-				setOpenRooms(false);
-			}
+			if (!platformRef?.current?.contains(event.target)) setOpenPlatform(false);
+			if (!genreRef?.current?.contains(event.target)) setOpenGenre(false);
+			if (!typeRef?.current?.contains(event.target)) setOpenType(false);
 		};
 
 		document.addEventListener('mousedown', clickHandler);
@@ -80,235 +71,94 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 	}, []);
 
 	/** HANDLERS **/
-	const advancedFilterHandler = (status: boolean) => {
-		setOpenLocation(false);
-		setOpenRooms(false);
+	const disableAllStateHandler = () => {
+		setOpenPlatform(false);
+		setOpenGenre(false);
 		setOpenType(false);
+	};
+
+	const advancedFilterHandler = (status: boolean) => {
+		disableAllStateHandler();
 		setOpenAdvancedFilter(status);
 	};
 
-	const locationStateChangeHandler = () => {
-		setOpenLocation((prev) => !prev);
-		setOpenRooms(false);
+	const platformStateChangeHandler = () => {
+		setOpenPlatform((prev) => !prev);
+		setOpenGenre(false);
+		setOpenType(false);
+	};
+
+	const genreStateChangeHandler = () => {
+		setOpenGenre((prev) => !prev);
+		setOpenPlatform(false);
 		setOpenType(false);
 	};
 
 	const typeStateChangeHandler = () => {
 		setOpenType((prev) => !prev);
-		setOpenLocation(false);
-		setOpenRooms(false);
+		setOpenPlatform(false);
+		setOpenGenre(false);
 	};
 
-	const roomStateChangeHandler = () => {
-		setOpenRooms((prev) => !prev);
-		setOpenType(false);
-		setOpenLocation(false);
+	const platformSelectHandler = (value: GamePlatform) => {
+		setSearchFilter({ ...searchFilter, search: { ...searchFilter.search, platformList: [value] } });
+		genreStateChangeHandler();
 	};
 
-	const disableAllStateHandler = () => {
-		setOpenRooms(false);
-		setOpenType(false);
-		setOpenLocation(false);
+	const genreSelectHandler = (value: GameGenre) => {
+		setSearchFilter({ ...searchFilter, search: { ...searchFilter.search, genreList: [value] } });
+		typeStateChangeHandler();
 	};
 
-	const propertyLocationSelectHandler = useCallback(
-		async (value: any) => {
-			try {
-				setSearchFilter({
-					...searchFilter,
-					search: {
-						...searchFilter.search,
-						locationList: [value],
-					},
-				});
-				typeStateChangeHandler();
-			} catch (err: any) {
-				console.log('ERROR, propertyLocationSelectHandler:', err);
-			}
-		},
-		[searchFilter],
-	);
-
-	const propertyTypeSelectHandler = useCallback(
-		async (value: any) => {
-			try {
-				setSearchFilter({
-					...searchFilter,
-					search: {
-						...searchFilter.search,
-						typeList: [value],
-					},
-				});
-				roomStateChangeHandler();
-			} catch (err: any) {
-				console.log('ERROR, propertyTypeSelectHandler:', err);
-			}
-		},
-		[searchFilter],
-	);
-
-	const propertyRoomSelectHandler = useCallback(
-		async (value: any) => {
-			try {
-				setSearchFilter({
-					...searchFilter,
-					search: {
-						...searchFilter.search,
-						roomsList: [value],
-					},
-				});
-				disableAllStateHandler();
-			} catch (err: any) {
-				console.log('ERROR, propertyRoomSelectHandler:', err);
-			}
-		},
-		[searchFilter],
-	);
-
-	const propertyBedSelectHandler = useCallback(
-		async (number: Number) => {
-			try {
-				if (number != 0) {
-					if (searchFilter?.search?.bedsList?.includes(number)) {
-						setSearchFilter({
-							...searchFilter,
-							search: {
-								...searchFilter.search,
-								bedsList: searchFilter?.search?.bedsList?.filter((item: Number) => item !== number),
-							},
-						});
-					} else {
-						setSearchFilter({
-							...searchFilter,
-							search: { ...searchFilter.search, bedsList: [...(searchFilter?.search?.bedsList || []), number] },
-						});
-					}
-				} else {
-					delete searchFilter?.search.bedsList;
-					setSearchFilter({ ...searchFilter });
-				}
-
-				console.log('propertyBedSelectHandler:', number);
-			} catch (err: any) {
-				console.log('ERROR, propertyBedSelectHandler:', err);
-			}
-		},
-		[searchFilter],
-	);
-
-	const propertyOptionSelectHandler = useCallback(
-		async (e: any) => {
-			try {
-				const value = e.target.value;
-				setOptionCheck(value);
-
-				if (value !== 'all') {
-					setSearchFilter({
-						...searchFilter,
-						search: {
-							...searchFilter.search,
-							options: [value],
-						},
-					});
-				} else {
-					delete searchFilter.search.options;
-					setSearchFilter({
-						...searchFilter,
-						search: {
-							...searchFilter.search,
-						},
-					});
-				}
-			} catch (err: any) {
-				console.log('ERROR, propertyOptionSelectHandler:', err);
-			}
-		},
-		[searchFilter],
-	);
-
-	const propertySquareHandler = useCallback(
-		async (e: any, type: string) => {
-			const value = e.target.value;
-
-			if (type == 'start') {
-				setSearchFilter({
-					...searchFilter,
-					search: {
-						...searchFilter.search,
-						// @ts-ignore
-						squaresRange: { ...searchFilter.search.squaresRange, start: parseInt(value) },
-					},
-				});
-			} else {
-				setSearchFilter({
-					...searchFilter,
-					search: {
-						...searchFilter.search,
-						// @ts-ignore
-						squaresRange: { ...searchFilter.search.squaresRange, end: parseInt(value) },
-					},
-				});
-			}
-		},
-		[searchFilter],
-	);
-
-	const yearStartChangeHandler = async (event: any) => {
-		setYearCheck({ ...yearCheck, start: Number(event.target.value) });
-
-		setSearchFilter({
-			...searchFilter,
-			search: {
-				...searchFilter.search,
-				periodsRange: { start: Number(event.target.value), end: yearCheck.end },
-			},
-		});
+	const typeSelectHandler = (value: GameType) => {
+		setSearchFilter({ ...searchFilter, search: { ...searchFilter.search, typeList: [value] } });
+		disableAllStateHandler();
 	};
 
-	const yearEndChangeHandler = async (event: any) => {
-		setYearCheck({ ...yearCheck, end: Number(event.target.value) });
+	const modeSelectHandler = (mode: GameMode | null) => {
+		const current = searchFilter?.search?.modeList || [];
+		const modeList = mode === null ? [] : current.includes(mode) ? current.filter((item) => item !== mode) : [...current, mode];
+		setSearchFilter({ ...searchFilter, search: { ...searchFilter.search, modeList } });
+	};
 
-		setSearchFilter({
-			...searchFilter,
-			search: {
-				...searchFilter.search,
-				periodsRange: { start: yearCheck.start, end: Number(event.target.value) },
-			},
-		});
+	const featuredChangeHandler = (e: any) => {
+		setSearchFilter({ ...searchFilter, search: { ...searchFilter.search, isFeatured: e.target.value === 'featured' } });
 	};
 
 	const resetFilterHandler = () => {
 		setSearchFilter(initialInput);
-		setOptionCheck('all');
-		setYearCheck({ start: 1970, end: thisYear });
+		setYearCheck({ start: '', end: '' });
+		setPriceCheck({ start: '', end: '' });
 	};
 
 	const pushSearchHandler = async () => {
 		try {
-			if (searchFilter?.search?.locationList?.length == 0) {
-				delete searchFilter.search.locationList;
+			const search = { ...searchFilter.search };
+			if (!search.platformList?.length) delete search.platformList;
+			if (!search.genreList?.length) delete search.genreList;
+			if (!search.typeList?.length) delete search.typeList;
+			if (!search.modeList?.length) delete search.modeList;
+			if (!search.text) delete search.text;
+			if (search.isFeatured !== true) delete search.isFeatured;
+
+			if (yearCheck.start !== '' || yearCheck.end !== '') {
+				const start = yearCheck.start === '' ? gameReleaseYears[gameReleaseYears.length - 1] : yearCheck.start;
+				const end = yearCheck.end === '' ? gameReleaseYears[0] : yearCheck.end;
+				search.releaseDateRange = {
+					start: new Date(Date.UTC(start, 0, 1)).toISOString(),
+					end: new Date(Date.UTC(end, 11, 31, 23, 59, 59)).toISOString(),
+				};
 			}
 
-			if (searchFilter?.search?.typeList?.length == 0) {
-				delete searchFilter.search.typeList;
+			if (priceCheck.start !== '' || priceCheck.end !== '') {
+				search.pricesRange = {
+					start: priceCheck.start === '' ? 0 : priceCheck.start,
+					end: priceCheck.end === '' ? gamePriceMax : priceCheck.end,
+				};
 			}
 
-			if (searchFilter?.search?.roomsList?.length == 0) {
-				delete searchFilter.search.roomsList;
-			}
-
-			if (searchFilter?.search?.options?.length == 0) {
-				delete searchFilter.search.options;
-			}
-
-			if (searchFilter?.search?.bedsList?.length == 0) {
-				delete searchFilter.search.bedsList;
-			}
-
-			await router.push(
-				`/property?input=${JSON.stringify(searchFilter)}`,
-				`/property?input=${JSON.stringify(searchFilter)}`,
-			);
+			const input = { ...searchFilter, search };
+			await router.push(`/game?input=${JSON.stringify(input)}`, `/game?input=${JSON.stringify(input)}`);
 		} catch (err: any) {
 			console.log('ERROR, pushSearchHandler:', err);
 		}
@@ -321,17 +171,23 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 			<>
 				<Stack className={'search-box'}>
 					<Stack className={'select-box'}>
-						<Box component={'div'} className={`box ${openLocation ? 'on' : ''}`} onClick={locationStateChangeHandler}>
-							<span>{searchFilter?.search?.locationList ? searchFilter?.search?.locationList[0] : t('Location')} </span>
+						<Box component={'div'} className={`box ${openPlatform ? 'on' : ''}`} onClick={platformStateChangeHandler}>
+							<span>
+								{searchFilter?.search?.platformList
+									? formatEnumLabel(searchFilter.search.platformList[0])
+									: t('Platform')}
+							</span>
+							<ExpandMoreIcon />
+						</Box>
+						<Box className={`box ${openGenre ? 'on' : ''}`} onClick={genreStateChangeHandler}>
+							<span>
+								{searchFilter?.search?.genreList ? formatEnumLabel(searchFilter.search.genreList[0]) : t('Genre')}
+							</span>
 							<ExpandMoreIcon />
 						</Box>
 						<Box className={`box ${openType ? 'on' : ''}`} onClick={typeStateChangeHandler}>
-							<span> {searchFilter?.search?.typeList ? searchFilter?.search?.typeList[0] : t('Property type')} </span>
-							<ExpandMoreIcon />
-						</Box>
-						<Box className={`box ${openRooms ? 'on' : ''}`} onClick={roomStateChangeHandler}>
 							<span>
-								{searchFilter?.search?.roomsList ? `${searchFilter?.search?.roomsList[0]} rooms}` : t('Rooms')}
+								{searchFilter?.search?.typeList ? formatEnumLabel(searchFilter.search.typeList[0]) : t('Pricing')}
 							</span>
 							<ExpandMoreIcon />
 						</Box>
@@ -347,39 +203,28 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 					</Stack>
 
 					{/*MENU */}
-					<div className={`filter-location ${openLocation ? 'on' : ''}`} ref={locationRef}>
-						{propertyLocation.map((location: string) => {
-							return (
-								<div onClick={() => propertyLocationSelectHandler(location)} key={location}>
-									<img src={`img/banner/cities/${location}.webp`} alt="" />
-									<span>{location}</span>
-								</div>
-							);
-						})}
+					<div className={`filter-rooms ${openPlatform ? 'on' : ''}`} ref={platformRef}>
+						{Object.values(GamePlatform).map((platform: GamePlatform) => (
+							<span onClick={() => platformSelectHandler(platform)} key={platform}>
+								{formatEnumLabel(platform)}
+							</span>
+						))}
 					</div>
 
-					<div className={`filter-type ${openType ? 'on' : ''}`} ref={typeRef}>
-						{propertyType.map((type: string) => {
-							return (
-								<div
-									style={{ backgroundImage: `url(/img/banner/types/${type.toLowerCase()}.webp)` }}
-									onClick={() => propertyTypeSelectHandler(type)}
-									key={type}
-								>
-									<span>{type}</span>
-								</div>
-							);
-						})}
+					<div className={`filter-rooms wrap ${openGenre ? 'on' : ''}`} ref={genreRef}>
+						{Object.values(GameGenre).map((genre: GameGenre) => (
+							<span onClick={() => genreSelectHandler(genre)} key={genre}>
+								{formatEnumLabel(genre)}
+							</span>
+						))}
 					</div>
 
-					<div className={`filter-rooms ${openRooms ? 'on' : ''}`} ref={roomsRef}>
-						{[1, 2, 3, 4, 5].map((room: number) => {
-							return (
-								<span onClick={() => propertyRoomSelectHandler(room)} key={room}>
-									{room} room{room > 1 ? 's' : ''}
-								</span>
-							);
-						})}
+					<div className={`filter-rooms ${openType ? 'on' : ''}`} ref={typeRef}>
+						{Object.values(GameType).map((type: GameType) => (
+							<span onClick={() => typeSelectHandler(type)} key={type}>
+								{formatEnumLabel(type)}
+							</span>
+						))}
 					</div>
 				</Stack>
 
@@ -397,13 +242,13 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 								<CloseIcon />
 							</div>
 							<div className={'top'}>
-								<span>Find your home</span>
+								<span>Find your game</span>
 								<div className={'search-input-box'}>
 									<img src="/img/icons/search.svg" alt="" />
 									<input
 										value={searchFilter?.search?.text ?? ''}
 										type="text"
-										placeholder={'What are you looking for?'}
+										placeholder={'Title, developer or publisher'}
 										onChange={(e: any) => {
 											setSearchFilter({
 												...searchFilter,
@@ -417,38 +262,37 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 							<div className={'middle'}>
 								<div className={'row-box'}>
 									<div className={'box'}>
-										<span>bedrooms</span>
+										<span>game modes</span>
 										<div className={'inside'}>
 											<div
-												className={`room ${!searchFilter?.search?.bedsList ? 'active' : ''}`}
-												onClick={() => propertyBedSelectHandler(0)}
+												className={`room ${!searchFilter?.search?.modeList?.length ? 'active' : ''}`}
+												onClick={() => modeSelectHandler(null)}
 											>
 												Any
 											</div>
-											{[1, 2, 3, 4, 5].map((bed: number) => (
+											{Object.values(GameMode).map((mode: GameMode) => (
 												<div
-													className={`room ${searchFilter?.search?.bedsList?.includes(bed) ? 'active' : ''}`}
-													onClick={() => propertyBedSelectHandler(bed)}
-													key={bed}
+													className={`room mode ${searchFilter?.search?.modeList?.includes(mode) ? 'active' : ''}`}
+													onClick={() => modeSelectHandler(mode)}
+													key={mode}
 												>
-													{bed == 0 ? 'Any' : bed}
+													{formatEnumLabel(mode)}
 												</div>
 											))}
 										</div>
 									</div>
 									<div className={'box'}>
-										<span>options</span>
+										<span>listing</span>
 										<div className={'inside'}>
 											<FormControl>
 												<Select
-													value={optionCheck}
-													onChange={propertyOptionSelectHandler}
+													value={searchFilter?.search?.isFeatured ? 'featured' : 'all'}
+													onChange={featuredChangeHandler}
 													displayEmpty
 													inputProps={{ 'aria-label': 'Without label' }}
 												>
-													<MenuItem value={'all'}>All Options</MenuItem>
-													<MenuItem value={'propertyBarter'}>Barter</MenuItem>
-													<MenuItem value={'propertyRent'}>Rent</MenuItem>
+													<MenuItem value={'all'}>All Games</MenuItem>
+													<MenuItem value={'featured'}>Featured Only</MenuItem>
 												</Select>
 											</FormControl>
 										</div>
@@ -456,18 +300,19 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 								</div>
 								<div className={'row-box'} style={{ marginTop: '44px' }}>
 									<div className={'box'}>
-										<span>Year Built</span>
+										<span>Release Year</span>
 										<div className={'inside space-between align-center'}>
 											<FormControl sx={{ width: '122px' }}>
 												<Select
-													value={yearCheck.start.toString()}
-													onChange={yearStartChangeHandler}
+													value={yearCheck.start}
+													onChange={(e: any) => setYearCheck({ ...yearCheck, start: e.target.value })}
 													displayEmpty
 													inputProps={{ 'aria-label': 'Without label' }}
 													MenuProps={MenuProps}
 												>
-													{propertyYears?.slice(0)?.map((year: number) => (
-														<MenuItem value={year} disabled={yearCheck.end <= year} key={year}>
+													<MenuItem value={''}>Any</MenuItem>
+													{gameReleaseYears.map((year: number) => (
+														<MenuItem value={year} disabled={yearCheck.end !== '' && yearCheck.end < year} key={year}>
 															{year}
 														</MenuItem>
 													))}
@@ -476,42 +321,45 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 											<div className={'minus-line'}></div>
 											<FormControl sx={{ width: '122px' }}>
 												<Select
-													value={yearCheck.end.toString()}
-													onChange={yearEndChangeHandler}
+													value={yearCheck.end}
+													onChange={(e: any) => setYearCheck({ ...yearCheck, end: e.target.value })}
 													displayEmpty
 													inputProps={{ 'aria-label': 'Without label' }}
 													MenuProps={MenuProps}
 												>
-													{propertyYears
-														?.slice(0)
-														.reverse()
-														.map((year: number) => (
-															<MenuItem value={year} disabled={yearCheck.start >= year} key={year}>
-																{year}
-															</MenuItem>
-														))}
+													<MenuItem value={''}>Any</MenuItem>
+													{gameReleaseYears.map((year: number) => (
+														<MenuItem
+															value={year}
+															disabled={yearCheck.start !== '' && yearCheck.start > year}
+															key={year}
+														>
+															{year}
+														</MenuItem>
+													))}
 												</Select>
 											</FormControl>
 										</div>
 									</div>
 									<div className={'box'}>
-										<span>square meter</span>
+										<span>price ($)</span>
 										<div className={'inside space-between align-center'}>
 											<FormControl sx={{ width: '122px' }}>
 												<Select
-													value={searchFilter?.search?.squaresRange?.start}
-													onChange={(e: any) => propertySquareHandler(e, 'start')}
+													value={priceCheck.start}
+													onChange={(e: any) => setPriceCheck({ ...priceCheck, start: e.target.value })}
 													displayEmpty
 													inputProps={{ 'aria-label': 'Without label' }}
 													MenuProps={MenuProps}
 												>
-													{propertySquare.map((square: number) => (
+													<MenuItem value={''}>Any</MenuItem>
+													{priceSteps.map((price: number) => (
 														<MenuItem
-															value={square}
-															disabled={(searchFilter?.search?.squaresRange?.end || 0) < square}
-															key={square}
+															value={price}
+															disabled={priceCheck.end !== '' && priceCheck.end < price}
+															key={price}
 														>
-															{square}
+															{price}
 														</MenuItem>
 													))}
 												</Select>
@@ -519,19 +367,20 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 											<div className={'minus-line'}></div>
 											<FormControl sx={{ width: '122px' }}>
 												<Select
-													value={searchFilter?.search?.squaresRange?.end}
-													onChange={(e: any) => propertySquareHandler(e, 'end')}
+													value={priceCheck.end}
+													onChange={(e: any) => setPriceCheck({ ...priceCheck, end: e.target.value })}
 													displayEmpty
 													inputProps={{ 'aria-label': 'Without label' }}
 													MenuProps={MenuProps}
 												>
-													{propertySquare.map((square: number) => (
+													<MenuItem value={''}>Any</MenuItem>
+													{priceSteps.map((price: number) => (
 														<MenuItem
-															value={square}
-															disabled={(searchFilter?.search?.squaresRange?.start || 0) > square}
-															key={square}
+															value={price}
+															disabled={priceCheck.start !== '' && priceCheck.start > price}
+															key={price}
 														>
-															{square}
+															{price}
 														</MenuItem>
 													))}
 												</Select>
@@ -566,16 +415,9 @@ HeaderFilter.defaultProps = {
 	initialInput: {
 		page: 1,
 		limit: 9,
-		search: {
-			squaresRange: {
-				start: 0,
-				end: 500,
-			},
-			pricesRange: {
-				start: 0,
-				end: 2000000,
-			},
-		},
+		sort: 'createdAt',
+		direction: 'DESC',
+		search: {},
 	},
 };
 

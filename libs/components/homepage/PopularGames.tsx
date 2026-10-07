@@ -5,62 +5,62 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination } from 'swiper';
 import WestIcon from '@mui/icons-material/West';
 import EastIcon from '@mui/icons-material/East';
-import PopularPropertyCard from './PopularPropertyCard';
-import { Property } from '../../types/property/property';
+import HomeGameCard from './HomeGameCard';
+import { Game } from '../../types/game/game';
 import Link from 'next/link';
-import { PropertiesInquiry } from '../../types/property/property.input';
+import { GamesInquiry } from '../../types/game/game.input';
 import { useQuery } from '@apollo/client';
-import { GET_PROPERTIES } from '../../../apollo/user/query';
+import { GET_GAMES } from '../../../apollo/user/query';
 import { T } from '../../types/common';
 
-interface PopularPropertiesProps {
-	initialInput: PropertiesInquiry;
+interface PopularGamesProps {
+	initialInput: GamesInquiry;
 }
 
-const PopularProperties = (props: PopularPropertiesProps) => {
+const PopularGames = (props: PopularGamesProps) => {
 	const { initialInput } = props;
 	const device = useDeviceDetect();
-	const [popularProperties, setPopularProperties] = useState<Property[]>([]);
+	const [popularGames, setPopularGames] = useState<Game[]>([]);
 
 	/** APOLLO REQUESTS **/
 
 	const {
-		loading: getPropertiesLoading,
-		data: getPropertiesData,
-		error: getPropertiesError,
-		refetch: getPropertiesRefetch,
-	} = useQuery(GET_PROPERTIES, {
+		loading: getGamesLoading,
+		data: getGamesData,
+		error: getGamesError,
+		refetch: getGamesRefetch,
+	} = useQuery(GET_GAMES, {
 		fetchPolicy: 'cache-and-network',
 		variables: { input: initialInput },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
-			setPopularProperties(data?.getProperties?.list);
+			setPopularGames(data?.getGames?.list ?? []);
 		},
 	});
 
 	/** HANDLERS **/
 
-	if (!popularProperties) return null;
+	if (!popularGames) return null;
 
 	if (device === 'mobile') {
 		return (
-			<Stack className={'popular-properties'}>
+			<Stack className={'popular-games'}>
 				<Stack className={'container'}>
 					<Stack className={'info-box'}>
-						<span>Popular properties</span>
+						<span>Popular Games</span>
 					</Stack>
 					<Stack className={'card-box'}>
 						<Swiper
-							className={'popular-property-swiper'}
+							className={'popular-game-swiper'}
 							slidesPerView={'auto'}
 							centeredSlides={true}
 							spaceBetween={25}
 							modules={[Autoplay]}
 						>
-							{popularProperties.map((property: Property) => {
+							{popularGames.map((game: Game) => {
 								return (
-									<SwiperSlide key={property._id} className={'popular-property-slide'}>
-										<PopularPropertyCard property={property} />
+									<SwiperSlide key={game._id} className={'popular-game-slide'}>
+										<HomeGameCard game={game} variant={'popular'} />
 									</SwiperSlide>
 								);
 							})}
@@ -71,17 +71,17 @@ const PopularProperties = (props: PopularPropertiesProps) => {
 		);
 	} else {
 		return (
-			<Stack className={'popular-properties'}>
+			<Stack className={'popular-games'}>
 				<Stack className={'container'}>
 					<Stack className={'info-box'}>
 						<Box component={'div'} className={'left'}>
-							<span>Popular properties</span>
+							<span>Popular Games</span>
 							<p>Popularity is based on views</p>
 						</Box>
 						<Box component={'div'} className={'right'}>
 							<div className={'more-box'}>
-								<Link href={'/property'}>
-									<span>See All Categories</span>
+								<Link href={'/game'}>
+									<span>See All Games</span>
 								</Link>
 								<img src="/img/icons/rightup.svg" alt="" />
 							</div>
@@ -89,7 +89,7 @@ const PopularProperties = (props: PopularPropertiesProps) => {
 					</Stack>
 					<Stack className={'card-box'}>
 						<Swiper
-							className={'popular-property-swiper'}
+							className={'popular-game-swiper'}
 							slidesPerView={'auto'}
 							spaceBetween={25}
 							modules={[Autoplay, Navigation, Pagination]}
@@ -101,10 +101,10 @@ const PopularProperties = (props: PopularPropertiesProps) => {
 								el: '.swiper-popular-pagination',
 							}}
 						>
-							{popularProperties.map((property: Property) => {
+							{popularGames.map((game: Game) => {
 								return (
-									<SwiperSlide key={property._id} className={'popular-property-slide'}>
-										<PopularPropertyCard property={property} />
+									<SwiperSlide key={game._id} className={'popular-game-slide'}>
+										<HomeGameCard game={game} variant={'popular'} />
 									</SwiperSlide>
 								);
 							})}
@@ -121,14 +121,14 @@ const PopularProperties = (props: PopularPropertiesProps) => {
 	}
 };
 
-PopularProperties.defaultProps = {
+PopularGames.defaultProps = {
 	initialInput: {
 		page: 1,
 		limit: 7,
-		sort: 'propertyViews',
+		sort: 'gameViews',
 		direction: 'DESC',
 		search: {},
 	},
 };
 
-export default PopularProperties;
+export default PopularGames;

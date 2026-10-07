@@ -4,7 +4,7 @@ import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
 import { Stack } from '@mui/material';
 import MemberMenu from '../../libs/components/member/MemberMenu';
-import MemberProperties from '../../libs/components/member/MemberProperties';
+import MemberGames from '../../libs/components/member/MemberGames';
 import { useRouter } from 'next/router';
 import MemberFollowers from '../../libs/components/member/MemberFollowers';
 import MemberArticles from '../../libs/components/member/MemberArticles';
@@ -36,11 +36,12 @@ const MemberPage: NextPage = () => {
 	/** LIFECYCLES **/
 	useEffect(() => {
 		if (!router.isReady) return;
-		if (!category) {
+		// 'properties' is the legacy Nestar tab name
+		if (!category || category === 'properties') {
 			router.replace(
 				{
 					pathname: router.pathname,
-					query: { ...router.query, category: 'properties' },
+					query: { ...router.query, category: 'games' },
 				},
 				undefined,
 				{ shallow: true },
@@ -111,7 +112,7 @@ const MemberPage: NextPage = () => {
 							</Stack>
 							<Stack className="main-config" mb={'76px'}>
 								<Stack className={'list-config'}>
-									{category === 'properties' && <MemberProperties />}
+									{category === 'games' && <MemberGames />}
 									{category === 'followers' && (
 										<MemberFollowers
 											subscribeHandler={subscribeHandler}

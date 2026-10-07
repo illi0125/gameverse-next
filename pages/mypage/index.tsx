@@ -4,10 +4,10 @@ import { NextPage } from 'next';
 import { Stack } from '@mui/material';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import MyProperties from '../../libs/components/mypage/MyProperties';
+import MyGames from '../../libs/components/mypage/MyGames';
 import MyFavorites from '../../libs/components/mypage/MyFavorites';
 import RecentlyVisited from '../../libs/components/mypage/RecentlyVisited';
-import AddProperty from '../../libs/components/mypage/AddNewProperty';
+import AddNewGame from '../../libs/components/mypage/AddNewGame';
 import MyProfile from '../../libs/components/mypage/MyProfile';
 import MyArticles from '../../libs/components/mypage/MyArticles';
 import { useMutation, useReactiveVar } from '@apollo/client';
@@ -42,6 +42,16 @@ const MyPage: NextPage = () => {
 	useEffect(() => {
 		if (!user._id) router.push('/').then();
 	}, [user]);
+
+	// Legacy Nestar tab names
+	useEffect(() => {
+		const legacy: Record<string, string> = { addProperty: 'addGame', myProperties: 'myGames' };
+		if (router.isReady && legacy[category]) {
+			const { propertyId, ...rest } = router.query;
+			const query = { ...rest, category: legacy[category], ...(propertyId ? { gameId: propertyId } : {}) };
+			router.replace({ pathname: '/mypage', query }, undefined, { shallow: true });
+		}
+	}, [category, router.isReady]);
 
 	/** HANDLERS **/
 	const subscribeHandler = async (id: string, refetch: any, query: any) => {
@@ -106,8 +116,8 @@ const MyPage: NextPage = () => {
 							</Stack>
 							<Stack className="main-config" mb={'76px'}>
 								<Stack className={'list-config'}>
-									{category === 'addProperty' && <AddProperty />}
-									{category === 'myProperties' && <MyProperties />}
+									{category === 'addGame' && <AddNewGame />}
+									{category === 'myGames' && <MyGames />}
 									{category === 'myFavorites' && <MyFavorites />}
 									{category === 'recentlyVisited' && <RecentlyVisited />}
 									{category === 'myArticles' && <MyArticles />}

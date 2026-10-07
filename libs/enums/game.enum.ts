@@ -1,0 +1,38 @@
+export enum GameStatus {
+	ACTIVE = 'ACTIVE',
+	UPCOMING = 'UPCOMING',
+	DELETE = 'DELETE',
+}
+
+export enum GameType {
+	FREE = 'FREE',
+	PAID = 'PAID',
+	PREMIUM = 'PREMIUM',
+}
+
+export enum GamePlatform {
+	PC = 'PC',
+	PLAYSTATION = 'PLAYSTATION',
+	XBOX = 'XBOX',
+	NINTENDO = 'NINTENDO',
+	MOBILE = 'MOBILE',
+}
+
+export enum GameGenre {
+	ACTION = 'ACTION',
+	ADVENTURE = 'ADVENTURE',
+	RPG = 'RPG',
+	STRATEGY = 'STRATEGY',
+	SPORTS = 'SPORTS',
+	RACING = 'RACING',
+	SHOOTER = 'SHOOTER',
+	SIMULATION = 'SIMULATION',
+	PUZZLE = 'PUZZLE',
+	HORROR = 'HORROR',
+}
+
+export enum GameMode {
+	SINGLE_PLAYER = 'SINGLE_PLAYER',
+	MULTIPLAYER = 'MULTIPLAYER',
+	CO_OP = 'CO_OP',
+}

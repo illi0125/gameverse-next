@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { NextPage } from 'next';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { Pagination, Stack, Typography } from '@mui/material';
-import PropertyCard from '../property/PropertyCard';
-import { Property } from '../../types/property/property';
+import GameCard from '../game/GameCard';
+import { Game } from '../../types/game/game';
 import { T } from '../../types/common';
 import { useQuery } from '@apollo/client';
-import { GET_VISITED } from '../../../apollo/user/query';
+import { GET_VISITED_GAMES } from '../../../apollo/user/query';
 
 const RecentlyVisited: NextPage = () => {
 	const device = useDeviceDetect();
-	const [recentlyVisited, setRecentlyVisited] = useState<Property[]>([]);
+	const [recentlyVisited, setRecentlyVisited] = useState<Game[]>([]);
 	const [total, setTotal] = useState<number>(0);
 	const [searchVisited, setSearchVisited] = useState<T>({ page: 1, limit: 6 });
 
@@ -20,12 +20,12 @@ const RecentlyVisited: NextPage = () => {
 		data: getVisitedData,
 		error: getVisitedError,
 		refetch: getVisitedRefetch,
-	} = useQuery(GET_VISITED, {
+	} = useQuery(GET_VISITED_GAMES, {
 		fetchPolicy: 'network-only',
 		variables: { input: searchVisited },
 		onCompleted: (data: T) => {
-			setRecentlyVisited(data.getVisited?.list);
-			setTotal(data.getVisited?.metaCounter?.[0]?.total || 0);
+			setRecentlyVisited(data?.getVisited?.list ?? []);
+			setTotal(data?.getVisited?.metaCounter?.[0]?.total || 0);
 		},
 	});
 
@@ -35,7 +35,7 @@ const RecentlyVisited: NextPage = () => {
 	};
 
 	if (device === 'mobile') {
-		return <div>NESTAR MY FAVORITES MOBILE</div>;
+		return <div>GAMEVERSE RECENTLY VISITED MOBILE</div>;
 	} else {
 		return (
 			<div id="my-favorites-page">
@@ -47,13 +47,13 @@ const RecentlyVisited: NextPage = () => {
 				</Stack>
 				<Stack className="favorites-list-box">
 					{recentlyVisited?.length ? (
-						recentlyVisited?.map((property: Property) => {
-							return <PropertyCard property={property} recentlyVisited={true} />;
+						recentlyVisited?.map((game: Game) => {
+							return <GameCard game={game} recentlyVisited={true} key={game._id} />;
 						})
 					) : (
 						<div className={'no-data'}>
 							<img src="/img/icons/icoAlert.svg" alt="" />
-							<p>No Recently Visited Properties found!</p>
+							<p>No recently visited games found!</p>
 						</div>
 					)}
 				</Stack>
@@ -70,7 +70,7 @@ const RecentlyVisited: NextPage = () => {
 						</Stack>
 						<Stack className="total-result">
 							<Typography>
-								Total {total} recently visited propert{total > 1 ? 'ies' : 'y'}
+								Total {total} recently visited game{total > 1 ? 's' : ''}
 							</Typography>
 						</Stack>
 					</Stack>

@@ -20,7 +20,7 @@ export const GET_AGENTS = gql`
 				memberDesc
 				memberWarnings
 				memberBlocks
-				memberProperties
+				memberGames
 				memberRank
 				memberPoints
 				memberLikes
@@ -55,7 +55,7 @@ export const GET_MEMBER = gql(`
         memberImage
         memberAddress
         memberDesc
-        memberProperties
+        memberGames
         memberArticles
         memberPoints
         memberLikes
@@ -177,7 +177,7 @@ export const GET_PROPERTIES = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberGames
 					memberRank
 					memberPoints
 					memberLikes
@@ -272,7 +272,7 @@ export const GET_FAVORITES = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					memberProperties
+					memberGames
 					memberArticles
 					memberPoints
 					memberLikes
@@ -335,7 +335,7 @@ export const GET_VISITED = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					memberProperties
+					memberGames
 					memberArticles
 					memberPoints
 					memberLikes
@@ -350,6 +350,333 @@ export const GET_VISITED = gql`
 					createdAt
 					updatedAt
 					accessToken
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
+ *          GAME          *
+ *************************/
+
+export const GET_GAME = gql`
+	query GetGame($input: String!) {
+		getGame(gameId: $input) {
+			_id
+			gameStatus
+			gameType
+			gameTitle
+			gameSlug
+			gameDescription
+			gameOverview
+			gameReleaseDate
+			gameDeveloper
+			gamePublisher
+			gameGenres
+			gamePlatforms
+			gameModes
+			gamePrice
+			gameDiscountPrice
+			gameImages
+			gameVideos
+			gameSystemRequirements {
+				platform
+				minimum
+				recommended
+			}
+			gameRatings
+			gameReviews
+			gameComments
+			gameViews
+			gameLikes
+			gameRank
+			memberId
+			isFeatured
+			isUpcoming
+			deletedAt
+			createdAt
+			updatedAt
+			memberData {
+				_id
+				memberType
+				memberStatus
+				memberAuthType
+				memberPhone
+				memberNick
+				memberFullName
+				memberImage
+				memberAddress
+				memberDesc
+				memberWarnings
+				memberBlocks
+				memberGames
+				memberRank
+				memberPoints
+				memberLikes
+				memberViews
+				deletedAt
+				createdAt
+				updatedAt
+			}
+			meLiked {
+				memberId
+				likeRefId
+				myFavorite
+			}
+		}
+	}
+`;
+
+export const GET_GAMES = gql`
+	query GetGames($input: GamesInquiry!) {
+		getGames(input: $input) {
+			list {
+				_id
+				gameStatus
+				gameType
+				gameTitle
+				gameSlug
+				gameDescription
+				gameOverview
+				gameReleaseDate
+				gameDeveloper
+				gamePublisher
+				gameGenres
+				gamePlatforms
+				gameModes
+				gamePrice
+				gameDiscountPrice
+				gameImages
+				gameVideos
+				gameSystemRequirements {
+					platform
+					minimum
+					recommended
+				}
+				gameRatings
+				gameReviews
+				gameComments
+				gameViews
+				gameLikes
+				gameRank
+				memberId
+				isFeatured
+				isUpcoming
+				deletedAt
+				createdAt
+				updatedAt
+				memberData {
+					_id
+					memberType
+					memberStatus
+					memberAuthType
+					memberPhone
+					memberNick
+					memberFullName
+					memberImage
+					memberAddress
+					memberDesc
+					memberWarnings
+					memberBlocks
+					memberGames
+					memberRank
+					memberPoints
+					memberLikes
+					memberViews
+					deletedAt
+					createdAt
+					updatedAt
+				}
+				meLiked {
+					memberId
+					likeRefId
+					myFavorite
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_AGENT_GAMES = gql`
+	query GetAgentGames($input: AgentGamesInquiry!) {
+		getAgentGames(input: $input) {
+			list {
+				_id
+				gameStatus
+				gameType
+				gameTitle
+				gameSlug
+				gameDescription
+				gameOverview
+				gameReleaseDate
+				gameDeveloper
+				gamePublisher
+				gameGenres
+				gamePlatforms
+				gameModes
+				gamePrice
+				gameDiscountPrice
+				gameImages
+				gameVideos
+				gameSystemRequirements {
+					platform
+					minimum
+					recommended
+				}
+				gameRatings
+				gameReviews
+				gameComments
+				gameViews
+				gameLikes
+				gameRank
+				memberId
+				isFeatured
+				isUpcoming
+				deletedAt
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_FAVORITE_GAMES = gql`
+	query GetFavoriteGames($input: OrdinaryInquiry!) {
+		getFavorites(input: $input) {
+			list {
+				_id
+				gameStatus
+				gameType
+				gameTitle
+				gameSlug
+				gameDescription
+				gameOverview
+				gameReleaseDate
+				gameDeveloper
+				gamePublisher
+				gameGenres
+				gamePlatforms
+				gameModes
+				gamePrice
+				gameDiscountPrice
+				gameImages
+				gameVideos
+				gameSystemRequirements {
+					platform
+					minimum
+					recommended
+				}
+				gameRatings
+				gameReviews
+				gameComments
+				gameViews
+				gameLikes
+				gameRank
+				memberId
+				isFeatured
+				isUpcoming
+				deletedAt
+				createdAt
+				updatedAt
+				memberData {
+					_id
+					memberType
+					memberStatus
+					memberAuthType
+					memberPhone
+					memberNick
+					memberFullName
+					memberImage
+					memberAddress
+					memberDesc
+					memberWarnings
+					memberBlocks
+					memberGames
+					memberRank
+					memberPoints
+					memberLikes
+					memberViews
+					deletedAt
+					createdAt
+					updatedAt
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_VISITED_GAMES = gql`
+	query GetVisitedGames($input: OrdinaryInquiry!) {
+		getVisited(input: $input) {
+			list {
+				_id
+				gameStatus
+				gameType
+				gameTitle
+				gameSlug
+				gameDescription
+				gameOverview
+				gameReleaseDate
+				gameDeveloper
+				gamePublisher
+				gameGenres
+				gamePlatforms
+				gameModes
+				gamePrice
+				gameDiscountPrice
+				gameImages
+				gameVideos
+				gameSystemRequirements {
+					platform
+					minimum
+					recommended
+				}
+				gameRatings
+				gameReviews
+				gameComments
+				gameViews
+				gameLikes
+				gameRank
+				memberId
+				isFeatured
+				isUpcoming
+				deletedAt
+				createdAt
+				updatedAt
+				memberData {
+					_id
+					memberType
+					memberStatus
+					memberAuthType
+					memberPhone
+					memberNick
+					memberFullName
+					memberImage
+					memberAddress
+					memberDesc
+					memberWarnings
+					memberBlocks
+					memberGames
+					memberRank
+					memberPoints
+					memberLikes
+					memberViews
+					deletedAt
+					createdAt
+					updatedAt
 				}
 			}
 			metaCounter {
@@ -391,7 +718,7 @@ export const GET_BOARD_ARTICLE = gql`
 				memberDesc
 				memberWarnings
 				memberBlocks
-				memberProperties
+				memberGames
 				memberRank
 				memberPoints
 				memberLikes
@@ -443,7 +770,7 @@ export const GET_BOARD_ARTICLES = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberGames
 					memberRank
 					memberPoints
 					memberLikes
@@ -489,7 +816,7 @@ export const GET_COMMENTS = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberGames
 					memberRank
 					memberPoints
 					memberLikes
@@ -540,7 +867,7 @@ export const GET_MEMBER_FOLLOWERS = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					memberProperties
+					memberGames
 					memberArticles
 					memberPoints
 					memberLikes
@@ -583,7 +910,7 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					memberProperties
+					memberGames
 					memberArticles
 					memberPoints
 					memberLikes

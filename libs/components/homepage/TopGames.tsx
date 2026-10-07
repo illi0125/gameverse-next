@@ -5,75 +5,75 @@ import WestIcon from '@mui/icons-material/West';
 import EastIcon from '@mui/icons-material/East';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination } from 'swiper';
-import TopPropertyCard from './TopPropertyCard';
-import { PropertiesInquiry } from '../../types/property/property.input';
-import { Property } from '../../types/property/property';
+import HomeGameCard from './HomeGameCard';
+import { GamesInquiry } from '../../types/game/game.input';
+import { Game } from '../../types/game/game';
 import { useMutation, useQuery } from '@apollo/client';
-import { GET_PROPERTIES } from '../../../apollo/user/query';
+import { GET_GAMES } from '../../../apollo/user/query';
 import { T } from '../../types/common';
-import { LIKE_TARGET_PROPERTY } from '../../../apollo/user/mutation';
+import { LIKE_TARGET_GAME } from '../../../apollo/user/mutation';
 import { Message } from '../../enums/common.enum';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 
-interface TopPropertiesProps {
-	initialInput: PropertiesInquiry;
+interface TopGamesProps {
+	initialInput: GamesInquiry;
 }
 
-const TopProperties = (props: TopPropertiesProps) => {
+const TopGames = (props: TopGamesProps) => {
 	const { initialInput } = props;
 	const device = useDeviceDetect();
-	const [topProperties, setTopProperties] = useState<Property[]>([]);
+	const [topGames, setTopGames] = useState<Game[]>([]);
 
 	/** APOLLO REQUESTS **/
-	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
+	const [likeTargetGame] = useMutation(LIKE_TARGET_GAME);
 
 	const {
-		loading: getPropertiesLoading,
-		data: getPropertiesData,
-		error: getPropertiesError,
-		refetch: getPropertiesRefetch,
-	} = useQuery(GET_PROPERTIES, {
+		loading: getGamesLoading,
+		data: getGamesData,
+		error: getGamesError,
+		refetch: getGamesRefetch,
+	} = useQuery(GET_GAMES, {
 		fetchPolicy: 'cache-and-network',
 		variables: { input: initialInput },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
-			setTopProperties(data?.getProperties?.list);
+			setTopGames(data?.getGames?.list ?? []);
 		},
 	});
 
 	/** HANDLERS **/
-	const likePropertyHandler = async (user: T, id: string) => {
+	const likeGameHandler = async (user: T, id: string) => {
 		try {
 			if (!id) return;
 			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-			await likeTargetProperty({ variables: { input: id } });
-			await getPropertiesRefetch({ input: initialInput });
+			await likeTargetGame({ variables: { input: id } });
+			await getGamesRefetch({ input: initialInput });
 			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
-			console.log('ERROR, likePropertyHandler:', err.message);
+			console.log('ERROR, likeGameHandler:', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
 
 	if (device === 'mobile') {
 		return (
-			<Stack className={'top-properties'}>
+			<Stack className={'top-games'}>
 				<Stack className={'container'}>
 					<Stack className={'info-box'}>
-						<span>Top properties</span>
+						<span>Top Games</span>
 					</Stack>
 					<Stack className={'card-box'}>
 						<Swiper
-							className={'top-property-swiper'}
+							className={'top-game-swiper'}
 							slidesPerView={'auto'}
 							centeredSlides={true}
 							spaceBetween={15}
 							modules={[Autoplay]}
 						>
-							{topProperties.map((property: Property) => {
+							{topGames.map((game: Game) => {
 								return (
-									<SwiperSlide className={'top-property-slide'} key={property?._id}>
-										<TopPropertyCard property={property} likePropertyHandler={likePropertyHandler} />
+									<SwiperSlide className={'top-game-slide'} key={game?._id}>
+										<HomeGameCard game={game} variant={'top'} likeGameHandler={likeGameHandler} />
 									</SwiperSlide>
 								);
 							})}
@@ -84,12 +84,12 @@ const TopProperties = (props: TopPropertiesProps) => {
 		);
 	} else {
 		return (
-			<Stack className={'top-properties'}>
+			<Stack className={'top-games'}>
 				<Stack className={'container'}>
 					<Stack className={'info-box'}>
 						<Box component={'div'} className={'left'}>
-							<span>Top properties</span>
-							<p>Check out our Top Properties</p>
+							<span>Top Games</span>
+							<p>Highest ranked by views, likes and reviews</p>
 						</Box>
 						<Box component={'div'} className={'right'}>
 							<div className={'pagination-box'}>
@@ -101,7 +101,7 @@ const TopProperties = (props: TopPropertiesProps) => {
 					</Stack>
 					<Stack className={'card-box'}>
 						<Swiper
-							className={'top-property-swiper'}
+							className={'top-game-swiper'}
 							slidesPerView={'auto'}
 							spaceBetween={15}
 							modules={[Autoplay, Navigation, Pagination]}
@@ -113,10 +113,10 @@ const TopProperties = (props: TopPropertiesProps) => {
 								el: '.swiper-top-pagination',
 							}}
 						>
-							{topProperties.map((property: Property) => {
+							{topGames.map((game: Game) => {
 								return (
-									<SwiperSlide className={'top-property-slide'} key={property?._id}>
-										<TopPropertyCard property={property} likePropertyHandler={likePropertyHandler} />
+									<SwiperSlide className={'top-game-slide'} key={game?._id}>
+										<HomeGameCard game={game} variant={'top'} likeGameHandler={likeGameHandler} />
 									</SwiperSlide>
 								);
 							})}
@@ -128,14 +128,14 @@ const TopProperties = (props: TopPropertiesProps) => {
 	}
 };
 
-TopProperties.defaultProps = {
+TopGames.defaultProps = {
 	initialInput: {
 		page: 1,
 		limit: 8,
-		sort: 'propertyRank',
+		sort: 'gameRank',
 		direction: 'DESC',
 		search: {},
 	},
 };
 
-export default TopProperties;
+export default TopGames;

@@ -20,7 +20,7 @@ export const GET_ALL_MEMBERS_BY_ADMIN = gql`
 				memberDesc
 				memberWarnings
 				memberBlocks
-				memberProperties
+				memberGames
 				memberRank
 				memberArticles
 				memberPoints
@@ -81,7 +81,7 @@ export const GET_ALL_PROPERTIES_BY_ADMIN = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberGames
 					memberRank
 					memberPoints
 					memberLikes
@@ -90,6 +90,78 @@ export const GET_ALL_PROPERTIES_BY_ADMIN = gql`
 					createdAt
 					updatedAt
 					accessToken
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
+ *          GAME          *
+ *************************/
+
+export const GET_ALL_GAMES_BY_ADMIN = gql`
+	query GetAllGamesByAdmin($input: AllGamesInquiry!) {
+		getAllGamesByAdmin(input: $input) {
+			list {
+				_id
+				gameStatus
+				gameType
+				gameTitle
+				gameSlug
+				gameDescription
+				gameOverview
+				gameReleaseDate
+				gameDeveloper
+				gamePublisher
+				gameGenres
+				gamePlatforms
+				gameModes
+				gamePrice
+				gameDiscountPrice
+				gameImages
+				gameVideos
+				gameSystemRequirements {
+					platform
+					minimum
+					recommended
+				}
+				gameRatings
+				gameReviews
+				gameComments
+				gameViews
+				gameLikes
+				gameRank
+				memberId
+				isFeatured
+				isUpcoming
+				deletedAt
+				createdAt
+				updatedAt
+				memberData {
+					_id
+					memberType
+					memberStatus
+					memberAuthType
+					memberPhone
+					memberNick
+					memberFullName
+					memberImage
+					memberAddress
+					memberDesc
+					memberWarnings
+					memberBlocks
+					memberGames
+					memberRank
+					memberPoints
+					memberLikes
+					memberViews
+					deletedAt
+					createdAt
+					updatedAt
 				}
 			}
 			metaCounter {
@@ -131,7 +203,7 @@ export const GET_ALL_BOARD_ARTICLES_BY_ADMIN = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberGames
 					memberRank
 					memberPoints
 					memberLikes
@@ -178,7 +250,7 @@ export const GET_COMMENTS = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberGames
 					memberRank
 					memberPoints
 					memberLikes

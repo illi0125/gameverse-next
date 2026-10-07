@@ -5,84 +5,83 @@ import WestIcon from '@mui/icons-material/West';
 import EastIcon from '@mui/icons-material/East';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination } from 'swiper';
-import { Property } from '../../types/property/property';
-import { PropertiesInquiry } from '../../types/property/property.input';
-import TrendPropertyCard from './TrendPropertyCard';
+import { Game } from '../../types/game/game';
+import { GamesInquiry } from '../../types/game/game.input';
+import HomeGameCard from './HomeGameCard';
 import { useMutation, useQuery } from '@apollo/client';
-import { GET_PROPERTIES } from '../../../apollo/user/query';
+import { GET_GAMES } from '../../../apollo/user/query';
 import { T } from '../../types/common';
-import { LIKE_TARGET_PROPERTY } from '../../../apollo/user/mutation';
+import { LIKE_TARGET_GAME } from '../../../apollo/user/mutation';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import { Message } from '../../enums/common.enum';
 
-interface TrendPropertiesProps {
-	initialInput: PropertiesInquiry;
+interface TrendGamesProps {
+	initialInput: GamesInquiry;
 }
 
-const TrendProperties = (props: TrendPropertiesProps) => {
+const TrendGames = (props: TrendGamesProps) => {
 	const { initialInput } = props;
 	const device = useDeviceDetect();
-	const [trendProperties, setTrendProperties] = useState<Property[]>([]);
+	const [trendGames, setTrendGames] = useState<Game[]>([]);
 
 	/** APOLLO REQUESTS **/
-	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
+	const [likeTargetGame] = useMutation(LIKE_TARGET_GAME);
 
 	const {
-		loading: getPropertiesLoading,
-		data: getPropertiesData,
-		error: getPropertiesError,
-		refetch: getPropertiesRefetch,
-	} = useQuery(GET_PROPERTIES, {
+		loading: getGamesLoading,
+		data: getGamesData,
+		error: getGamesError,
+		refetch: getGamesRefetch,
+	} = useQuery(GET_GAMES, {
 		fetchPolicy: 'cache-and-network',
 		variables: { input: initialInput },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
-			setTrendProperties(data?.getProperties?.list);
+			setTrendGames(data?.getGames?.list ?? []);
 		},
 	});
 
 	/** HANDLERS **/
-	const likePropertyHandler = async (user: T, id: string) => {
+	const likeGameHandler = async (user: T, id: string) => {
 		try {
 			if (!id) return;
 			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-			// execute likeTargetProperty Mutation
-			await likeTargetProperty({ variables: { input: id } });
-			await getPropertiesRefetch({ input: initialInput });
+			// execute likeTargetGame Mutation
+			await likeTargetGame({ variables: { input: id } });
+			await getGamesRefetch({ input: initialInput });
 			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
-			console.log('ERROR, likePropertyHandler:', err.message);
+			console.log('ERROR, likeGameHandler:', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
 
-	if (trendProperties) console.log('trendProperties:', trendProperties);
-	if (!trendProperties) return null;
+	if (!trendGames) return null;
 
 	if (device === 'mobile') {
 		return (
-			<Stack className={'trend-properties'}>
+			<Stack className={'trend-games'}>
 				<Stack className={'container'}>
 					<Stack className={'info-box'}>
-						<span>Trend Properties</span>
+						<span>Trending Games</span>
 					</Stack>
 					<Stack className={'card-box'}>
-						{trendProperties.length === 0 ? (
+						{trendGames.length === 0 ? (
 							<Box component={'div'} className={'empty-list'}>
-								Trends Empty
+								No trending games yet
 							</Box>
 						) : (
 							<Swiper
-								className={'trend-property-swiper'}
+								className={'trend-game-swiper'}
 								slidesPerView={'auto'}
 								centeredSlides={true}
 								spaceBetween={15}
 								modules={[Autoplay]}
 							>
-								{trendProperties.map((property: Property) => {
+								{trendGames.map((game: Game) => {
 									return (
-										<SwiperSlide key={property._id} className={'trend-property-slide'}>
-											<TrendPropertyCard property={property} likePropertyHandler={likePropertyHandler} />
+										<SwiperSlide key={game._id} className={'trend-game-slide'}>
+											<HomeGameCard game={game} variant={'trend'} likeGameHandler={likeGameHandler} />
 										</SwiperSlide>
 									);
 								})}
@@ -94,11 +93,11 @@ const TrendProperties = (props: TrendPropertiesProps) => {
 		);
 	} else {
 		return (
-			<Stack className={'trend-properties'}>
+			<Stack className={'trend-games'}>
 				<Stack className={'container'}>
 					<Stack className={'info-box'}>
 						<Box component={'div'} className={'left'}>
-							<span>Trend Properties</span>
+							<span>Trending Games</span>
 							<p>Trend is based on likes</p>
 						</Box>
 						<Box component={'div'} className={'right'}>
@@ -110,13 +109,13 @@ const TrendProperties = (props: TrendPropertiesProps) => {
 						</Box>
 					</Stack>
 					<Stack className={'card-box'}>
-						{trendProperties.length === 0 ? (
+						{trendGames.length === 0 ? (
 							<Box component={'div'} className={'empty-list'}>
-								Trends Empty
+								No trending games yet
 							</Box>
 						) : (
 							<Swiper
-								className={'trend-property-swiper'}
+								className={'trend-game-swiper'}
 								slidesPerView={'auto'}
 								spaceBetween={15}
 								modules={[Autoplay, Navigation, Pagination]}
@@ -128,10 +127,10 @@ const TrendProperties = (props: TrendPropertiesProps) => {
 									el: '.swiper-trend-pagination',
 								}}
 							>
-								{trendProperties.map((property: Property) => {
+								{trendGames.map((game: Game) => {
 									return (
-										<SwiperSlide key={property._id} className={'trend-property-slide'}>
-											<TrendPropertyCard property={property} likePropertyHandler={likePropertyHandler} />
+										<SwiperSlide key={game._id} className={'trend-game-slide'}>
+											<HomeGameCard game={game} variant={'trend'} likeGameHandler={likeGameHandler} />
 										</SwiperSlide>
 									);
 								})}
@@ -144,14 +143,14 @@ const TrendProperties = (props: TrendPropertiesProps) => {
 	}
 };
 
-TrendProperties.defaultProps = {
+TrendGames.defaultProps = {
 	initialInput: {
 		page: 1,
 		limit: 8,
-		sort: 'propertyLikes',
+		sort: 'gameLikes',
 		direction: 'DESC',
 		search: {},
 	},
 };
 
-export default TrendProperties;
+export default TrendGames;

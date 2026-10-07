@@ -21,3 +21,22 @@ export const Messages = {
 };
 
 export const topPropertyRank = 2;
+
+/** GAME **/
+export const topGameRank = 2;
+
+export const gamePriceMax = 1000;
+
+export const gameReleaseYears: number[] = [];
+
+for (let i = thisYear + 2; i >= 1980; i--) {
+	gameReleaseYears.push(i);
+}
+
+export const gameSortOptions = [
+	{ id: 'new', label: 'Newest', sort: 'createdAt', direction: 'DESC' },
+	{ id: 'popular', label: 'Most Popular', sort: 'gameRank', direction: 'DESC' },
+	{ id: 'release', label: 'Latest Release', sort: 'gameReleaseDate', direction: 'DESC' },
+	{ id: 'lowest', label: 'Lowest Price', sort: 'gamePrice', direction: 'ASC' },
+	{ id: 'highest', label: 'Highest Price', sort: 'gamePrice', direction: 'DESC' },
+];

@@ -2,36 +2,36 @@ import React, { useState } from 'react';
 import { NextPage } from 'next';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { Pagination, Stack, Typography } from '@mui/material';
-import PropertyCard from '../property/PropertyCard';
-import { Property } from '../../types/property/property';
+import GameCard from '../game/GameCard';
+import { Game } from '../../types/game/game';
 import { T } from '../../types/common';
 import { useMutation, useQuery } from '@apollo/client';
-import { LIKE_TARGET_PROPERTY } from '../../../apollo/user/mutation';
-import { GET_FAVORITES } from '../../../apollo/user/query';
+import { LIKE_TARGET_GAME } from '../../../apollo/user/mutation';
+import { GET_FAVORITE_GAMES } from '../../../apollo/user/query';
 import { Messages } from '../../config';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 
 const MyFavorites: NextPage = () => {
 	const device = useDeviceDetect();
-	const [myFavorites, setMyFavorites] = useState<Property[]>([]);
+	const [myFavorites, setMyFavorites] = useState<Game[]>([]);
 	const [total, setTotal] = useState<number>(0);
 	const [searchFavorites, setSearchFavorites] = useState<T>({ page: 1, limit: 6 });
 
 	/** APOLLO REQUESTS **/
-	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
+	const [likeTargetGame] = useMutation(LIKE_TARGET_GAME);
 
 	const {
 		loading: getFavoritesLoading,
 		data: getFavoritesData,
 		error: getFavoritesError,
 		refetch: getFavoritesRefetch,
-	} = useQuery(GET_FAVORITES, {
+	} = useQuery(GET_FAVORITE_GAMES, {
 		fetchPolicy: 'network-only',
 		variables: { input: searchFavorites },
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
-			setMyFavorites(data.getFavorites?.list);
-			setTotal(data.getFavorites?.metaCounter?.[0]?.total || 0);
+			setMyFavorites(data?.getFavorites?.list ?? []);
+			setTotal(data?.getFavorites?.metaCounter?.[0]?.total || 0);
 		},
 	});
 
@@ -40,21 +40,21 @@ const MyFavorites: NextPage = () => {
 		setSearchFavorites({ ...searchFavorites, page: value });
 	};
 
-	const likePropertyHandler = async (user: T, id: string) => {
+	const likeGameHandler = async (user: T, id: string) => {
 		try {
 			if (!id) return;
 			if (!user._id) throw new Error(Messages.error2);
-			await likeTargetProperty({ variables: { input: id } });
+			await likeTargetGame({ variables: { input: id } });
 			await getFavoritesRefetch({ input: searchFavorites });
-			await sweetTopSmallSuccessAlert('succes', 800);
+			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
-			console.log('ERROR, likePropertyHandler:', err.message);
+			console.log('ERROR, likeGameHandler:', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
 
 	if (device === 'mobile') {
-		return <div>NESTAR MY FAVORITES MOBILE</div>;
+		return <div>GAMEVERSE MY FAVORITES MOBILE</div>;
 	} else {
 		return (
 			<div id="my-favorites-page">
@@ -66,8 +66,8 @@ const MyFavorites: NextPage = () => {
 				</Stack>
 				<Stack className="favorites-list-box">
 					{myFavorites?.length ? (
-						myFavorites?.map((property: Property) => {
-							return <PropertyCard property={property} likePropertyHandler={likePropertyHandler} myFavorites={true} />;
+						myFavorites?.map((game: Game) => {
+							return <GameCard game={game} likeGameHandler={likeGameHandler} myFavorites={true} key={game._id} />;
 						})
 					) : (
 						<div className={'no-data'}>
@@ -89,7 +89,7 @@ const MyFavorites: NextPage = () => {
 						</Stack>
 						<Stack className="total-result">
 							<Typography>
-								Total {total} favorite propert{total > 1 ? 'ies' : 'y'}
+								Total {total} favorite game{total > 1 ? 's' : ''}
 							</Typography>
 						</Stack>
 					</Stack>

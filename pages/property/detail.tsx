@@ -54,7 +54,7 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 	const [propertyComments, setPropertyComments] = useState<Comment[]>([]);
 	const [commentTotal, setCommentTotal] = useState<number>(0);
 	const [insertCommentData, setInsertCommentData] = useState<CommentInput>({
-		commentGroup: CommentGroup.PROPERTY,
+		commentGroup: CommentGroup.GAME,
 		commentContent: '',
 		commentRefId: '',
 	});
@@ -125,6 +125,7 @@ const PropertyDetail: NextPage = ({ initialComment, ...props }: any) => {
 			setCommentInquiry({
 				...commentInquiry,
 				search: {
+					commentGroup: CommentGroup.GAME,
 					commentRefId: router.query.id as string,
 				},
 			});

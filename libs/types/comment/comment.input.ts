@@ -9,6 +9,7 @@ export interface CommentInput {
 }
 
 interface CISearch {
+	commentGroup: CommentGroup;
 	commentRefId: string;
 }
 
