@@ -5,7 +5,7 @@ export default function Document() {
 		<Html lang="en">
 			<Head>
 				<meta name="robots" content="index,follow" />
-				<link rel="icon" type="image/png" href="/img/logo/favicon.svg" />
+				<link rel="icon" type="image/svg+xml" href="/img/logo/favicon.svg" />
 
 				{/* Homepage display + HUD faces (used only inside .gv-home) */}
 				<link rel="preconnect" href="https://fonts.googleapis.com" />

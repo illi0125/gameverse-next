@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
+import useHomeScrollMemory from '../../hooks/useHomeScrollMemory';
 import Head from 'next/head';
 import Top from '../Top';
 import Footer from '../Footer';
@@ -18,6 +19,7 @@ const withLayoutMain = (Component: any) => {
 	return (props: any) => {
 		const device = useDeviceDetect();
 		const user = useReactiveVar(userVar);
+		useHomeScrollMemory();
 
 		/** LIFECYCLES **/
 		useEffect(() => {
