@@ -45,3 +45,5 @@ custom.d.ts
 .env.development
 .env.local
 .env
+
+design-references

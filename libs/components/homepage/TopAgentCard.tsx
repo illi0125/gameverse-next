@@ -5,21 +5,30 @@ import { formatEnumLabel } from '../../utils';
 
 interface TopAgentProps {
 	agent: Member;
+	index?: number;
+	active?: boolean;
+	onSelect?: (index: number) => void;
 }
 
+/** Character-select tile: cut-corner portrait, name and role; hovering or focusing it selects the agent **/
 const TopAgentCard = (props: TopAgentProps) => {
-	const { agent } = props;
+	const { agent, index = 0, active = false, onSelect } = props;
 	const agentImage = agent?.memberImage
 		? `${process.env.REACT_APP_API_URL}/${agent?.memberImage}`
 		: '/img/profile/defaultUser.svg';
 
 	return (
-		<Link href={`/agent/detail?agentId=${agent?._id}`} className="gv-agent">
-			<span className="gv-agent__avatar">
-				<img src={agentImage} alt="" width={96} height={96} loading="lazy" decoding="async" />
+		<Link
+			href={`/agent/detail?agentId=${agent?._id}`}
+			className={`gv-agent-tile ${active ? 'is-active' : ''}`}
+			onMouseEnter={() => onSelect?.(index)}
+			onFocus={() => onSelect?.(index)}
+		>
+			<span className="gv-agent-tile__portrait">
+				<img src={agentImage} alt="" loading="lazy" decoding="async" />
 			</span>
-			<span className="gv-agent__name">{agent?.memberNick}</span>
-			<span className="gv-agent__role">{formatEnumLabel(agent?.memberType)}</span>
+			<span className="gv-agent-tile__name">{agent?.memberNick}</span>
+			<span className="gv-agent-tile__role">{formatEnumLabel(agent?.memberType)}</span>
 		</Link>
 	);
 };

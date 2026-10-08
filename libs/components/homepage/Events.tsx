@@ -1,6 +1,8 @@
-import React from 'react';
-import HomeSection from './HomeSection';
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
+import { SCENE_QUERY, pad } from './homeMotion';
 
 interface EventData {
 	eventTitle: string;
@@ -35,14 +37,19 @@ const eventsData: EventData[] = [
 	},
 ];
 
-const EventCard = ({ event }: { event: EventData }) => {
+const EventCard = ({ event, index }: { event: EventData; index: number }) => {
 	return (
-		<article className="gv-event">
-			<img className="gv-event__art" src={event?.imageSrc} alt="" width={600} height={800} loading="lazy" decoding="async" />
-			<div className="gv-event__body">
-				<span className="gv-event__where">{event?.city}</span>
-				<h3 className="gv-event__title">{event?.eventTitle}</h3>
-				<p className="gv-event__desc">{event?.description}</p>
+		<article className={`gv-world-plate ${index % 2 ? 'is-right' : ''}`}>
+			<div className="gv-world-plate__art">
+				<img src={event?.imageSrc} alt="" loading="lazy" decoding="async" />
+				<span className="gv-world-plate__index" aria-hidden>
+					Event {pad(index + 1)}
+				</span>
+			</div>
+			<div className="gv-world-plate__body">
+				<span className="gv-world-plate__where">{event?.city}</span>
+				<h3 className="gv-world-plate__title">{event?.eventTitle}</h3>
+				<p className="gv-world-plate__desc">{event?.description}</p>
 			</div>
 		</article>
 	);
@@ -50,20 +57,61 @@ const EventCard = ({ event }: { event: EventData }) => {
 
 const Events = () => {
 	const device = useDeviceDetect();
+	const rootRef = useRef<HTMLElement>(null);
+
+	/** LIFECYCLES **/
+	useEffect(() => {
+		const root = rootRef.current;
+		if (!root) return;
+		gsap.registerPlugin(ScrollTrigger);
+
+		const mm = gsap.matchMedia();
+		mm.add(SCENE_QUERY, () => {
+			// Each plate enters tilted, levels out at the centre of the screen and tilts away as it leaves
+			root.querySelectorAll<HTMLElement>('.gv-world-plate').forEach((plate, index) => {
+				const side = index % 2 ? -1 : 1;
+				gsap.fromTo(
+					plate,
+					{ rotation: 6 * side, scale: 0.9, xPercent: 6 * side },
+					{
+						keyframes: [
+							{ rotation: 0, scale: 1, xPercent: 0, duration: 0.5 },
+							{ rotation: -4 * side, scale: 0.94, xPercent: -3 * side, duration: 0.5 },
+						],
+						ease: 'none',
+						scrollTrigger: { trigger: plate, start: 'top bottom', end: 'bottom top', scrub: 0.5 },
+					},
+				);
+			});
+		});
+
+		return () => mm.revert();
+	}, [device]);
 
 	if (device === 'mobile') {
 		return <div>EVENT CARD</div>;
 	} else {
 		return (
-			<HomeSection id="events" title="Events" description="Community events worth your attention.">
-				<ul className="gv-events" aria-label="Events">
-					{eventsData.map((event: EventData) => (
-						<li key={event?.eventTitle}>
-							<EventCard event={event} />
-						</li>
-					))}
-				</ul>
-			</HomeSection>
+			<section className="gv-world" id="events" aria-labelledby="events-heading" ref={rootRef}>
+				<div className="gv-world__inner">
+					<header className="gv-world__head">
+						<p className="gv-chapter" aria-hidden>
+							<span>06</span>World map
+						</p>
+						<h2 className="gv-world__title" id="events-heading">
+							Events
+						</h2>
+						<p className="gv-world__desc">Community events worth your attention.</p>
+					</header>
+					<ul className="gv-world__list" aria-label="Events">
+						{eventsData.map((event: EventData, index: number) => (
+							<li key={event?.eventTitle}>
+								<EventCard event={event} index={index} />
+							</li>
+						))}
+					</ul>
+				</div>
+			</section>
 		);
 	}
 };

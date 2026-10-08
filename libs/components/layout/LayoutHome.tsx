@@ -11,6 +11,8 @@ import { userVar } from '../../../apollo/store';
 import { useReactiveVar } from '@apollo/client';
 import { getJwtToken, updateUserInfo } from '../../auth';
 import Chat from '../Chat';
+import HomeChapters from '../homepage/HomeChapters';
+import HomeCredits from '../homepage/HomeCredits';
 
 const withLayoutMain = (Component: any) => {
 	return (props: any) => {
@@ -32,7 +34,7 @@ const withLayoutMain = (Component: any) => {
 						<title>Gameverse</title>
 						<meta name={'title'} content={`Gameverse`} />
 					</Head>
-					<Stack id="mobile-wrap">
+					<Stack id="mobile-wrap" className={'gv-home-shell'}>
 						<Stack id={'top'}>
 							<Top />
 						</Stack>
@@ -44,6 +46,7 @@ const withLayoutMain = (Component: any) => {
 
 						<Stack id={'footer'}>
 							<Footer />
+							<HomeCredits />
 						</Stack>
 					</Stack>
 				</>
@@ -55,7 +58,7 @@ const withLayoutMain = (Component: any) => {
 						<title>Gameverse</title>
 						<meta name={'title'} content={`Gameverse`} />
 					</Head>
-					<Stack id="pc-wrap">
+					<Stack id="pc-wrap" className={'gv-home-shell'}>
 						<Stack id={'top'}>
 							<Top />
 						</Stack>
@@ -65,10 +68,13 @@ const withLayoutMain = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
+						<HomeChapters />
+
 						<Chat />
 
 						<Stack id={'footer'}>
 							<Footer />
+							<HomeCredits />
 						</Stack>
 					</Stack>
 				</>
