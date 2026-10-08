@@ -15,25 +15,25 @@ const eventsData: EventData[] = [
 		eventTitle: 'Indie Showcase',
 		city: 'Online',
 		description: 'Discover upcoming indie games from small studios and add them to your favorites before release.',
-		imageSrc: '/img/gameverse/event-1.svg',
+		imageSrc: '/img/gameverse/event-1.jpg',
 	},
 	{
 		eventTitle: 'Co-op Weekend',
 		city: 'Community',
 		description: 'Team up with friends and explore co-op and multiplayer games picked by the community.',
-		imageSrc: '/img/gameverse/event-2.svg',
+		imageSrc: '/img/gameverse/event-2.jpg',
 	},
 	{
 		eventTitle: 'Retro Game Night',
 		city: 'Community',
 		description: 'Share your favorite classics and talk about the games that started it all.',
-		imageSrc: '/img/gameverse/event-3.svg',
+		imageSrc: '/img/gameverse/event-3.jpg',
 	},
 	{
 		eventTitle: 'Speedrun Marathon',
 		city: 'Online',
 		description: 'Watch fast runs of popular titles and post your own personal bests in the community.',
-		imageSrc: '/img/gameverse/event-4.svg',
+		imageSrc: '/img/gameverse/event-4.jpg',
 	},
 ];
 
