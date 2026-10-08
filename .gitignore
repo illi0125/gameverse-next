@@ -47,3 +47,5 @@ custom.d.ts
 .env
 
 design-references
+# Local high-res game images and their backups (yarn images:replace)
+game-images/

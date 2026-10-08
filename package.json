@@ -8,6 +8,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
+		"images:replace": "node scripts/replace-game-images.mjs",
 		"changelog": "standard-version --skip.tag"
 	},
 	"dependencies": {
