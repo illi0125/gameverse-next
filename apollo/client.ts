@@ -58,6 +58,23 @@ class LoggingWebSocket {
 	}
 }
 
+const CHAT_SOCKET_URL = process.env.REACT_APP_API_WS ?? 'ws://127.0.0.1:3007';
+
+/**
+ * The chat socket sends the token in its URL once, when it opens (no reconnect). After logging in without a page
+ * reload it would stay a Guest connection, so a new identity gets a new connection; the Chat widget follows socketVar.
+ */
+export const reconnectChatSocket = () => {
+	if (typeof window === 'undefined') return;
+	const current = socketVar();
+	try {
+		current?.close();
+	} catch (err) {
+		/* already closed */
+	}
+	new LoggingWebSocket(CHAT_SOCKET_URL);
+};
+
 function createIsomorphicLink() {
 	if (typeof window !== 'undefined') {
 		const authLink = new ApolloLink((operation, forward) => {
@@ -78,7 +95,7 @@ function createIsomorphicLink() {
 
 		/* WEBSOCKET SUBSCRIPTION LINK */
 		const wsLink = new WebSocketLink({
-			uri: process.env.REACT_APP_API_WS ?? 'ws://127.0.0.1:3007',
+			uri: CHAT_SOCKET_URL,
 			options: {
 				reconnect: false,
 				timeout: 30000,

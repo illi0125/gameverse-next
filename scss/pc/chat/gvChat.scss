@@ -1,0 +1,593 @@
+/** LIVE CHAT — the global widget rendered by the desktop layouts (libs/components/Chat.tsx)
+ *  docs/GAMEVERSE_DESIGN_SYSTEM.md: black HUD header with a chapter chip, paper message area, ink and paper bubbles,
+ *  Signal for live state / unread / send, cut-corner shapes (no radius, no shadows).
+ *  Tokens are declared here because the widget also appears inside layouts without a redesigned shell.
+ *  Stacking: above the header (99) and page content, below SweetAlert (1060) and MUI modals (1300).
+ */
+
+.gv-chat {
+	--gv-void: #000000;
+	--gv-ink: #000000;
+	--gv-uv: #6f5bff;
+	--gv-signal: #d7ff3a;
+	--gv-haze: #c9c4dc;
+	--gv-rule: rgba(0, 0, 0, 0.14);
+	--gv-muted: rgba(0, 0, 0, 0.6);
+	--gv-display: 'Archivo', #{$font};
+	--gv-mono: 'JetBrains Mono', ui-monospace, monospace;
+	--gv-ease: cubic-bezier(0.23, 1, 0.32, 1);
+	--gv-chat-gap: 24px;
+	--gv-chat-z: 1040;
+
+	font-family: var(--gv-display);
+	color: var(--gv-ink);
+
+	button {
+		font: inherit;
+	}
+}
+
+/** Launcher: ink plate with a Signal icon cell; inverts while the window is open **/
+
+.gv-chat .gv-chat__launcher {
+	position: fixed;
+	z-index: var(--gv-chat-z);
+	right: var(--gv-chat-gap);
+	bottom: calc(var(--gv-chat-gap) + env(safe-area-inset-bottom, 0px));
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	height: 52px;
+	padding: 0 18px 0 6px;
+	border: 1.5px solid var(--gv-ink);
+	background: var(--gv-ink);
+	color: #ffffff;
+	cursor: pointer;
+	@include gv-cut-btn(12px);
+	animation: gv-chat-launch 520ms var(--gv-ease) both;
+	transition:
+		background-color 180ms ease,
+		color 180ms ease,
+		transform 140ms var(--gv-ease);
+
+	&:hover {
+		background: var(--gv-uv);
+		border-color: var(--gv-uv);
+	}
+
+	&:active {
+		transform: scale(0.96);
+	}
+
+	/* Clipped control: focus shows as a fill (design system §4) */
+	&:focus-visible {
+		outline: none;
+		background: var(--gv-signal);
+		border-color: var(--gv-ink);
+		color: var(--gv-ink);
+	}
+}
+
+.gv-chat .gv-chat__launcher-icon {
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	background: var(--gv-signal);
+	color: var(--gv-ink);
+	transition: transform 260ms var(--gv-ease);
+
+	svg {
+		width: 22px;
+		height: 22px;
+	}
+}
+
+.gv-chat .gv-chat__launcher-label {
+	font-family: var(--gv-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.08em;
+	line-height: 1;
+	text-transform: uppercase;
+}
+
+.gv-chat.is-open .gv-chat__launcher {
+	background: #ffffff;
+	color: var(--gv-ink);
+
+	.gv-chat__launcher-icon {
+		background: var(--gv-ink);
+		color: #ffffff;
+		transform: rotate(90deg);
+	}
+
+	&:hover {
+		background: var(--gv-signal);
+		border-color: var(--gv-ink);
+	}
+}
+
+/* Unread: Signal square with the count; pops each time it changes (keyed in the component) */
+.gv-chat .gv-chat__unread {
+	position: absolute;
+	top: 2px;
+	left: 30px;
+	display: grid;
+	place-items: center;
+	min-width: 20px;
+	height: 20px;
+	padding: 0 4px;
+	border: 1.5px solid var(--gv-ink);
+	background: #ffffff;
+	color: var(--gv-ink);
+	font-family: var(--gv-mono);
+	font-size: 0.6875rem;
+	font-weight: 500;
+	line-height: 1;
+	animation: gv-chat-pop 420ms var(--gv-ease) both;
+}
+
+/** Window **/
+
+.gv-chat .gv-chat__window {
+	position: fixed;
+	z-index: var(--gv-chat-z);
+	right: var(--gv-chat-gap);
+	bottom: calc(var(--gv-chat-gap) + 52px + 12px + env(safe-area-inset-bottom, 0px));
+	display: flex;
+	flex-direction: column;
+	width: 380px;
+	height: min(600px, calc(100vh - 87px - 112px));
+	height: min(600px, calc(100dvh - 87px - 112px));
+	border: 1.5px solid var(--gv-ink);
+	background: #ffffff;
+	@include gv-cut(22px, 62%);
+	transform-origin: 100% 100%;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(14px) scale(0.96);
+	pointer-events: none;
+	transition:
+		opacity 200ms ease,
+		transform 260ms var(--gv-ease),
+		visibility 0s linear 260ms;
+}
+
+.gv-chat.is-open .gv-chat__window {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+	pointer-events: auto;
+	transition:
+		opacity 200ms ease,
+		transform 320ms var(--gv-ease),
+		visibility 0s;
+}
+
+.gv-chat .gv-chat__head {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto auto;
+	align-items: end;
+	gap: 12px;
+	padding: calc(22px + 16px) 14px 16px 18px;
+	background: var(--gv-void);
+	color: #ffffff;
+}
+
+.gv-chat .gv-chat__kicker {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 8px;
+	font-family: var(--gv-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--gv-haze);
+
+	span {
+		padding: 3px 6px;
+		background: #ffffff;
+		color: var(--gv-ink);
+		line-height: 1;
+	}
+}
+
+.gv-chat .gv-chat__title {
+	margin: 0;
+	font-family: var(--gv-display);
+	font-size: 1.75rem;
+	font-weight: 850;
+	line-height: 0.9;
+	letter-spacing: -0.04em;
+	text-transform: uppercase;
+}
+
+.gv-chat .gv-chat__status {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	margin: 0 0 2px;
+	font-family: var(--gv-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--gv-haze);
+
+	&::before {
+		content: '';
+		width: 7px;
+		height: 7px;
+		border: 1.5px solid currentColor;
+	}
+
+	&.is-live {
+		color: var(--gv-signal);
+
+		&::before {
+			border-color: var(--gv-signal);
+			background: var(--gv-signal);
+		}
+	}
+}
+
+.gv-chat .gv-chat__close {
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, 0.24);
+	background: transparent;
+	color: #ffffff;
+	cursor: pointer;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+
+	svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	&:hover,
+	&:focus-visible {
+		outline: none;
+		border-color: var(--gv-signal);
+		background: var(--gv-signal);
+		color: var(--gv-ink);
+	}
+}
+
+/** Messages **/
+
+.gv-chat .gv-chat__content {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	background: #f4f4f6;
+}
+
+/* ScrollableFeed's own div is the scroller (it inherits max-height); it fills the area between head and composer */
+.gv-chat .gv-chat__content > div {
+	flex: 1;
+	height: 100%;
+	max-height: 100%;
+	overscroll-behavior: contain;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+.gv-chat .gv-chat__feed {
+	padding: 16px 14px 18px;
+}
+
+.gv-chat .gv-chat__welcome {
+	padding: 12px 14px;
+	border-left: 3px solid var(--gv-signal);
+	background: #ffffff;
+
+	&-title {
+		margin: 0;
+		font-size: 0.9375rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: -0.01em;
+	}
+
+	&-desc {
+		margin: 4px 0 0;
+		font-size: 0.8125rem;
+		line-height: 1.45;
+		color: var(--gv-muted);
+	}
+}
+
+.gv-chat .gv-chat__empty {
+	margin: 22px 0 0;
+	font-family: var(--gv-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.08em;
+	text-align: center;
+	text-transform: uppercase;
+	color: var(--gv-muted);
+}
+
+.gv-chat .gv-chat__list {
+	display: grid;
+	gap: 3px;
+	margin: 6px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.gv-chat .gv-chat__msg {
+	display: flex;
+	align-items: flex-end;
+	gap: 8px;
+	animation: gv-chat-in 260ms var(--gv-ease) both;
+
+	&.is-first {
+		margin-top: 12px;
+	}
+
+	&.is-mine {
+		justify-content: flex-end;
+	}
+}
+
+.gv-chat .gv-chat__avatar {
+	flex: none;
+	width: 30px;
+	height: 30px;
+
+	img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		background: #ececf0;
+		clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+	}
+}
+
+.gv-chat .gv-chat__stack {
+	display: grid;
+	justify-items: start;
+	gap: 4px;
+	min-width: 0;
+	max-width: 78%;
+}
+
+.gv-chat .gv-chat__msg.is-mine .gv-chat__stack {
+	justify-items: end;
+}
+
+.gv-chat .gv-chat__name {
+	font-family: var(--gv-mono);
+	font-size: 0.625rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--gv-muted);
+}
+
+.gv-chat .gv-chat__bubble {
+	max-width: 100%;
+	margin: 0;
+	padding: 9px 12px 10px;
+	border: 1.5px solid var(--gv-rule);
+	background: #ffffff;
+	font-size: 0.9375rem;
+	line-height: 1.4;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+/* The last bubble of a group gets the notch: theirs bottom-left, mine bottom-right */
+.gv-chat .gv-chat__msg.is-theirs.is-last .gv-chat__bubble {
+	border-color: rgba(0, 0, 0, 0.22);
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+.gv-chat .gv-chat__msg.is-mine .gv-chat__bubble {
+	border-color: var(--gv-ink);
+	background: var(--gv-ink);
+	color: #ffffff;
+}
+
+.gv-chat .gv-chat__msg.is-mine.is-last .gv-chat__bubble {
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+
+/** Composer **/
+
+.gv-chat .gv-chat__composer {
+	display: flex;
+	align-items: stretch;
+	border-top: 1.5px solid var(--gv-ink);
+	background: #ffffff;
+}
+
+.gv-chat .gv-chat__input {
+	flex: 1;
+	min-width: 0;
+	height: 56px;
+	padding: 0 16px;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	font-family: var(--gv-display);
+	font-size: 1rem;
+	color: var(--gv-ink);
+	outline: none;
+
+	&::placeholder {
+		color: rgba(0, 0, 0, 0.42);
+	}
+
+	&:focus-visible {
+		box-shadow: inset 0 -3px 0 var(--gv-uv);
+	}
+}
+
+.gv-chat .gv-chat__send {
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: 64px;
+	padding-right: 8px;
+	border: 0;
+	border-left: 1.5px solid var(--gv-ink);
+	background: #ececf0;
+	color: rgba(0, 0, 0, 0.45);
+	cursor: pointer;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+
+	svg {
+		width: 22px;
+		height: 22px;
+		transition: transform 180ms var(--gv-ease);
+	}
+
+	&.is-ready {
+		background: var(--gv-signal);
+		color: var(--gv-ink);
+	}
+
+	&:hover {
+		background: var(--gv-ink);
+		color: #ffffff;
+
+		svg {
+			transform: translateX(2px);
+		}
+	}
+
+	&:focus-visible {
+		outline: none;
+		background: var(--gv-uv);
+		color: #ffffff;
+	}
+}
+
+@keyframes gv-chat-launch {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes gv-chat-pop {
+	0% {
+		transform: scale(0.4);
+	}
+	60% {
+		transform: scale(1.18);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+@keyframes gv-chat-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/** Narrow windows: the launcher becomes a square, the window a full-width sheet **/
+
+@media (max-width: 639px) {
+	.gv-chat {
+		--gv-chat-gap: 12px;
+	}
+
+	.gv-chat .gv-chat__launcher {
+		width: 52px;
+		padding: 0;
+		justify-content: center;
+	}
+
+	.gv-chat .gv-chat__launcher-label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+
+	.gv-chat .gv-chat__unread {
+		top: -6px;
+		left: -6px;
+	}
+
+	.gv-chat .gv-chat__window {
+		left: var(--gv-chat-gap);
+		width: auto;
+		height: calc(100vh - 52px - 3 * var(--gv-chat-gap) - 16px);
+		height: calc(100dvh - 52px - 3 * var(--gv-chat-gap) - 16px - env(safe-area-inset-bottom, 0px));
+	}
+
+	/* 16px keeps iOS from zooming into the field */
+	.gv-chat .gv-chat__input {
+		font-size: 16px;
+	}
+}
+
+@media (max-height: 520px) {
+	.gv-chat .gv-chat__window {
+		height: calc(100vh - 52px - 2 * var(--gv-chat-gap) - 24px);
+		height: calc(100dvh - 52px - 2 * var(--gv-chat-gap) - 24px);
+	}
+
+	.gv-chat .gv-chat__head {
+		padding-top: calc(22px + 8px);
+		padding-bottom: 10px;
+	}
+
+	.gv-chat .gv-chat__kicker {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-chat .gv-chat__launcher,
+	.gv-chat .gv-chat__unread,
+	.gv-chat .gv-chat__msg {
+		animation: none;
+	}
+
+	.gv-chat .gv-chat__window,
+	.gv-chat.is-open .gv-chat__window {
+		transform: none;
+		transition:
+			opacity 160ms ease,
+			visibility 0s linear 160ms;
+	}
+
+	.gv-chat.is-open .gv-chat__window {
+		transition: opacity 160ms ease;
+	}
+
+	.gv-chat .gv-chat__launcher-icon,
+	.gv-chat .gv-chat__send svg {
+		transition: none;
+	}
+}

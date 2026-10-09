@@ -3,6 +3,7 @@ import { initializeApollo } from '../../apollo/client';
 import { userVar } from '../../apollo/store';
 import { CustomJwtPayload } from '../types/customJwtPayload';
 import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
+import { reconnectChatSocket } from '../../apollo/client';
 
 export function getJwtToken(): any {
 	if (typeof window !== 'undefined') {
@@ -42,6 +43,8 @@ export const logIn = async (nick: string, password: string): Promise<void> => {
 		if (jwtToken) {
 			updateStorage({ jwtToken });
 			updateUserInfo(jwtToken);
+			// Live chat: reconnect so messages are sent as this member, not as Guest
+			reconnectChatSocket();
 		}
 	} catch (err) {
 		// The page shows the message and stays put (it used to call logOut(), which reloaded the page)
@@ -80,6 +83,8 @@ export const signUp = async (nick: string, password: string, phone: string, type
 		if (jwtToken) {
 			updateStorage({ jwtToken });
 			updateUserInfo(jwtToken);
+			// Live chat: reconnect so messages are sent as this member, not as Guest
+			reconnectChatSocket();
 		}
 	} catch (err) {
 		throw err;
