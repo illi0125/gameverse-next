@@ -1,181 +1,168 @@
-import React, { SyntheticEvent, useState } from 'react';
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
-import { AccordionDetails, Box, Stack, Typography } from '@mui/material';
-import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
-import { useRouter } from 'next/router';
-import { styled } from '@mui/material/styles';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import { useQuery } from '@apollo/client';
-import { GET_NOTICES } from '../../../apollo/user/query';
-import { NoticeCategory, SupportTopic } from '../../enums/notice.enum';
-import { Direction } from '../../enums/common.enum';
+import React, { useEffect, useState } from 'react';
 import { Notice } from '../../types/notice/notice';
+import { faqTopics, matchesText, topicMeta } from './csMeta';
+import { pad } from '../homepage/homeMotion';
 
-/** Public FAQ tabs → backend SupportTopic (entries are managed in Admin › Support › FAQ) **/
-const faqTopics: Record<string, SupportTopic> = {
-	games: SupportTopic.GAMES,
-	payment: SupportTopic.PAYMENT,
-	players: SupportTopic.PLAYERS,
-	agents: SupportTopic.DEVELOPERS,
-	membership: SupportTopic.MEMBERSHIP,
-	community: SupportTopic.COMMUNITY,
-	other: SupportTopic.OTHER,
+interface FaqProps {
+	faqs: Notice[];
+	loading: boolean;
+	error: boolean;
+	topicKey: string;
+	topicCounts: Record<string, number>;
+	onTopicChange: (key: string) => void;
+	searchText: string;
+	onSearchChange: (text: string) => void;
+}
+
+/** Wraps literal (case-insensitive) matches of `text` in <mark> **/
+const Highlight = ({ value, text }: { value: string; text: string }) => {
+	const needle = text.trim();
+	if (!needle) return <>{value}</>;
+	const lower = value.toLowerCase();
+	const target = needle.toLowerCase();
+	const parts: React.ReactNode[] = [];
+	let from = 0;
+	let at = lower.indexOf(target);
+	while (at !== -1) {
+		if (at > from) parts.push(value.slice(from, at));
+		parts.push(<mark key={at}>{value.slice(at, at + needle.length)}</mark>);
+		from = at + needle.length;
+		at = lower.indexOf(target, from);
+	}
+	parts.push(value.slice(from));
+	return <>{parts}</>;
 };
 
-const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(
-	({ theme }) => ({
-		border: `1px solid ${theme.palette.divider}`,
-		'&:not(:last-child)': {
-			borderBottom: 0,
-		},
-		'&:before': {
-			display: 'none',
-		},
-	}),
-);
-const AccordionSummary = styled((props: AccordionSummaryProps) => (
-	<MuiAccordionSummary expandIcon={<KeyboardArrowDownRoundedIcon sx={{ fontSize: '1.4rem' }} />} {...props} />
-))(({ theme }) => ({
-	backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, .05)' : '#fff',
-	'& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-		transform: 'rotate(180deg)',
-	},
-	'& .MuiAccordionSummary-content': {
-		marginLeft: theme.spacing(1),
-	},
-}));
-
-const Faq = () => {
-	const device = useDeviceDetect();
-	const router = useRouter();
-	const [category, setCategory] = useState<string>('games');
+/** Public FAQ (entries are managed in Admin › Support › FAQ): topic rail, one open answer at a time, instant search **/
+const Faq = (props: FaqProps) => {
+	const { faqs, loading, error, topicKey, topicCounts, onTopicChange, searchText, onSearchChange } = props;
 	const [expanded, setExpanded] = useState<string | false>(false);
 
-	/** APOLLO REQUESTS **/
-	const {
-		loading,
-		data: faqData,
-		error,
-	} = useQuery(GET_NOTICES, {
-		fetchPolicy: 'cache-and-network',
-		variables: {
-			input: {
-				page: 1,
-				limit: 100,
-				sort: 'createdAt',
-				direction: Direction.ASC,
-				search: { noticeCategory: NoticeCategory.FAQ, noticeTopic: faqTopics[category] },
-			},
-		},
-	});
-	const faqs: Notice[] = faqData?.getNotices?.list ?? [];
+	const searching = searchText.trim().length > 0;
+	const topic = faqTopics.find((entry) => entry.key === topicKey) ?? faqTopics[0];
+	const list = searching
+		? faqs.filter((faq) => matchesText(searchText, faq.noticeTitle, faq.noticeContent))
+		: faqs.filter((faq) => faq.noticeTopic === topic.topic);
+
+	// A new topic or search starts with every answer closed (as switching tabs did before)
+	useEffect(() => setExpanded(false), [topicKey, searching]);
 
 	/** HANDLERS **/
-	const changeCategoryHandler = (category: string) => {
-		setCategory(category);
-		setExpanded(false);
+	const changeCategoryHandler = (key: string) => {
+		onTopicChange(key);
+		if (searching) onSearchChange('');
 	};
 
-	const handleChange = (panel: string) => (event: SyntheticEvent, newExpanded: boolean) => {
-		setExpanded(newExpanded ? panel : false);
-	};
+	const handleChange = (panel: string) => setExpanded((current) => (current === panel ? false : panel));
 
-	if (device === 'mobile') {
-		return <div>FAQ MOBILE</div>;
-	} else {
-		return (
-			<Stack className={'faq-content'}>
-				<Box className={'categories'} component={'div'}>
-					<div
-						className={category === 'games' ? 'active' : ''}
-						onClick={() => {
-							changeCategoryHandler('games');
-						}}
-					>
-						Games
-					</div>
-					<div
-						className={category === 'payment' ? 'active' : ''}
-						onClick={() => {
-							changeCategoryHandler('payment');
-						}}
-					>
-						Payment
-					</div>
-					<div
-						className={category === 'players' ? 'active' : ''}
-						onClick={() => {
-							changeCategoryHandler('players');
-						}}
-					>
-						For Players
-					</div>
-					<div
-						className={category === 'agents' ? 'active' : ''}
-						onClick={() => {
-							changeCategoryHandler('agents');
-						}}
-					>
-						For Developers
-					</div>
-					<div
-						className={category === 'membership' ? 'active' : ''}
-						onClick={() => {
-							changeCategoryHandler('membership');
-						}}
-					>
-						Membership
-					</div>
-					<div
-						className={category === 'community' ? 'active' : ''}
-						onClick={() => {
-							changeCategoryHandler('community');
-						}}
-					>
-						Community
-					</div>
-					<div
-						className={category === 'other' ? 'active' : ''}
-						onClick={() => {
-							changeCategoryHandler('other');
-						}}
-					>
-						Other
-					</div>
-				</Box>
-				<Box className={'wrap'} component={'div'}>
-					{faqs.length === 0 && (
-						<Typography className={'faq-empty'}>
-							{loading
-								? 'Loading questions…'
-								: error
-								? 'Questions are unavailable right now.'
-								: 'No questions in this topic yet.'}
-						</Typography>
+	return (
+		<div className="gv-cs-faq">
+			<nav className="gv-cs-topics" aria-label="FAQ topics">
+				<p className="gv-cs-topics__title">Topics</p>
+				<ul>
+					{faqTopics.map((entry, index) => {
+						const current = !searching && entry.key === topic.key;
+						return (
+							<li key={entry.key}>
+								<button
+									type="button"
+									className={`gv-cs-topic ${current ? 'is-current' : ''}`}
+									aria-current={current ? 'true' : undefined}
+									onClick={() => changeCategoryHandler(entry.key)}
+								>
+									<span className="gv-cs-topic__index">{pad(index + 1)}</span>
+									<span className="gv-cs-topic__name">{entry.label}</span>
+									<span className="gv-cs-topic__count">{loading ? '—' : topicCounts[entry.key] ?? 0}</span>
+								</button>
+							</li>
+						);
+					})}
+				</ul>
+			</nav>
+
+			<div className="gv-cs-faq__main">
+				<header className="gv-cs-section-head">
+					<p className="gv-chapter" aria-hidden>
+						<span>01</span>FAQ
+					</p>
+					<h2 className="gv-cs-section-head__title" aria-live="polite">
+						{searching ? `Results for “${searchText.trim()}”` : topic.label}
+					</h2>
+					<p className="gv-cs-section-head__desc">
+						{searching
+							? `${list.length} answer${list.length === 1 ? '' : 's'} across every topic`
+							: topic.desc}
+					</p>
+					{searching && (
+						<button type="button" className="gv-cs-textlink" onClick={() => onSearchChange('')}>
+							Clear search and browse {topic.label}
+						</button>
 					)}
-					{faqs.map((faq: Notice) => (
-						<Accordion expanded={expanded === faq._id} onChange={handleChange(faq._id)} key={faq._id}>
-							<AccordionSummary id="panel1d-header" className="question" aria-controls="panel1d-content">
-								<Typography className="badge" variant={'h4'}>
-									Q
-								</Typography>
-								<Typography> {faq.noticeTitle}</Typography>
-							</AccordionSummary>
-							<AccordionDetails>
-								<Stack className={'answer flex-box'}>
-									<Typography className="badge" variant={'h4'} color={'primary'}>
-										A
-									</Typography>
-									<Typography> {faq.noticeContent}</Typography>
-								</Stack>
-							</AccordionDetails>
-						</Accordion>
-					))}
-				</Box>
-			</Stack>
-		);
-	}
+				</header>
+
+				{list.length === 0 ? (
+					<div className="gv-cs-empty" role="status">
+						<p className="gv-cs-empty__title">
+							{loading
+								? 'Loading answers…'
+								: error
+								? 'Answers are unavailable right now.'
+								: searching
+								? 'No answer matches that.'
+								: 'No questions in this topic yet.'}
+						</p>
+						{!loading && !error && (
+							<p className="gv-cs-empty__desc">
+								{searching ? 'Try a shorter word, or ask the team in Ask us.' : 'Pick another topic, or ask the team in Ask us.'}
+							</p>
+						)}
+					</div>
+				) : (
+					<ol className="gv-cs-qa">
+						{list.map((faq: Notice, index: number) => {
+							const open = expanded === faq._id;
+							return (
+								<li className={`gv-cs-qa__item ${open ? 'is-open' : ''}`} key={faq._id}>
+									<h3 className="gv-cs-qa__q">
+										<button
+											type="button"
+											id={`faq-q-${faq._id}`}
+											aria-expanded={open}
+											aria-controls={`faq-a-${faq._id}`}
+											onClick={() => handleChange(faq._id)}
+										>
+											<span className="gv-cs-qa__num">Q.{pad(index + 1)}</span>
+											<span className="gv-cs-qa__text">
+												<Highlight value={faq.noticeTitle} text={searchText} />
+												{searching && <span className="gv-cs-qa__topic">{topicMeta(faq.noticeTopic).label}</span>}
+											</span>
+											<span className="gv-cs-qa__icon" aria-hidden />
+										</button>
+									</h3>
+									<div
+										className="gv-cs-qa__panel"
+										id={`faq-a-${faq._id}`}
+										role="region"
+										aria-labelledby={`faq-q-${faq._id}`}
+										hidden={!open}
+									>
+										<div className="gv-cs-qa__answer">
+											<span className="gv-cs-qa__a" aria-hidden>
+												A.
+											</span>
+											<p>
+												<Highlight value={faq.noticeContent} text={searchText} />
+											</p>
+										</div>
+									</div>
+								</li>
+							);
+						})}
+					</ol>
+				)}
+			</div>
+		</div>
+	);
 };
 
 export default Faq;

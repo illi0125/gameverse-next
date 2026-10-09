@@ -1,70 +1,83 @@
-import React from 'react';
-import { Stack, Box } from '@mui/material';
+import React, { useState } from 'react';
 import moment from 'moment';
-import { useQuery } from '@apollo/client';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { GET_NOTICES } from '../../../apollo/user/query';
-import { NoticeCategory } from '../../enums/notice.enum';
-import { Direction } from '../../enums/common.enum';
 import { Notice as NoticeItem } from '../../types/notice/notice';
-import { NoticesInquiry } from '../../types/notice/notice.input';
+import { pad } from '../homepage/homeMotion';
 
-const noticesInquiry: NoticesInquiry = {
-	page: 1,
-	limit: 50,
-	sort: 'createdAt',
-	direction: Direction.DESC,
-	search: { noticeCategory: NoticeCategory.NOTICE },
-};
+/** Bodies longer than this start clamped with a Read more toggle **/
+const LONG_BODY = 260;
 
-/** Public notices, managed in Admin › Support › Notices **/
-const Notice = () => {
-	const device = useDeviceDetect();
+interface NoticeProps {
+	notices: NoticeItem[];
+	loading: boolean;
+	error: boolean;
+}
 
-	/** APOLLO REQUESTS **/
-	const { loading, data, error } = useQuery(GET_NOTICES, {
-		fetchPolicy: 'cache-and-network',
-		variables: { input: noticesInquiry },
-	});
-	const notices: NoticeItem[] = data?.getNotices?.list ?? [];
+/** Public notices, managed in Admin › Support › Notices: newest first, numbered, events flagged **/
+const Notice = ({ notices, loading, error }: NoticeProps) => {
+	const [openIds, setOpenIds] = useState<string[]>([]);
 
-	if (device === 'mobile') {
-		return <div>NOTICE MOBILE</div>;
-	} else {
-		return (
-			<Stack className={'notice-content'}>
-				<span className={'title'}>Notice</span>
-				<Stack className={'main'}>
-					<Box component={'div'} className={'top'}>
-						<span>number</span>
-						<span>title</span>
-						<span>date</span>
-					</Box>
-					<Stack className={'bottom'}>
-						{notices.length === 0 && (
-							<div className={'notice-card'}>
-								<span className={'notice-title'}>
-									{loading ? 'Loading notices…' : error ? 'Notices are unavailable right now.' : 'No notices yet.'}
-								</span>
-							</div>
-						)}
-						{notices.map((notice: NoticeItem, index: number) => (
-							<div className={`notice-card ${notice.noticeEvent ? 'event' : ''}`} key={notice._id}>
-								{notice.noticeEvent ? <div>event</div> : <span className={'notice-number'}>{index + 1}</span>}
-								<span className={'notice-title'}>
-									{notice.noticeTitle}
-									{notice.noticeContent && notice.noticeContent !== notice.noticeTitle && (
-										<small className={'notice-body'}>{notice.noticeContent}</small>
+	const toggle = (id: string) =>
+		setOpenIds((current) => (current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id]));
+
+	return (
+		<div className="gv-cs-notices">
+			<header className="gv-cs-section-head">
+				<p className="gv-chapter" aria-hidden>
+					<span>02</span>Notices
+				</p>
+				<h2 className="gv-cs-section-head__title">From the team</h2>
+				<p className="gv-cs-section-head__desc">Announcements and events, newest first.</p>
+			</header>
+
+			{notices.length === 0 ? (
+				<div className="gv-cs-empty" role="status">
+					<p className="gv-cs-empty__title">
+						{loading ? 'Loading notices…' : error ? 'Notices are unavailable right now.' : 'No notices yet.'}
+					</p>
+				</div>
+			) : (
+				<ol className="gv-cs-log">
+					{notices.map((notice: NoticeItem, index: number) => {
+						const body = notice.noticeContent && notice.noticeContent !== notice.noticeTitle ? notice.noticeContent : '';
+						const long = body.length > LONG_BODY;
+						const open = openIds.includes(notice._id);
+						return (
+							<li className={`gv-cs-log__entry ${notice.noticeEvent ? 'is-event' : ''}`} key={notice._id}>
+								<div className="gv-cs-log__rail">
+									<span className="gv-cs-log__num">{pad(index + 1)}</span>
+									<time className="gv-cs-log__date" dateTime={moment(notice.createdAt).format('YYYY-MM-DD')}>
+										{moment(notice.createdAt).format('DD.MM.YYYY')}
+									</time>
+								</div>
+								<div className="gv-cs-log__body">
+									{notice.noticeEvent && <span className="gv-cs-flag">Event</span>}
+									<h3 className="gv-cs-log__title">{notice.noticeTitle}</h3>
+									{body && (
+										<>
+											<p className={`gv-cs-log__text ${long && !open ? 'is-clamped' : ''}`} id={`notice-${notice._id}`}>
+												{body}
+											</p>
+											{long && (
+												<button
+													type="button"
+													className="gv-cs-textlink"
+													aria-expanded={open}
+													aria-controls={`notice-${notice._id}`}
+													onClick={() => toggle(notice._id)}
+												>
+													{open ? 'Show less' : 'Read more'}
+												</button>
+											)}
+										</>
 									)}
-								</span>
-								<span className={'notice-date'}>{moment(notice.createdAt).format('DD.MM.YYYY')}</span>
-							</div>
-						))}
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	}
+								</div>
+							</li>
+						);
+					})}
+				</ol>
+			)}
+		</div>
+	);
 };
 
 export default Notice;
