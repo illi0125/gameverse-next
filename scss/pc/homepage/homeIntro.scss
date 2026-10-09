@@ -1,0 +1,158 @@
+/** HOMEPAGE INTRO — "Press start", once per session (HomeIntro.tsx) **/
+
+.gv-intro {
+	--gv-void: #000000;
+	--gv-signal: #d7ff3a;
+	--gv-uv: #6f5bff;
+	--gv-haze: #c9c4dc;
+	--gv-gutter: clamp(16px, 4vw, 40px);
+
+	position: fixed;
+	inset: 0;
+	z-index: 1200;
+	overflow: hidden;
+	background: var(--gv-void);
+	color: #ffffff;
+	user-select: none;
+}
+
+/* Seen this session: the pre-paint script (or the hand-over) hides it before React unmounts it */
+html[data-gv-intro='skip'] .gv-intro:not(.is-playing) {
+	display: none;
+}
+
+.gv-intro__stage {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.gv-intro__title {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: 0;
+	font-family: 'Archivo', #{$font};
+	font-weight: 850;
+	font-size: min(14vw, 30vh);
+	line-height: 0.84;
+	letter-spacing: -0.055em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.gv-intro__line {
+	display: block;
+}
+
+.gv-intro__char {
+	display: inline-block;
+}
+
+.gv-intro__label,
+.gv-intro__hint {
+	position: absolute;
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.gv-intro__label {
+	top: 50%;
+	margin-top: -0.6em;
+	color: #ffffff;
+}
+
+.gv-intro__label--left {
+	left: var(--gv-gutter);
+}
+
+.gv-intro__label--right {
+	right: var(--gv-gutter);
+}
+
+.gv-intro__hint {
+	right: var(--gv-gutter);
+	bottom: var(--gv-gutter);
+	color: var(--gv-haze);
+	font-size: 0.6875rem;
+}
+
+.gv-intro__spark {
+	position: absolute;
+	width: 14px;
+	height: 14px;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.gv-intro__spark--sq {
+	background: var(--gv-signal);
+}
+
+.gv-intro__spark--plus {
+	width: 24px;
+	height: 24px;
+	background:
+		linear-gradient(var(--gv-haze), var(--gv-haze)) center / 100% 2px no-repeat,
+		linear-gradient(var(--gv-haze), var(--gv-haze)) center / 2px 100% no-repeat;
+}
+
+.gv-intro__plate {
+	position: absolute;
+	width: 24vmax;
+	height: 24vmax;
+	transform: translate(-50%, -50%) scale(0);
+	pointer-events: none;
+	@include gv-cut(32px);
+}
+
+.gv-intro__plate--uv {
+	background: var(--gv-uv);
+}
+
+.gv-intro__plate--signal {
+	background: var(--gv-signal);
+}
+
+/* Motion allowed: the stage starts empty and the timeline builds it (no flash before hydration) */
+@media (prefers-reduced-motion: no-preference) {
+	.gv-intro__char {
+		visibility: hidden;
+	}
+
+	.gv-intro__label,
+	.gv-intro__hint {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-intro__spark,
+	.gv-intro__plate,
+	.gv-intro__hint {
+		display: none;
+	}
+}
+
+/* Narrow screens: no side margin for the labels, so they sit above and below the headline */
+@media (max-width: 899px) {
+	.gv-intro__label {
+		left: 0;
+		right: 0;
+		margin-top: 0;
+		text-align: center;
+	}
+
+	.gv-intro__label--left {
+		top: calc(50% - min(14vw, 30vh) * 1.45 - 2.6em);
+	}
+
+	.gv-intro__label--right {
+		top: calc(50% + min(14vw, 30vh) * 1.4 + 1.2em);
+	}
+}

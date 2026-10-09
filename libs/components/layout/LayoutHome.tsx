@@ -14,6 +14,7 @@ import { getJwtToken, updateUserInfo } from '../../auth';
 import Chat from '../Chat';
 import HomeChapters from '../homepage/HomeChapters';
 import HomeCredits from '../homepage/HomeCredits';
+import HomeIntro from '../homepage/HomeIntro';
 
 const withLayoutMain = (Component: any) => {
 	return (props: any) => {
@@ -37,6 +38,7 @@ const withLayoutMain = (Component: any) => {
 						<meta name={'title'} content={`Gameverse`} />
 					</Head>
 					<Stack id="mobile-wrap" className={'gv-home-shell'}>
+						<HomeIntro />
 						<Stack id={'top'}>
 							<Top />
 						</Stack>
@@ -61,6 +63,7 @@ const withLayoutMain = (Component: any) => {
 						<meta name={'title'} content={`Gameverse`} />
 					</Head>
 					<Stack id="pc-wrap" className={'gv-home-shell'}>
+						<HomeIntro />
 						<Stack id={'top'}>
 							<Top />
 						</Stack>

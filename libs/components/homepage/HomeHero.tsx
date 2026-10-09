@@ -10,6 +10,7 @@ import { Direction } from '../../enums/common.enum';
 import { GameGenre, GameMode, GamePlatform } from '../../enums/game.enum';
 import { REACT_APP_API_URL } from '../../config';
 import { formatEnumLabel } from '../../utils';
+import { onIntroDone } from './introGate';
 
 interface HomeHeroProps {
 	search?: ReactNode;
@@ -101,33 +102,32 @@ const HomeHero = ({ search, visual }: HomeHeroProps) => {
 		});
 
 		mm.add('(prefers-reduced-motion: no-preference)', () => {
-			// The single load moment: headline lines rise out of their masks, frame rules draw in
-			gsap.from(root.querySelectorAll('.gv-hero__word'), {
-				yPercent: 110,
-				duration: 0.9,
-				ease: 'power4.out',
-				stagger: 0.08,
-				delay: 0.1,
-			});
-			gsap.from(root.querySelectorAll('.gv-hero__rule'), {
-				scale: 0,
-				duration: 1.1,
-				ease: 'power3.inOut',
-				stagger: 0.06,
+			// The single load moment: headline lines rise out of their masks, frame rules draw in.
+			// Held hidden while the intro plays, then released by its hand-over.
+			const words = root.querySelectorAll('.gv-hero__word');
+			const rules = root.querySelectorAll('.gv-hero__rule');
+			gsap.set(words, { yPercent: 110 });
+			gsap.set(rules, { scale: 0 });
+			const stopWaiting = onIntroDone(() => {
+				gsap.to(words, { yPercent: 0, duration: 0.9, ease: 'power4.out', stagger: 0.08, delay: 0.1 });
+				gsap.to(rules, { scale: 1, duration: 1.1, ease: 'power3.inOut', stagger: 0.06 });
 			});
 
 			// Banner: the platform marquee travels with the scroll
 			const marquee = root.querySelector('.gv-promo__track');
-			if (!marquee) return;
-			gsap.fromTo(
-				marquee,
-				{ xPercent: 3 },
-				{
-					xPercent: -18,
-					ease: 'none',
-					scrollTrigger: { trigger: root.querySelector('.gv-promo'), start: 'top bottom', end: 'bottom top', scrub: 0.4 },
-				},
-			);
+			if (marquee) {
+				gsap.fromTo(
+					marquee,
+					{ xPercent: 3 },
+					{
+						xPercent: -18,
+						ease: 'none',
+						scrollTrigger: { trigger: root.querySelector('.gv-promo'), start: 'top bottom', end: 'bottom top', scrub: 0.4 },
+					},
+				);
+			}
+
+			return () => stopWaiting();
 		});
 
 		return () => mm.revert();

@@ -183,6 +183,7 @@ Rules:
 | Parallax depth | Agents | Word `xPercent 4 → -6`; items `yPercent` alternate `[-14, 10, -4]` |
 | Marquee | Banner, Credits | Banner `xPercent 3 → -18` scrubbed; credits loop `xPercent -50 / 28s`, `timeScale` = 1 + velocity/300 (max 9), eases back to 1 |
 | Load reveal | Hero only | Masked lines rise; frame rules draw. **One per page** |
+| Intro | Homepage, once per session (`HomeIntro`, `introGate`) | Void overlay: `PRESS / START / GAMEVERSE` typed 70ms/letter with a 3-letter Signal/UV/Haze/paper flicker trail; mono `PLAYER 1` · `READY`; Signal ■ and Haze + sparks twinkle; cut-corner UV then Signal plates flood (`power2.in`); the stage lifts (`yPercent -100`) and hands over to the hero load reveal. Any key/press skips; reduced motion = static 0.8s + fade. Not a second load reveal: the hero reveal waits for it |
 
 Fallbacks: below 900px wide, below 560px tall, or with reduced motion, there's no pinning. Stages become normal flow, tracks become scroll-snap rails (`useHomeRail` with arrow controls), fans become snap rows, and hero covers auto-advance every 5s (narrow screens, motion allowed).
 

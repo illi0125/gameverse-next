@@ -15,6 +15,15 @@ export default function Document() {
 					href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@700..900&display=swap"
 				/>
 
+				{/* Homepage intro plays once per session: hide it before first paint when already seen.
+				    The rule is inline so it applies before any stylesheet arrives. */}
+				<style>{`html[data-gv-intro=skip] .gv-intro:not(.is-playing){display:none}`}</style>
+				<script
+					dangerouslySetInnerHTML={{
+						__html: "try{if(sessionStorage.getItem('gv-intro-seen')==='1')document.documentElement.setAttribute('data-gv-intro','skip')}catch(e){}",
+					}}
+				/>
+
 				{/* SEO */}
 				<meta name="keyword" content={'gameverse, game store, pc games, console games, mobile games'} />
 				<meta
