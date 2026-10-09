@@ -68,7 +68,7 @@ Use this when redesigning any other page. Do not invent new colours, typefaces, 
 | Variable | Family | Role |
 | --- | --- | --- |
 | `--gv-display` | **Archivo** (variable `wdth 62–125`, `wght 100–900`) | Display headlines, titles, body |
-| `--gv-mega` | **Unbounded** 700–900 | Monuments: rank numerals, odometers, rotated counters, giant words (AGENTS, platform marquee, GAMEVERSE credits) |
+| `--gv-mega` | **Unbounded** 700–900 | Monuments: rank numerals, odometers, rotated counters, giant words (DEVELOPERS, platform marquee, GAMEVERSE credits) |
 | `--gv-mono` | **JetBrains Mono** 400/500 | HUD only: chapter labels, kickers, readouts, buttons, meta, timestamps |
 
 Poppins (`$font`) remains the site-wide default outside redesigned scopes.
@@ -99,7 +99,7 @@ Poppins (`$font`) remains the site-wide default outside redesigned scopes.
 | --- | --- | --- | --- | --- |
 | Hero display | Archivo 850 | `min(10.4vw, 15.5vh)` | `-0.055em` / `0.84` | Upper |
 | Chapter display | Archivo 850 | `clamp(3rem, 10–14vw, 6.5–12rem)`; pinned: `min(8.6–9vw, 14–15vh)` | `-0.055em…-0.06em` / `0.82–0.86` | Upper |
-| Monument numeral / word | Unbounded 900 | Rank `min(21vw, 44vh)`; odometer `min(9vw, 15vh)`; AGENTS `18.4vw`; credits `19vw`; marquee `clamp(64px, 14vw, 240px)` | `-0.04em…-0.06em` / `0.78–0.95` | Upper |
+| Monument numeral / word | Unbounded 900 | Rank `min(21vw, 44vh)`; odometer `min(9vw, 15vh)`; DEVELOPERS `11.2vw`; credits `19vw`; marquee `clamp(64px, 14vw, 240px)` | `-0.04em…-0.06em` / `0.78–0.95` | Upper |
 | Item title | Archivo 850 | `clamp(1.75rem, 3vw, 2.875rem)`; pinned `min(3–3.2vw, 5.4–6vh)` | `-0.04em` / `0.92–1` | Upper |
 | Small title | Archivo 800 | `1rem–1.25rem` | `-0.01…-0.02em` | Upper |
 | Body | Archivo 400 | `0.9375–1rem` | lh `1.5`, max `36–40ch` | Sentence |

@@ -24,7 +24,7 @@ const About: NextPage = () => {
 								genres, game modes and prices without jumping between stores.
 								<br />
 								<br />
-								Agents keep listings up to date with release dates, system requirements and media, while players
+								Developers keep listings up to date with release dates, system requirements and media, while players
 								follow trends, save favorites and share their opinions with the community.
 							</p>
 							<Stack className={'boxes'}>
@@ -69,8 +69,8 @@ const About: NextPage = () => {
 				</Stack>
 				<Stack className={'agents'}>
 					<Stack className={'container'}>
-						<span className={'title'}>Our Exclusive Agents</span>
-						<p className={'desc'}>Meet the agents who curate our catalog</p>
+						<span className={'title'}>Our Developers</span>
+						<p className={'desc'}>Meet the developers who curate our catalog</p>
 						<Stack className={'wrap'}>
 							{/*{[1, 2, 3, 4, 5].map(() => {*/}
 							{/*	return <AgentCard />;*/}
@@ -106,7 +106,7 @@ const About: NextPage = () => {
 							</div>
 							<div className={'text-box'}>
 								<span>Grow Your Audience</span>
-								<p>Collect likes, views and comments, and build followers as an agent.</p>
+								<p>Collect likes, views and comments, and build followers as a developer.</p>
 							</div>
 						</Stack>
 						<Stack className={'btn'}>

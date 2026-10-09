@@ -2,6 +2,7 @@ import numeral from 'numeral';
 import { sweetMixinErrorAlert } from './sweetAlert';
 import { FollowInquiry } from './types/follow/follow.input';
 import { GameType } from './enums/game.enum';
+import { MemberType } from './enums/member.enum';
 import { Game } from './types/game/game';
 
 export const formatterStr = (value: number | undefined): string => {
@@ -36,6 +37,10 @@ export const formatEnumLabel = (value: string | undefined): string => {
 		.map((word: string) => word.charAt(0) + word.slice(1).toLowerCase())
 		.join(' ');
 };
+
+/** Member roles as the UI names them: the AGENT role (game owners) is shown as "Developer" **/
+export const memberTypeLabel = (type: MemberType | string | undefined): string =>
+	type === MemberType.AGENT ? 'Developer' : formatEnumLabel(type);
 
 export const hasGameDiscount = (game: Pick<Game, 'gamePrice' | 'gameDiscountPrice'>): boolean => {
 	return game?.gameDiscountPrice > 0 && game?.gameDiscountPrice < game?.gamePrice;

@@ -24,14 +24,14 @@ const AgentCard = (props: AgentCardProps) => {
 		: '/img/profile/defaultUser.svg';
 
 	if (device === 'mobile') {
-		return <div>AGENT CARD</div>;
+		return <div>DEVELOPER CARD</div>;
 	} else {
 		return (
 			<Stack className="agent-general-card">
 				<Link
 					href={{
-						pathname: '/agent/detail',
-						query: { agentId: agent?._id },
+						pathname: '/developer/detail',
+						query: { developerId: agent?._id },
 					}}
 				>
 					<Box
@@ -52,13 +52,13 @@ const AgentCard = (props: AgentCardProps) => {
 					<Box component={'div'} className={'agent-info'}>
 						<Link
 							href={{
-								pathname: '/agent/detail',
-								query: { agentId: 'id' },
+								pathname: '/developer/detail',
+								query: { developerId: agent?._id },
 							}}
 						>
 							<strong>{agent?.memberFullName ?? agent?.memberNick}</strong>
 						</Link>
-						<span>Agent</span>
+						<span>Developer</span>
 					</Box>
 					<Box component={'div'} className={'buttons'}>
 						<IconButton color={'default'}>

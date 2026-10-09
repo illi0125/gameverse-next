@@ -24,7 +24,7 @@ import { GameStatus } from '../../../enums/game.enum';
 import { formatEnumLabel, formatGamePrice } from '../../../utils';
 import { AdminGameUpdate } from '../../../types/game/game.update';
 
-const headCells = ['ID', 'TITLE', 'PRICE', 'AGENT', 'PLATFORMS', 'TYPE', 'FEATURED', 'STATUS'];
+const headCells = ['ID', 'TITLE', 'PRICE', 'DEVELOPER', 'PLATFORMS', 'TYPE', 'FEATURED', 'STATUS'];
 
 const statusBadge: Record<GameStatus, string> = {
 	[GameStatus.ACTIVE]: 'badge success',

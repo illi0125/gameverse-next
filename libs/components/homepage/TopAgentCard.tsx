@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Member } from '../../types/member/member';
-import { formatEnumLabel } from '../../utils';
+import { memberTypeLabel } from '../../utils';
 
 interface TopAgentProps {
 	agent: Member;
@@ -19,7 +19,7 @@ const TopAgentCard = (props: TopAgentProps) => {
 
 	return (
 		<Link
-			href={`/agent/detail?agentId=${agent?._id}`}
+			href={`/developer/detail?developerId=${agent?._id}`}
 			className={`gv-agent-tile ${active ? 'is-active' : ''}`}
 			onMouseEnter={() => onSelect?.(index)}
 			onFocus={() => onSelect?.(index)}
@@ -28,7 +28,7 @@ const TopAgentCard = (props: TopAgentProps) => {
 				<img src={agentImage} alt="" loading="lazy" decoding="async" />
 			</span>
 			<span className="gv-agent-tile__name">{agent?.memberNick}</span>
-			<span className="gv-agent-tile__role">{formatEnumLabel(agent?.memberType)}</span>
+			<span className="gv-agent-tile__role">{memberTypeLabel(agent?.memberType)}</span>
 		</Link>
 	);
 };

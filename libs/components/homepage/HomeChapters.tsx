@@ -4,7 +4,7 @@ const chapters = [
 	{ id: 'trending-games', label: 'Trending' },
 	{ id: 'popular-games', label: 'Popular' },
 	{ id: 'top-games', label: 'Ranked' },
-	{ id: 'top-agents', label: 'Agents' },
+	{ id: 'top-agents', label: 'Developers' },
 	{ id: 'community', label: 'Community' },
 	{ id: 'events', label: 'Events' },
 ];

@@ -17,7 +17,13 @@ import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { useRouter } from 'next/router';
 import { Game, GameSystemRequirement } from '../../libs/types/game/game';
 import moment from 'moment';
-import { formatEnumLabel, formatGameOriginalPrice, formatGamePrice, hasGameDiscount } from '../../libs/utils';
+import {
+	formatEnumLabel,
+	formatGameOriginalPrice,
+	formatGamePrice,
+	hasGameDiscount,
+	memberTypeLabel,
+} from '../../libs/utils';
 import { REACT_APP_API_URL } from '../../libs/config';
 import { userVar } from '../../apollo/store';
 import { CommentInput, CommentsInquiry } from '../../libs/types/comment/comment.input';
@@ -319,7 +325,7 @@ const GameDetail: NextPage = ({ initialComment, ...props }: any) => {
 	const owner = game.memberData;
 	const ownerHref = owner
 		? owner.memberType === MemberType.AGENT
-			? `/agent/detail?agentId=${owner._id}`
+			? `/developer/detail?developerId=${owner._id}`
 			: `/member?memberId=${owner._id}`
 		: null;
 	const isLiked = Boolean(game.meLiked?.[0]?.myFavorite);
@@ -472,7 +478,7 @@ const GameDetail: NextPage = ({ initialComment, ...props }: any) => {
 
 						<dl className="gv-gd-spec" aria-label="Game details">
 							<div className="gv-gd-spec__cell">
-								<dt>Developer</dt>
+								<dt>Studio</dt>
 								<dd>{game.gameDeveloper}</dd>
 							</div>
 							<div className="gv-gd-spec__cell">
@@ -546,7 +552,7 @@ const GameDetail: NextPage = ({ initialComment, ...props }: any) => {
 											{owner.memberNick}
 										</Link>
 										<p className="gv-gd-owner__meta">
-											<span>{formatEnumLabel(owner.memberType)}</span>
+											<span>{memberTypeLabel(owner.memberType)}</span>
 											<span>
 												{owner.memberGames ?? 0} game{owner.memberGames === 1 ? '' : 's'} listed
 											</span>
@@ -558,7 +564,7 @@ const GameDetail: NextPage = ({ initialComment, ...props }: any) => {
 							)}
 							{owner && ownerHref && (
 								<Link href={ownerHref} className="gv-gd-ink-cta">
-									View {owner.memberType === MemberType.AGENT ? 'Agent' : 'Profile'}
+									View {owner.memberType === MemberType.AGENT ? 'Developer' : 'Profile'}
 								</Link>
 							)}
 						</section>

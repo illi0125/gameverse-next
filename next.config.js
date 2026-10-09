@@ -12,6 +12,9 @@ const nextConfig = {
 			{ source: '/property', destination: '/game', permanent: false },
 			{ source: '/property/detail', destination: '/game/detail', permanent: false },
 			{ source: '/_admin/properties', destination: '/_admin/games', permanent: false },
+			// Game owners are called Developers in the UI (backend role stays AGENT)
+			{ source: '/agent', destination: '/developer', permanent: false },
+			{ source: '/agent/detail', destination: '/developer/detail', permanent: false },
 		];
 	},
 };

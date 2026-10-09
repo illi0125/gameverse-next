@@ -9,7 +9,7 @@ import { AgentsInquiry } from '../../types/member/member.input';
 import { useQuery } from '@apollo/client';
 import { GET_AGENTS } from '../../../apollo/user/query';
 import { T } from '../../types/common';
-import { formatEnumLabel } from '../../utils';
+import { memberTypeLabel } from '../../utils';
 import { SCENE_QUERY } from './homeMotion';
 
 interface TopAgentsProps {
@@ -77,18 +77,18 @@ const TopAgents = (props: TopAgentsProps) => {
 					<p className="gv-chapter" aria-hidden>
 						<span>04</span>Character select
 					</p>
-					<Link href={'/agent'} className="gv-ink-cta">
-						See all agents
+					<Link href={'/developer'} className="gv-ink-cta">
+						See all developers
 					</Link>
 				</header>
 
 				<h2 className="gv-roster__word" id="top-agents-heading">
-					<span className="gv-visually-hidden">Top </span>Agents
+					<span className="gv-visually-hidden">Top </span>Developers
 				</h2>
 
 				{agents.length === 0 ? (
 					<p className="gv-roster__empty">
-						No agents yet. <Link href={'/agent'}>Visit the agents page</Link>
+						No developers yet. <Link href={'/developer'}>Visit the developers page</Link>
 					</p>
 				) : (
 					<div className="gv-roster__stage">
@@ -98,17 +98,17 @@ const TopAgents = (props: TopAgentsProps) => {
 							</p>
 							<p className="gv-roster__selected-name">{chosen?.memberNick}</p>
 							<p className="gv-roster__selected-stats">
-								<span>{formatEnumLabel(chosen?.memberType)}</span>
+								<span>{memberTypeLabel(chosen?.memberType)}</span>
 								<span>{chosen?.memberGames ?? 0} games</span>
 								<span>{chosen?.memberLikes ?? 0} likes</span>
 								<span>{chosen?.memberViews ?? 0} views</span>
 							</p>
-							<Link href={`/agent/detail?agentId=${chosen?._id}`} className="gv-ink-cta gv-ink-cta--solid">
+							<Link href={`/developer/detail?developerId=${chosen?._id}`} className="gv-ink-cta gv-ink-cta--solid">
 								View profile
 							</Link>
 						</div>
 
-						<ul className={`gv-roster__grid ${device === 'mobile' ? 'is-compact' : ''}`} aria-label="Top agents">
+						<ul className={`gv-roster__grid ${device === 'mobile' ? 'is-compact' : ''}`} aria-label="Top developers">
 							{agents.map((agent: Member, index: number) => (
 								<li className="gv-roster__item" key={agent?._id}>
 									<TopAgentCard agent={agent} index={index} active={index === selected} onSelect={setSelected} />

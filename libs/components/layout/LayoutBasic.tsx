@@ -33,14 +33,14 @@ const withLayoutBasic = (Component: any) => {
 					desc = 'We are glad to see you again!';
 					bgImage = '/img/gameverse/banner-games.svg';
 					break;
-				case '/agent':
-					title = 'Agents';
-					desc = 'Meet the agents behind our catalog';
+				case '/developer':
+					title = 'Developers';
+					desc = 'Meet the developers behind our catalog';
 					bgImage = '/img/gameverse/banner-agents.svg';
 					break;
-				case '/agent/detail':
-					title = 'Agent Page';
-					desc = 'Games and reviews from this agent';
+				case '/developer/detail':
+					title = 'Developer Page';
+					desc = 'Games and reviews from this developer';
 					bgImage = '/img/gameverse/banner-agents.svg';
 					break;
 				case '/mypage':

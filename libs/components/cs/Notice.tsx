@@ -18,7 +18,7 @@ const Notice = () => {
 		},
 		{
 			no: 2,
-			title: "Agents can list games for free",
+			title: "Developers can list games for free",
 			date: '31.03.2024',
 		},
 	];

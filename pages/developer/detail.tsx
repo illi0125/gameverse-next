@@ -124,7 +124,9 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 
 	/** LIFECYCLES **/
 	useEffect(() => {
-		if (router.query.agentId) setAgentId(router.query.agentId as string);
+		// developerId is current; agentId keeps legacy /agent/detail links working
+		const id = router.query.developerId ?? router.query.agentId;
+		if (id) setAgentId(id as string);
 	}, [router]);
 
 	useEffect(() => {
@@ -200,7 +202,7 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 
 
 	if (device === 'mobile') {
-		return <div>AGENT DETAIL PAGE MOBILE</div>;
+		return <div>DEVELOPER DETAIL PAGE MOBILE</div>;
 	} else {
 		return (
 			<Stack className={'agent-detail-page'}>

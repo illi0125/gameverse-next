@@ -59,7 +59,7 @@ const fromGame = (game: Game): GameForm => ({
 /** Mirrors backend DTO validation so the agent sees problems before submitting **/
 const validateForm = (form: GameForm): string | null => {
 	if (!form.gameTitle.trim() || form.gameTitle.length > 150) return 'Title is required (max 150 characters)';
-	if (!form.gameDeveloper.trim() || form.gameDeveloper.length > 150) return 'Developer is required (max 150 characters)';
+	if (!form.gameDeveloper.trim() || form.gameDeveloper.length > 150) return 'Studio is required (max 150 characters)';
 	if (!form.gamePublisher.trim() || form.gamePublisher.length > 150) return 'Publisher is required (max 150 characters)';
 	if (!form.gameReleaseDate) return 'Release date is required';
 	if (!form.gameGenres.length) return 'Select at least one genre';
@@ -288,11 +288,11 @@ const AddNewGame = ({ initialValues, ...props }: any) => {
 
 						<Stack className="config-row">
 							<Stack className="price-year-after-price">
-								<Typography className="title">Developer</Typography>
+								<Typography className="title">Studio</Typography>
 								<input
 									type="text"
 									className="description-input"
-									placeholder={'Developer'}
+									placeholder={'Studio'}
 									maxLength={150}
 									value={form.gameDeveloper}
 									onChange={({ target: { value } }) => setField('gameDeveloper', value)}

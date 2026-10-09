@@ -68,7 +68,7 @@ const Faq = () => {
 			{
 				id: '04',
 				subject: 'What is the difference between Free, Paid and Premium?',
-				content: 'Free games cost nothing. Paid and Premium games have a listed price; a discounted price is shown when the agent has set one.',
+				content: 'Free games cost nothing. Paid and Premium games have a listed price; a discounted price is shown when the developer has set one.',
 			},
 			{
 				id: '05',
@@ -78,7 +78,7 @@ const Faq = () => {
 			{
 				id: '06',
 				subject: 'Can I see system requirements before choosing a game?',
-				content: 'Yes. When the agent provides them, each game page lists minimum and recommended requirements per platform.',
+				content: 'Yes. When the developer provides them, each game page lists minimum and recommended requirements per platform.',
 			},
 		],
 		payment: [
@@ -121,20 +121,20 @@ const Faq = () => {
 			},
 			{
 				id: '04',
-				subject: 'Can I follow agents?',
-				content: 'Yes. Open an agent or member profile and press Follow to keep up with their activity.',
+				subject: 'Can I follow developers?',
+				content: 'Yes. Open a developer or member profile and press Follow to keep up with their activity.',
 			},
 		],
 		agents: [
 			{
 				id: '01',
-				subject: 'Who are agents on Gameverse?',
-				content: 'Agents are members who list and manage games in the catalog.',
+				subject: 'Who are developers on Gameverse?',
+				content: 'Developers are members who list and manage games in the catalog.',
 			},
 			{
 				id: '02',
 				subject: 'How do I add a new game?',
-				content: 'Log in with an agent account, open My Page and choose Add Game. Fill in the details, select platforms, genres and modes, and upload images.',
+				content: 'Log in with a developer account, open My Page and choose Add Game. Fill in the details, select platforms, genres and modes, and upload images.',
 			},
 			{
 				id: '03',
@@ -246,7 +246,7 @@ const Faq = () => {
 							changeCategoryHandler('agents');
 						}}
 					>
-						For Agents
+						For Developers
 					</div>
 					<div
 						className={category === 'membership' ? 'active' : ''}
