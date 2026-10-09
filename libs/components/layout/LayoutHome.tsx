@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
 import useHomeScrollMemory from '../../hooks/useHomeScrollMemory';
 import Head from 'next/head';
 import Top from '../Top';
@@ -18,7 +17,6 @@ import HomeIntro from '../homepage/HomeIntro';
 
 const withLayoutMain = (Component: any) => {
 	return (props: any) => {
-		const device = useDeviceDetect();
 		const user = useReactiveVar(userVar);
 		useHomeScrollMemory();
 
@@ -30,61 +28,34 @@ const withLayoutMain = (Component: any) => {
 
 		/** HANDLERS **/
 
-		if (device == 'mobile') {
-			return (
-				<>
-					<Head>
-						<title>Gameverse</title>
-						<meta name={'title'} content={`Gameverse`} />
-					</Head>
-					<Stack id="mobile-wrap" className={'gv-home-shell'}>
-						<HomeIntro />
-						<Stack id={'top'}>
-							<Top />
-						</Stack>
-
-						<Stack id={'main'} className={'gv-home'}>
-							<HomeHero />
-							<Component {...props} />
-						</Stack>
-
-						<Stack id={'footer'}>
-							<Footer />
-							<HomeCredits />
-						</Stack>
+		return (
+			<>
+				<Head>
+					<title>Gameverse</title>
+					<meta name={'title'} content={`Gameverse`} />
+				</Head>
+				<Stack id="pc-wrap" className={'gv-home-shell'}>
+					<HomeIntro />
+					<Stack id={'top'}>
+						<Top />
 					</Stack>
-				</>
-			);
-		} else {
-			return (
-				<>
-					<Head>
-						<title>Gameverse</title>
-						<meta name={'title'} content={`Gameverse`} />
-					</Head>
-					<Stack id="pc-wrap" className={'gv-home-shell'}>
-						<HomeIntro />
-						<Stack id={'top'}>
-							<Top />
-						</Stack>
 
-						<Stack id={'main'} className={'gv-home'}>
-							<HomeHero search={<HeaderFilter />} visual={<FiberContainer />} />
-							<Component {...props} />
-						</Stack>
-
-						<HomeChapters />
-
-						<Chat />
-
-						<Stack id={'footer'}>
-							<Footer />
-							<HomeCredits />
-						</Stack>
+					<Stack id={'main'} className={'gv-home'}>
+						<HomeHero search={<HeaderFilter />} visual={<FiberContainer />} />
+						<Component {...props} />
 					</Stack>
-				</>
-			);
-		}
+
+					<HomeChapters />
+
+					<Chat />
+
+					<Stack id={'footer'}>
+						<Footer />
+						<HomeCredits />
+					</Stack>
+				</Stack>
+			</>
+		);
 	};
 };
 

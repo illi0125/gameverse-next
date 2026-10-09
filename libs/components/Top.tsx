@@ -3,23 +3,23 @@ import { useState } from 'react';
 import { useRouter, withRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { getJwtToken, logOut, updateUserInfo } from '../auth';
-import { Stack, Box } from '@mui/material';
+import { Stack, Box, Drawer } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import { alpha, styled } from '@mui/material/styles';
 import Menu, { MenuProps } from '@mui/material/Menu';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { CaretDown } from 'phosphor-react';
-import useDeviceDetect from '../hooks/useDeviceDetect';
 import Link from 'next/link';
 import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { Logout } from '@mui/icons-material';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { REACT_APP_API_URL } from '../config';
 
 const Top = () => {
-	const device = useDeviceDetect();
 	const user = useReactiveVar(userVar);
 	const { t, i18n } = useTranslation('common');
 	const router = useRouter();
@@ -32,6 +32,25 @@ const Top = () => {
 	const [bgColor, setBgColor] = useState<boolean>(false);
 	const [logoutAnchor, setLogoutAnchor] = React.useState<null | HTMLElement>(null);
 	const logoutOpen = Boolean(logoutAnchor);
+	const [menuOpen, setMenuOpen] = useState<boolean>(false);
+
+	const navLinks = [
+		{ href: '/', label: t('Home'), match: (path: string) => path === '/' },
+		{ href: '/game', label: t('Games'), match: (path: string) => path.startsWith('/game') },
+		{ href: '/developer', label: t('Developers'), match: (path: string) => path.startsWith('/developer') },
+		{
+			href: '/community?articleCategory=FREE',
+			label: t('Community'),
+			match: (path: string) => path.startsWith('/community'),
+		},
+		...(user?._id ? [{ href: '/mypage', label: t('My Page'), match: (path: string) => path.startsWith('/mypage') }] : []),
+		{ href: '/cs', label: t('CS'), match: (path: string) => path.startsWith('/cs') },
+	];
+	const languages = [
+		{ id: 'en', label: t('English') },
+		{ id: 'kr', label: t('Korean') },
+		{ id: 'ru', label: t('Russian') },
+	];
 
 	/** LIFECYCLES **/
 	useEffect(() => {
@@ -57,6 +76,11 @@ const Top = () => {
 		const jwt = getJwtToken();
 		if (jwt) updateUserInfo(jwt);
 	}, []);
+
+	// The small-screen menu closes whenever a link changes the route
+	useEffect(() => {
+		setMenuOpen(false);
+	}, [router.asPath]);
 
 	/** HANDLERS **/
 	const langClick = (e: any) => {
@@ -139,152 +163,207 @@ const Top = () => {
 		window.addEventListener('scroll', changeNavbarColor);
 	}
 
-	if (device == 'mobile') {
-		return (
-			<Stack className={'top'}>
-				<Link href={'/'}>
-					<div>{t('Home')}</div>
-				</Link>
-				<Link href={'/game'}>
-					<div>{t('Games')}</div>
-				</Link>
-				<Link href={'/developer'}>
-					<div> {t('Developers')} </div>
-				</Link>
-				<Link href={'/community?articleCategory=FREE'}>
-					<div> {t('Community')} </div>
-				</Link>
-				<Link href={'/cs'}>
-					<div> {t('CS')} </div>
-				</Link>
-			</Stack>
-		);
-	} else {
-		return (
-			<Stack className={'navbar'}>
-				<Stack className={`navbar-main ${colorChange ? 'transparent' : ''} ${bgColor ? 'transparent' : ''}`}>
-					<Stack className={'container'}>
-						<Box component={'div'} className={'logo-box'}>
-							<Link href={'/'}>
-								<img src="/img/logo/logoWhite.svg" alt="" />
+	return (
+		<Stack className={'navbar'}>
+			<Stack className={`navbar-main ${colorChange ? 'transparent' : ''} ${bgColor ? 'transparent' : ''}`}>
+				<Stack className={'container'}>
+					<Box component={'div'} className={'logo-box'}>
+						<Link href={'/'}>
+							<img src="/img/logo/logoWhite.svg" alt="" />
+						</Link>
+					</Box>
+					<Box component={'div'} className={'router-box'}>
+						<Link href={'/'}>
+							<div>{t('Home')}</div>
+						</Link>
+						<Link href={'/game'}>
+							<div>{t('Games')}</div>
+						</Link>
+						<Link href={'/developer'}>
+							<div> {t('Developers')} </div>
+						</Link>
+						<Link href={'/community?articleCategory=FREE'}>
+							<div> {t('Community')} </div>
+						</Link>
+						{user?._id && (
+							<Link href={'/mypage'}>
+								<div> {t('My Page')} </div>
 							</Link>
-						</Box>
-						<Box component={'div'} className={'router-box'}>
-							<Link href={'/'}>
-								<div>{t('Home')}</div>
-							</Link>
-							<Link href={'/game'}>
-								<div>{t('Games')}</div>
-							</Link>
-							<Link href={'/developer'}>
-								<div> {t('Developers')} </div>
-							</Link>
-							<Link href={'/community?articleCategory=FREE'}>
-								<div> {t('Community')} </div>
-							</Link>
-							{user?._id && (
-								<Link href={'/mypage'}>
-									<div> {t('My Page')} </div>
-								</Link>
-							)}
-							<Link href={'/cs'}>
-								<div> {t('CS')} </div>
-							</Link>
-						</Box>
-						<Box component={'div'} className={'user-box'}>
-							{user?._id ? (
-								<>
-									<div className={'login-user'} onClick={(event: any) => setLogoutAnchor(event.currentTarget)}>
-										<img
-											src={
-												user?.memberImage ? `${REACT_APP_API_URL}/${user?.memberImage}` : '/img/profile/defaultUser.svg'
-											}
-											alt=""
-										/>
-									</div>
+						)}
+						<Link href={'/cs'}>
+							<div> {t('CS')} </div>
+						</Link>
+					</Box>
+					<Box component={'div'} className={'user-box'}>
+						{user?._id ? (
+							<>
+								<div className={'login-user'} onClick={(event: any) => setLogoutAnchor(event.currentTarget)}>
+									<img
+										src={
+											user?.memberImage ? `${REACT_APP_API_URL}/${user?.memberImage}` : '/img/profile/defaultUser.svg'
+										}
+										alt=""
+									/>
+								</div>
 
-									<Menu
-										id="basic-menu"
-										anchorEl={logoutAnchor}
-										open={logoutOpen}
-										onClose={() => {
-											setLogoutAnchor(null);
-										}}
-										sx={{ mt: '5px' }}
-									>
-										<MenuItem onClick={() => logOut()}>
-											<Logout fontSize="small" style={{ color: 'blue', marginRight: '10px' }} />
-											Logout
-										</MenuItem>
-									</Menu>
-								</>
-							) : (
-								<Link href={'/account/join'}>
-									<div className={'join-box'}>
-										<AccountCircleOutlinedIcon />
-										<span>
-											{t('Login')} / {t('Register')}
-										</span>
-									</div>
-								</Link>
-							)}
-
-							<div className={'lan-box'}>
-								{user?._id && <NotificationsOutlinedIcon className={'notification-icon'} />}
-								<Button
-									disableRipple
-									className="btn-lang"
-									onClick={langClick}
-									endIcon={<CaretDown size={14} color="#616161" weight="fill" />}
+								<Menu
+									id="basic-menu"
+									anchorEl={logoutAnchor}
+									open={logoutOpen}
+									onClose={() => {
+										setLogoutAnchor(null);
+									}}
+									sx={{ mt: '5px' }}
 								>
-									<Box component={'div'} className={'flag'}>
-										{lang !== null ? (
-											<img src={`/img/flag/lang${lang}.png`} alt={'usaFlag'} />
-										) : (
-											<img src={`/img/flag/langen.png`} alt={'usaFlag'} />
-										)}
-									</Box>
-								</Button>
+									<MenuItem onClick={() => logOut()}>
+										<Logout fontSize="small" style={{ color: 'blue', marginRight: '10px' }} />
+										Logout
+									</MenuItem>
+								</Menu>
+							</>
+						) : (
+							<Link href={'/account/join'}>
+								<div className={'join-box'}>
+									<AccountCircleOutlinedIcon />
+									<span>
+										{t('Login')} / {t('Register')}
+									</span>
+								</div>
+							</Link>
+						)}
 
-								<StyledMenu anchorEl={anchorEl2} open={drop} onClose={langClose} sx={{ position: 'absolute' }}>
-									<MenuItem disableRipple onClick={langChoice} id="en">
-										<img
-											className="img-flag"
-											src={'/img/flag/langen.png'}
-											onClick={langChoice}
-											id="en"
-											alt={'usaFlag'}
-										/>
-										{t('English')}
-									</MenuItem>
-									<MenuItem disableRipple onClick={langChoice} id="kr">
-										<img
-											className="img-flag"
-											src={'/img/flag/langkr.png'}
-											onClick={langChoice}
-											id="uz"
-											alt={'koreanFlag'}
-										/>
-										{t('Korean')}
-									</MenuItem>
-									<MenuItem disableRipple onClick={langChoice} id="ru">
-										<img
-											className="img-flag"
-											src={'/img/flag/langru.png'}
-											onClick={langChoice}
-											id="ru"
-											alt={'russiaFlag'}
-										/>
-										{t('Russian')}
-									</MenuItem>
-								</StyledMenu>
-							</div>
-						</Box>
-					</Stack>
+						<div className={'lan-box'}>
+							{user?._id && <NotificationsOutlinedIcon className={'notification-icon'} />}
+							<Button
+								disableRipple
+								className="btn-lang"
+								onClick={langClick}
+								endIcon={<CaretDown size={14} color="#616161" weight="fill" />}
+							>
+								<Box component={'div'} className={'flag'}>
+									{lang !== null ? (
+										<img src={`/img/flag/lang${lang}.png`} alt={'usaFlag'} />
+									) : (
+										<img src={`/img/flag/langen.png`} alt={'usaFlag'} />
+									)}
+								</Box>
+							</Button>
+
+							<StyledMenu anchorEl={anchorEl2} open={drop} onClose={langClose} sx={{ position: 'absolute' }}>
+								<MenuItem disableRipple onClick={langChoice} id="en">
+									<img
+										className="img-flag"
+										src={'/img/flag/langen.png'}
+										onClick={langChoice}
+										id="en"
+										alt={'usaFlag'}
+									/>
+									{t('English')}
+								</MenuItem>
+								<MenuItem disableRipple onClick={langChoice} id="kr">
+									<img
+										className="img-flag"
+										src={'/img/flag/langkr.png'}
+										onClick={langChoice}
+										id="uz"
+										alt={'koreanFlag'}
+									/>
+									{t('Korean')}
+								</MenuItem>
+								<MenuItem disableRipple onClick={langChoice} id="ru">
+									<img
+										className="img-flag"
+										src={'/img/flag/langru.png'}
+										onClick={langChoice}
+										id="ru"
+										alt={'russiaFlag'}
+									/>
+									{t('Russian')}
+								</MenuItem>
+							</StyledMenu>
+						</div>
+
+						<button
+							type="button"
+							className={'menu-btn'}
+							aria-label={t('Menu')}
+							aria-expanded={menuOpen}
+							aria-controls={'gv-nav-drawer'}
+							onClick={() => setMenuOpen(true)}
+						>
+							<MenuRoundedIcon />
+						</button>
+					</Box>
 				</Stack>
 			</Stack>
-		);
-	}
+
+			<Drawer
+				anchor={'right'}
+				open={menuOpen}
+				onClose={() => setMenuOpen(false)}
+				PaperProps={{ id: 'gv-nav-drawer', className: 'gv-nav-drawer' }}
+			>
+				<div className={'gv-nav-drawer__head'}>
+					<span className={'gv-nav-drawer__tag'}>Menu</span>
+					<button
+						type="button"
+						className={'gv-nav-drawer__close'}
+						aria-label={t('Close')}
+						onClick={() => setMenuOpen(false)}
+					>
+						<CloseRoundedIcon />
+					</button>
+				</div>
+
+				<nav className={'gv-nav-drawer__links'} aria-label={'Main'}>
+					{navLinks.map((link, index) => {
+						const active = link.match(router.pathname);
+						return (
+							<Link
+								key={link.href}
+								href={link.href}
+								className={`gv-nav-drawer__link ${active ? 'is-active' : ''}`}
+								aria-current={active ? 'page' : undefined}
+								onClick={() => setMenuOpen(false)}
+							>
+								<span className={'gv-nav-drawer__index'}>{String(index).padStart(2, '0')}</span>
+								<span>{link.label}</span>
+							</Link>
+						);
+					})}
+				</nav>
+
+				<div className={'gv-nav-drawer__foot'}>
+					<div className={'gv-nav-drawer__langs'} role={'group'} aria-label={'Language'}>
+						{languages.map((language) => (
+							<button
+								key={language.id}
+								type="button"
+								id={language.id}
+								className={`gv-nav-drawer__lang ${lang === language.id ? 'is-active' : ''}`}
+								aria-pressed={lang === language.id}
+								onClick={langChoice}
+							>
+								{language.label}
+							</button>
+						))}
+					</div>
+
+					{user?._id ? (
+						<button type="button" className={'gv-nav-drawer__cta is-ghost'} onClick={() => logOut()}>
+							<Logout fontSize="small" />
+							Logout
+						</button>
+					) : (
+						<Link href={'/account/join'} className={'gv-nav-drawer__cta'} onClick={() => setMenuOpen(false)}>
+							<AccountCircleOutlinedIcon fontSize="small" />
+							{t('Login')} / {t('Register')}
+						</Link>
+					)}
+				</div>
+			</Drawer>
+		</Stack>
+	);
 };
 
 export default withRouter(Top);

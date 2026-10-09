@@ -54,7 +54,8 @@ hr {
 
 	.container {
 		position: relative;
-		width: 1300px;
+		/* 1300px on desktop; never wider than the screen minus the page gutter */
+		width: min(1300px, calc(100% - 2 * clamp(16px, 4vw, 40px)));
 		margin: 0 auto;
 		display: flex;
 	}

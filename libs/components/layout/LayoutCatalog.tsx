@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import { Stack } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
 import Top from '../Top';
 import Footer from '../Footer';
 import Chat from '../Chat';
@@ -13,8 +12,6 @@ import { getJwtToken, updateUserInfo } from '../../auth';
  */
 const withLayoutCatalog = (Component: any) => {
 	return (props: any) => {
-		const device = useDeviceDetect();
-
 		/** LIFECYCLES **/
 		useEffect(() => {
 			const jwt = getJwtToken();
@@ -27,25 +24,6 @@ const withLayoutCatalog = (Component: any) => {
 				<meta name={'title'} content={`Gameverse`} />
 			</Head>
 		);
-
-		if (device == 'mobile') {
-			return (
-				<>
-					{head}
-					<Stack id="mobile-wrap" className={'gv-catalog-shell'}>
-						<Stack id={'top'}>
-							<Top />
-						</Stack>
-						<Stack id={'main'}>
-							<Component {...props} />
-						</Stack>
-						<Stack id={'footer'}>
-							<Footer />
-						</Stack>
-					</Stack>
-				</>
-			);
-		}
 
 		return (
 			<>

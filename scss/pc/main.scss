@@ -6,6 +6,7 @@
 @import '/scss/pc/homepage/homeIntro.scss';
 @import '/scss/pc/common/gvAlert.scss';
 @import '/scss/pc/common/gvCursor.scss';
+@import '/scss/pc/common/gvNavDrawer.scss';
 
 @import '/scss/pc/game/game.scss';
 @import '/scss/pc/game/gameBigCard.scss';
@@ -290,7 +291,7 @@ body::-webkit-scrollbar {
 		flex-direction: row;
 		background: #181a20;
 		.footer-container {
-			width: 1300px;
+			width: min(1300px, calc(100% - 2 * clamp(16px, 4vw, 40px)));
 			height: auto;
 			margin: 0 auto;
 			.main {
@@ -440,6 +441,131 @@ body::-webkit-scrollbar {
 					line-height: normal;
 				}
 			}
+		}
+	}
+}
+
+/** SHELL — fluid header and footer, small-screen menu (one layout for every device) **/
+
+#pc-wrap #top .navbar .navbar-main {
+	.container {
+		gap: 24px;
+
+		.logo-box {
+			flex-shrink: 0;
+		}
+
+		.router-box {
+			width: auto;
+			flex: 0 1 617px;
+			gap: 16px;
+		}
+
+		.user-box {
+			width: auto;
+			flex-shrink: 0;
+			align-items: center;
+		}
+	}
+
+	.menu-btn {
+		display: none;
+	}
+
+	@media (max-width: 899px) {
+		height: 64px;
+		padding: 0;
+
+		.container {
+			gap: 12px;
+
+			.logo-box img {
+				display: block;
+				width: 128px;
+			}
+
+			.router-box,
+			.user-box .lan-box {
+				display: none;
+			}
+
+			.user-box {
+				gap: 10px;
+
+				.login-user img {
+					display: block;
+					width: 36px;
+					height: 36px;
+				}
+
+				.join-box {
+					height: 40px;
+					padding-inline: 16px;
+
+					svg {
+						display: none;
+					}
+				}
+			}
+		}
+
+		.menu-btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 40px;
+			height: 40px;
+			padding: 0;
+			color: #ffffff;
+			background: transparent;
+			border: 1px solid rgba(255, 255, 255, 0.24);
+			cursor: pointer;
+
+			&:focus-visible {
+				outline: 2px solid #d7ff3a;
+				outline-offset: 2px;
+			}
+		}
+	}
+
+	@media (max-width: 479px) {
+		.container .user-box .join-box {
+			display: none;
+		}
+	}
+}
+
+#pc-wrap #footer .footer-container {
+	box-sizing: border-box;
+
+	@media (max-width: 899px) {
+		.main {
+			flex-direction: column;
+			gap: 48px;
+
+			.left {
+				height: auto;
+				gap: 28px;
+			}
+
+			.right .top div {
+				width: 100%;
+			}
+
+			.right .bottom {
+				margin-top: 40px;
+				flex-wrap: wrap;
+				gap: 32px 40px;
+				justify-content: flex-start;
+			}
+		}
+
+		.second {
+			height: auto;
+			padding-top: 18px;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 8px;
 		}
 	}
 }

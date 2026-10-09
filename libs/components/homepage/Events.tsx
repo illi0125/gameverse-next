@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { SCENE_QUERY, pad } from './homeMotion';
 
 interface EventData {
@@ -56,7 +55,6 @@ const EventCard = ({ event, index }: { event: EventData; index: number }) => {
 };
 
 const Events = () => {
-	const device = useDeviceDetect();
 	const rootRef = useRef<HTMLElement>(null);
 
 	/** LIFECYCLES **/
@@ -86,34 +84,30 @@ const Events = () => {
 		});
 
 		return () => mm.revert();
-	}, [device]);
+	}, []);
 
-	if (device === 'mobile') {
-		return <div>EVENT CARD</div>;
-	} else {
-		return (
-			<section className="gv-world" id="events" aria-labelledby="events-heading" ref={rootRef}>
-				<div className="gv-world__inner">
-					<header className="gv-world__head">
-						<p className="gv-chapter" aria-hidden>
-							<span>06</span>World map
-						</p>
-						<h2 className="gv-world__title" id="events-heading">
-							Events
-						</h2>
-						<p className="gv-world__desc">Community events worth your attention.</p>
-					</header>
-					<ul className="gv-world__list" aria-label="Events">
-						{eventsData.map((event: EventData, index: number) => (
-							<li key={event?.eventTitle}>
-								<EventCard event={event} index={index} />
-							</li>
-						))}
-					</ul>
-				</div>
-			</section>
-		);
-	}
+	return (
+		<section className="gv-world" id="events" aria-labelledby="events-heading" ref={rootRef}>
+			<div className="gv-world__inner">
+				<header className="gv-world__head">
+					<p className="gv-chapter" aria-hidden>
+						<span>06</span>World map
+					</p>
+					<h2 className="gv-world__title" id="events-heading">
+						Events
+					</h2>
+					<p className="gv-world__desc">Community events worth your attention.</p>
+				</header>
+				<ul className="gv-world__list" aria-label="Events">
+					{eventsData.map((event: EventData, index: number) => (
+						<li key={event?.eventTitle}>
+							<EventCard event={event} index={index} />
+						</li>
+					))}
+				</ul>
+			</div>
+		</section>
+	);
 };
 
 export default Events;
