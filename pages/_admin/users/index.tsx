@@ -2,15 +2,17 @@ import React, { useCallback, useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import withAdminLayout from '../../../libs/components/layout/LayoutAdmin';
 import { MemberPanelList } from '../../../libs/components/admin/users/MemberList';
-import { Box, InputAdornment, List, ListItem, Stack } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
+import {
+	AdminPageHeader,
+	AdminSearch,
+	AdminTab,
+	AdminTabs,
+	DensityToggle,
+	useAdminDensity,
+} from '../../../libs/components/admin/ui/AdminUi';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { TabContext } from '@mui/lab';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import TablePagination from '@mui/material/TablePagination';
-import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import { MembersInquiry } from '../../../libs/types/member/member.input';
 import { Member } from '../../../libs/types/member/member';
 import { MemberStatus, MemberType } from '../../../libs/enums/member.enum';
@@ -157,118 +159,102 @@ const AdminUsers: NextPage = ({ initialInquiry, ...props }: any) => {
 		}
 	};
 
-	return (
-		<Box component={'div'} className={'content'}>
-			<Typography variant={'h2'} className={'tit'} sx={{ mb: '24px' }}>
-				Member List
-			</Typography>
-			<Box component={'div'} className={'table-wrap'}>
-				<Box component={'div'} sx={{ width: '100%', typography: 'body1' }}>
-					<TabContext value={value}>
-						<Box component={'div'}>
-							<List className={'tab-menu'}>
-								<ListItem
-									onClick={(e: any) => tabChangeHandler(e, 'ALL')}
-									value="ALL"
-									className={value === 'ALL' ? 'li on' : 'li'}
-								>
-									All
-								</ListItem>
-								<ListItem
-									onClick={(e: any) => tabChangeHandler(e, 'ACTIVE')}
-									value="ACTIVE"
-									className={value === 'ACTIVE' ? 'li on' : 'li'}
-								>
-									Active
-								</ListItem>
-								<ListItem
-									onClick={(e: any) => tabChangeHandler(e, 'BLOCK')}
-									value="BLOCK"
-									className={value === 'BLOCK' ? 'li on' : 'li'}
-								>
-									Blocked
-								</ListItem>
-								<ListItem
-									onClick={(e: any) => tabChangeHandler(e, 'DELETE')}
-									value="DELETE"
-									className={value === 'DELETE' ? 'li on' : 'li'}
-								>
-									Deleted
-								</ListItem>
-							</List>
-							<Divider />
-							<Stack className={'search-area'} sx={{ m: '24px' }}>
-								<OutlinedInput
-									value={searchText}
-									onChange={(e: any) => textHandler(e.target.value)}
-									sx={{ width: '100%' }}
-									className={'search'}
-									placeholder="Search user name"
-									onKeyDown={(event) => {
-										if (event.key == 'Enter') searchTextHandler();
-									}}
-									endAdornment={
-										<>
-											{searchText && (
-												<CancelRoundedIcon
-													style={{ cursor: 'pointer' }}
-													onClick={async () => {
-														setSearchText('');
-														setMembersInquiry({
-															...membersInquiry,
-															search: {
-																...membersInquiry.search,
-																text: '',
-															},
-														});
-														await getAllMembersRefetch({ input: membersInquiry });
-													}}
-												/>
-											)}
-											<InputAdornment position="end" onClick={() => searchTextHandler()}>
-												<img src="/img/icons/search_icon.png" alt={'searchIcon'} />
-											</InputAdornment>
-										</>
-									}
-								/>
-								<Select sx={{ width: '160px', ml: '20px' }} value={searchType}>
-									<MenuItem value={'ALL'} onClick={() => searchTypeHandler('ALL')}>
-										All
-									</MenuItem>
-									<MenuItem value={'USER'} onClick={() => searchTypeHandler('USER')}>
-										User
-									</MenuItem>
-									<MenuItem value={'AGENT'} onClick={() => searchTypeHandler('AGENT')}>
-										Developer
-									</MenuItem>
-									<MenuItem value={'ADMIN'} onClick={() => searchTypeHandler('ADMIN')}>
-										Admin
-									</MenuItem>
-								</Select>
-							</Stack>
-							<Divider />
-						</Box>
-						<MemberPanelList
-							members={members}
-							anchorEl={anchorEl}
-							menuIconClickHandler={menuIconClickHandler}
-							menuIconCloseHandler={menuIconCloseHandler}
-							updateMemberHandler={updateMemberHandler}
-						/>
+	/** PRESENTATION (status counts are read-only queries, one row each) **/
+	const [density, setDensity] = useAdminDensity();
+	const countQuery = (memberStatus?: MemberStatus) => ({
+		fetchPolicy: 'network-only' as const,
+		variables: { input: { page: 1, limit: 1, search: memberStatus ? { memberStatus } : {} } },
+	});
+	const allCount = useQuery(GET_ALL_MEMBERS_BY_ADMIN, countQuery());
+	const activeCount = useQuery(GET_ALL_MEMBERS_BY_ADMIN, countQuery(MemberStatus.ACTIVE));
+	const blockCount = useQuery(GET_ALL_MEMBERS_BY_ADMIN, countQuery(MemberStatus.BLOCK));
+	const deleteCount = useQuery(GET_ALL_MEMBERS_BY_ADMIN, countQuery(MemberStatus.DELETE));
+	const totalOf = (result: T) => result.data?.getAllMembersByAdmin?.metaCounter?.[0]?.total ?? (result.data ? 0 : undefined);
 
-						<TablePagination
-							rowsPerPageOptions={[10, 20, 40, 60]}
-							component="div"
-							count={membersTotal}
-							rowsPerPage={membersInquiry?.limit}
-							page={membersInquiry?.page - 1}
-							onPageChange={changePageHandler}
-							onRowsPerPageChange={changeRowsPerPageHandler}
-						/>
-					</TabContext>
-				</Box>
-			</Box>
-		</Box>
+	// A role or status change moves members between tabs, so the counts follow the list
+	useEffect(() => {
+		[allCount, activeCount, blockCount, deleteCount].forEach((query) => query.refetch().catch(() => undefined));
+	}, [members]);
+
+	const statusTabs: AdminTab[] = [
+		{ value: 'ALL', label: 'All', count: totalOf(allCount) },
+		{ value: 'ACTIVE', label: 'Active', count: totalOf(activeCount) },
+		{ value: 'BLOCK', label: 'Blocked', count: totalOf(blockCount) },
+		{ value: 'DELETE', label: 'Deleted', count: totalOf(deleteCount) },
+	];
+
+	return (
+		<div className="gv-admin-page">
+			<AdminPageHeader
+				kicker="Manage"
+				title="Users"
+				desc="Every account on GameVerse. Change a role or status from the chips in each row."
+			/>
+
+			<section className="gv-admin-panel" aria-label="Member list">
+				<AdminTabs tabs={statusTabs} value={value} onChange={(next) => tabChangeHandler(null, next)} label="Member status" />
+
+				<div className="gv-admin-toolbar">
+					<AdminSearch
+						value={searchText}
+						placeholder="Search user name"
+						onChange={textHandler}
+						onSubmit={searchTextHandler}
+						onClear={async () => {
+							setSearchText('');
+							setMembersInquiry({
+								...membersInquiry,
+								search: {
+									...membersInquiry.search,
+									text: '',
+								},
+							});
+							await getAllMembersRefetch({ input: membersInquiry });
+						}}
+					/>
+					<label className="gv-admin-select">
+						<span>Type</span>
+						<Select value={searchType} MenuProps={{ className: 'gv-admin-menu' }}>
+							<MenuItem value={'ALL'} onClick={() => searchTypeHandler('ALL')}>
+								All
+							</MenuItem>
+							<MenuItem value={'USER'} onClick={() => searchTypeHandler('USER')}>
+								User
+							</MenuItem>
+							<MenuItem value={'AGENT'} onClick={() => searchTypeHandler('AGENT')}>
+								Developer
+							</MenuItem>
+							<MenuItem value={'ADMIN'} onClick={() => searchTypeHandler('ADMIN')}>
+								Admin
+							</MenuItem>
+						</Select>
+					</label>
+					<DensityToggle density={density} onChange={setDensity} />
+				</div>
+
+				<MemberPanelList
+					members={members}
+					loading={getAllMembersByAdminLoading}
+					error={Boolean(getAllMembersByAdminError)}
+					density={density}
+					anchorEl={anchorEl}
+					menuIconClickHandler={menuIconClickHandler}
+					menuIconCloseHandler={menuIconCloseHandler}
+					updateMemberHandler={updateMemberHandler}
+				/>
+
+				<TablePagination
+					className="gv-admin-pagination"
+					rowsPerPageOptions={[10, 20, 40, 60]}
+					component="div"
+					count={membersTotal}
+					rowsPerPage={membersInquiry?.limit}
+					page={membersInquiry?.page - 1}
+					onPageChange={changePageHandler}
+					onRowsPerPageChange={changeRowsPerPageHandler}
+				/>
+			</section>
+		</div>
 	);
 };
 

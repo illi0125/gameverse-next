@@ -1,126 +1,30 @@
 import React from 'react';
 import Link from 'next/link';
-import {
-	Box,
-	Button,
-	Fade,
-	Menu,
-	MenuItem,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
-	Tooltip,
-} from '@mui/material';
-import IconButton from '@mui/material/IconButton';
-import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
-import OpenInBrowserRoundedIcon from '@mui/icons-material/OpenInBrowserRounded';
+import { Fade, Menu, MenuItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@mui/material';
+import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import Moment from 'react-moment';
 import { BoardArticle } from '../../../types/board-article/board-article';
 import { REACT_APP_API_URL } from '../../../config';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Typography from '@mui/material/Typography';
 import { BoardArticleStatus } from '../../../enums/board-article.enum';
+import { articleHref, articleImage, boardMeta } from '../../community/communityMeta';
+import { AdminEmpty, ChipTone, Density, StatusChip } from '../ui/AdminUi';
 
-interface Data {
-	category: string;
-	title: string;
-	writer: string;
-	register: string;
-	view: number;
-	like: number;
-	status: string;
-	article_id: string;
-}
+const statusTone: Record<string, ChipTone> = {
+	[BoardArticleStatus.ACTIVE]: 'live',
+	[BoardArticleStatus.DELETE]: 'off',
+};
 
-interface HeadCell {
-	disablePadding: boolean;
-	id: keyof Data;
-	label: string;
-	numeric: boolean;
-}
-
-const headCells: readonly HeadCell[] = [
-	{
-		id: 'article_id',
-		numeric: true,
-		disablePadding: false,
-		label: 'ARTICLE ID',
-	},
-	{
-		id: 'title',
-		numeric: true,
-		disablePadding: false,
-		label: 'TITLE',
-	},
-	{
-		id: 'category',
-		numeric: true,
-		disablePadding: false,
-		label: 'CATEGORY',
-	},
-	{
-		id: 'writer',
-		numeric: true,
-		disablePadding: false,
-		label: 'WRITER',
-	},
-	{
-		id: 'view',
-		numeric: false,
-		disablePadding: false,
-		label: 'VIEW',
-	},
-	{
-		id: 'like',
-		numeric: false,
-		disablePadding: false,
-		label: 'LIKE',
-	},
-	{
-		id: 'register',
-		numeric: true,
-		disablePadding: false,
-		label: 'REGISTER DATE',
-	},
-	{
-		id: 'status',
-		numeric: false,
-		disablePadding: false,
-		label: 'STATUS',
-	},
-];
-
-interface EnhancedTableProps {
-	numSelected: number;
-	onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Data) => void;
-	onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-	rowCount: number;
-}
-
-function EnhancedTableHead(props: EnhancedTableProps) {
-	return (
-		<TableHead>
-			<TableRow>
-				{headCells.map((headCell) => (
-					<TableCell
-						key={headCell.id}
-						align={headCell.numeric ? 'left' : 'center'}
-						padding={headCell.disablePadding ? 'none' : 'normal'}
-					>
-						{headCell.label}
-					</TableCell>
-				))}
-			</TableRow>
-		</TableHead>
-	);
-}
+const statusLabels: Record<string, string> = {
+	[BoardArticleStatus.ACTIVE]: 'Active',
+	[BoardArticleStatus.DELETE]: 'Deleted',
+};
+const statusLabel = (status: string) => statusLabels[status] ?? status;
 
 interface CommunityArticleListProps {
 	articles: BoardArticle[];
+	loading?: boolean;
+	error?: boolean;
+	density?: Density;
 	anchorEl: any;
 	menuIconClickHandler: any;
 	menuIconCloseHandler: any;
@@ -128,114 +32,147 @@ interface CommunityArticleListProps {
 	removeArticleHandler: any;
 }
 
+/** Admin article table; the status chip opens the same menu as before, deleted articles can be restored or removed for good **/
 const CommunityArticleList = (props: CommunityArticleListProps) => {
-	const { articles, anchorEl, menuIconClickHandler, menuIconCloseHandler, updateArticleHandler, removeArticleHandler } =
-		props;
+	const {
+		articles,
+		loading = false,
+		error = false,
+		density = 'comfortable',
+		anchorEl,
+		menuIconClickHandler,
+		menuIconCloseHandler,
+		updateArticleHandler,
+		removeArticleHandler,
+	} = props;
 
 	return (
-		<Stack>
-			<TableContainer>
-				<Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'medium'}>
-					{/*@ts-ignore*/}
-					<EnhancedTableHead />
-					<TableBody>
-						{articles?.length === 0 && (
-							<TableRow>
-								<TableCell align="center" colSpan={8}>
-									<span className={'no-data'}>data not found!</span>
+		<TableContainer className={`gv-admin-table is-${density}`}>
+			<Table aria-label="Articles">
+				<TableHead>
+					<TableRow>
+						<TableCell>Article</TableCell>
+						<TableCell>Board</TableCell>
+						<TableCell>Writer</TableCell>
+						<TableCell align="right">Views</TableCell>
+						<TableCell align="right">Likes</TableCell>
+						<TableCell>Posted</TableCell>
+						<TableCell>Status</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody>
+					{articles.length === 0 && (
+						<TableRow>
+							<TableCell colSpan={7} className="gv-admin-table__empty">
+								{loading ? (
+									<AdminEmpty title="Loading articles…" />
+								) : error ? (
+									<AdminEmpty title="Articles could not be loaded." desc="Check the connection and try again." />
+								) : (
+									<AdminEmpty title="No articles match." desc="Try another status or board." />
+								)}
+							</TableCell>
+						</TableRow>
+					)}
+					{articles.map((article: BoardArticle, index: number) => {
+						const isDeleted = article.articleStatus === BoardArticleStatus.DELETE;
+						const writerImage = article?.memberData?.memberImage
+							? `${REACT_APP_API_URL}/${article.memberData.memberImage}`
+							: '/img/profile/defaultUser.svg';
+						const title = (
+							<>
+								<span className="gv-admin-person__avatar gv-admin-game__thumb">
+									<img src={articleImage(article)} alt="" />
+								</span>
+								<span>
+									<span className="gv-admin-article__title">{article.articleTitle}</span>
+									<span className="gv-admin-person__id">{article._id}</span>
+								</span>
+							</>
+						);
+
+						return (
+							<TableRow hover key={article._id} className={isDeleted ? 'is-dimmed' : undefined}>
+								<TableCell>
+									{isDeleted ? (
+										<span className="gv-admin-person">{title}</span>
+									) : (
+										<Link href={articleHref(article)} className="gv-admin-person">
+											{title}
+										</Link>
+									)}
+								</TableCell>
+								<TableCell>{boardMeta(article.articleCategory).label}</TableCell>
+								<TableCell>
+									{article.memberData ? (
+										<Link href={`/member?memberId=${article.memberData._id}`} className="gv-admin-writer">
+											<img src={writerImage} alt="" />
+											<span className="gv-admin-link">{article.memberData.memberNick}</span>
+										</Link>
+									) : (
+										<span className="gv-admin-muted">—</span>
+									)}
+								</TableCell>
+								<TableCell align="right" className="gv-admin-mono">
+									{article.articleViews}
+								</TableCell>
+								<TableCell align="right" className="gv-admin-mono">
+									{article.articleLikes}
+								</TableCell>
+								<TableCell className="gv-admin-mono">
+									<Moment format={'DD.MM.YY HH:mm'}>{article.createdAt}</Moment>
+								</TableCell>
+								<TableCell>
+									<span className="gv-admin-row-actions">
+										<StatusChip
+											label={statusLabel(article.articleStatus)}
+											tone={statusTone[article.articleStatus] ?? 'neutral'}
+											ariaLabel={`Change status of ${article.articleTitle}, now ${statusLabel(article.articleStatus)}`}
+											onClick={(e: any) => menuIconClickHandler(e, index)}
+										/>
+										{isDeleted && (
+											<Tooltip title="Remove permanently">
+												<button
+													type="button"
+													className="gv-admin-iconbtn is-danger"
+													aria-label={`Remove ${article.articleTitle} permanently`}
+													onClick={() => removeArticleHandler(article._id)}
+												>
+													<DeleteForeverOutlinedIcon aria-hidden />
+												</button>
+											</Tooltip>
+										)}
+									</span>
+									<Menu
+										className={'gv-admin-menu'}
+										anchorEl={anchorEl[index]}
+										open={Boolean(anchorEl[index])}
+										onClose={menuIconCloseHandler}
+										TransitionComponent={Fade}
+									>
+										<li className="gv-admin-menu__label">{isDeleted ? 'Restore' : 'Change status to'}</li>
+										{Object.values(BoardArticleStatus)
+											.filter((status) => status !== article.articleStatus)
+											.map((status: string) => (
+												<MenuItem
+													onClick={() => updateArticleHandler({ _id: article._id, articleStatus: status })}
+													key={status}
+												>
+													{status === BoardArticleStatus.DELETE
+														? 'Delete'
+														: isDeleted
+														? `Restore as ${statusLabel(status)}`
+														: statusLabel(status)}
+												</MenuItem>
+											))}
+									</Menu>
 								</TableCell>
 							</TableRow>
-						)}
-
-						{articles?.length !== 0 &&
-							articles?.map((article: BoardArticle, index: number) => (
-								<TableRow hover key={article._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-									<TableCell align="left">{article._id}</TableCell>
-									<TableCell align="left">
-										<Box component={'div'}>
-											{article.articleTitle}
-											{article.articleStatus === BoardArticleStatus.ACTIVE && (
-												<Link
-													href={`/community/detail?articleCategory=${article.articleCategory}&id=${article._id}`}
-													className={'img_box'}
-												>
-													<IconButton className="btn_window">
-														<Tooltip title={'Open window'}>
-															<OpenInBrowserRoundedIcon />
-														</Tooltip>
-													</IconButton>
-												</Link>
-											)}
-										</Box>
-									</TableCell>
-									<TableCell align="left">{article.articleCategory}</TableCell>
-									<TableCell align="left" className={'name'}>
-										<Link href={`/member?memberId=${article?.memberData?._id}`}>
-											<Avatar
-												alt="Remy Sharp"
-												src={
-													article?.memberData?.memberImage
-														? `${REACT_APP_API_URL}/${article?.memberData?.memberImage}`
-														: `/img/profile/defaultUser.svg`
-												}
-												sx={{ ml: '2px', mr: '10px' }}
-											/>
-											{article?.memberData?.memberNick}
-										</Link>
-									</TableCell>
-									<TableCell align="center">{article?.articleViews}</TableCell>
-									<TableCell align="center">{article?.articleLikes}</TableCell>
-									<TableCell align="left">
-										<Moment format={'DD.MM.YY HH:mm'}>{article?.createdAt}</Moment>
-									</TableCell>
-									<TableCell align="center">
-										{article.articleStatus === BoardArticleStatus.DELETE ? (
-											<Button
-												variant="outlined"
-												sx={{ p: '3px', border: 'none', ':hover': { border: '1px solid #000000' } }}
-												onClick={() => removeArticleHandler(article._id)}
-											>
-												<DeleteIcon fontSize="small" />
-											</Button>
-										) : (
-											<>
-												<Button onClick={(e: any) => menuIconClickHandler(e, index)} className={'badge success'}>
-													{article.articleStatus}
-												</Button>
-
-												<Menu
-													className={'menu-modal'}
-													MenuListProps={{
-														'aria-labelledby': 'fade-button',
-													}}
-													anchorEl={anchorEl[index]}
-													open={Boolean(anchorEl[index])}
-													onClose={menuIconCloseHandler}
-													TransitionComponent={Fade}
-													sx={{ p: 1 }}
-												>
-													{Object.values(BoardArticleStatus)
-														.filter((ele) => ele !== article.articleStatus)
-														.map((status: string) => (
-															<MenuItem
-																onClick={() => updateArticleHandler({ _id: article._id, articleStatus: status })}
-																key={status}
-															>
-																<Typography variant={'subtitle1'} component={'span'}>
-																	{status}
-																</Typography>
-															</MenuItem>
-														))}
-												</Menu>
-											</>
-										)}
-									</TableCell>
-								</TableRow>
-							))}
-					</TableBody>
-				</Table>
-			</TableContainer>
-		</Stack>
+						);
+					})}
+				</TableBody>
+			</Table>
+		</TableContainer>
 	);
 };
 

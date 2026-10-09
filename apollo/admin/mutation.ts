@@ -177,3 +177,93 @@ export const REMOVE_COMMENT_BY_ADMIN = gql`
 		}
 	}
 `;
+
+/**************************
+ *    SUPPORT (CS)        *
+ *************************/
+
+export const CREATE_NOTICE = gql`
+	mutation CreateNotice($input: NoticeInput!) {
+		createNotice(input: $input) {
+				_id
+				noticeCategory
+				noticeStatus
+				noticeTopic
+				noticeTitle
+				noticeContent
+				noticeEvent
+				memberId
+				createdAt
+				updatedAt
+		}
+	}
+`;
+
+export const UPDATE_NOTICE = gql`
+	mutation UpdateNotice($input: NoticeUpdate!) {
+		updateNotice(input: $input) {
+				_id
+				noticeCategory
+				noticeStatus
+				noticeTopic
+				noticeTitle
+				noticeContent
+				noticeEvent
+				memberId
+				createdAt
+				updatedAt
+		}
+	}
+`;
+
+export const REMOVE_NOTICE = gql`
+	mutation RemoveNotice($input: String!) {
+		removeNotice(noticeId: $input) {
+			_id
+		}
+	}
+`;
+
+export const ANSWER_INQUIRY = gql`
+	mutation AnswerInquiry($input: InquiryAnswer!) {
+		answerInquiry(input: $input) {
+				_id
+				inquiryTopic
+				inquiryStatus
+				inquiryTitle
+				inquiryContent
+				answerContent
+				answeredAt
+				answeredBy
+				memberId
+				createdAt
+				updatedAt
+		}
+	}
+`;
+
+export const UPDATE_INQUIRY_BY_ADMIN = gql`
+	mutation UpdateInquiryByAdmin($input: InquiryStatusUpdate!) {
+		updateInquiryByAdmin(input: $input) {
+				_id
+				inquiryTopic
+				inquiryStatus
+				inquiryTitle
+				inquiryContent
+				answerContent
+				answeredAt
+				answeredBy
+				memberId
+				createdAt
+				updatedAt
+		}
+	}
+`;
+
+export const REMOVE_INQUIRY = gql`
+	mutation RemoveInquiry($input: String!) {
+		removeInquiry(inquiryId: $input) {
+			_id
+		}
+	}
+`;

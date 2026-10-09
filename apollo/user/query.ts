@@ -662,3 +662,52 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 		}
 	}
 `;
+
+/**************************
+ *    SUPPORT (CS)        *
+ *************************/
+
+export const GET_NOTICES = gql`
+	query GetNotices($input: NoticesInquiry!) {
+		getNotices(input: $input) {
+			list {
+				_id
+				noticeCategory
+				noticeStatus
+				noticeTopic
+				noticeTitle
+				noticeContent
+				noticeEvent
+				memberId
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_MY_INQUIRIES = gql`
+	query GetMyInquiries($input: MyInquiriesInquiry!) {
+		getMyInquiries(input: $input) {
+			list {
+				_id
+				inquiryTopic
+				inquiryStatus
+				inquiryTitle
+				inquiryContent
+				answerContent
+				answeredAt
+				answeredBy
+				memberId
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;

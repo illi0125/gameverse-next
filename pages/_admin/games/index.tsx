@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import withAdminLayout from '../../../libs/components/layout/LayoutAdmin';
-import { Box, List, ListItem, OutlinedInput, Stack } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { TabContext } from '@mui/lab';
 import TablePagination from '@mui/material/TablePagination';
+import {
+	AdminPageHeader,
+	AdminSearch,
+	AdminTab,
+	AdminTabs,
+	DensityToggle,
+	useAdminDensity,
+} from '../../../libs/components/admin/ui/AdminUi';
 import { GamePanelList } from '../../../libs/components/admin/games/GameList';
 import { AllGamesInquiry } from '../../../libs/types/game/game.input';
 import { Game } from '../../../libs/types/game/game';
@@ -41,7 +45,11 @@ const AdminGames: NextPage = ({ initialInquiry, ...props }: any) => {
 	const [updateGameByAdmin] = useMutation(UPDATE_GAME_BY_ADMIN);
 	const [removeGameByAdmin] = useMutation(REMOVE_GAME_BY_ADMIN);
 
-	const { refetch: getAllGamesByAdminRefetch } = useQuery(GET_ALL_GAMES_BY_ADMIN, {
+	const {
+		loading: getAllGamesByAdminLoading,
+		error: getAllGamesByAdminError,
+		refetch: getAllGamesByAdminRefetch,
+	} = useQuery(GET_ALL_GAMES_BY_ADMIN, {
 		fetchPolicy: 'network-only',
 		variables: { input: gamesInquiry },
 		notifyOnNetworkStatusChange: true,
@@ -128,97 +136,120 @@ const AdminGames: NextPage = ({ initialInquiry, ...props }: any) => {
 	const selectedOf = (key: ListFilter): string => (gamesInquiry.search[key] as string[] | undefined)?.[0] ?? 'ALL';
 
 	const renderListSelect = (key: ListFilter, label: string, values: string[]) => (
-		<Select
-			sx={{ width: '170px' }}
-			value={selectedOf(key)}
-			onChange={(e: any) => listFilterHandler(key, e.target.value)}
-			renderValue={(value: string) => (value === 'ALL' ? `${label}: All` : formatEnumLabel(value))}
-		>
-			<MenuItem value={'ALL'}>All</MenuItem>
-			{values.map((value: string) => (
-				<MenuItem value={value} key={value}>
-					{formatEnumLabel(value)}
-				</MenuItem>
-			))}
-		</Select>
+		<label className="gv-admin-select">
+			<span>{label}</span>
+			<Select
+				value={selectedOf(key)}
+				onChange={(e: any) => listFilterHandler(key, e.target.value)}
+				MenuProps={{ className: 'gv-admin-menu' }}
+				renderValue={(value: string) => (value === 'ALL' ? 'All' : formatEnumLabel(value))}
+			>
+				<MenuItem value={'ALL'}>All</MenuItem>
+				{values.map((value: string) => (
+					<MenuItem value={value} key={value}>
+						{formatEnumLabel(value)}
+					</MenuItem>
+				))}
+			</Select>
+		</label>
 	);
 
-	return (
-		<Box component={'div'} className={'content'}>
-			<Typography variant={'h2'} className={'tit'} sx={{ mb: '24px' }}>
-				Game List
-			</Typography>
-			<Box component={'div'} className={'table-wrap'}>
-				<Box component={'div'} sx={{ width: '100%', typography: 'body1' }}>
-					<TabContext value={statusValue}>
-						<Box component={'div'}>
-							<List className={'tab-menu'}>
-								{statusTabs.map((tab) => (
-									<ListItem
-										key={tab.value}
-										onClick={() => tabChangeHandler(tab.value)}
-										value={tab.value}
-										className={statusValue === tab.value ? 'li on' : 'li'}
-									>
-										{tab.label}
-									</ListItem>
-								))}
-							</List>
-							<Divider />
-							<Stack className={'search-area'} direction={'row'} gap={'16px'} flexWrap={'wrap'} sx={{ m: '24px' }}>
-								<OutlinedInput
-									value={searchText}
-									placeholder={'Search title, developer, publisher'}
-									sx={{ width: '280px' }}
-									onChange={(e: any) => setSearchText(e.target.value)}
-									onKeyDown={(e: any) => {
-										if (e.key === 'Enter') textSearchHandler();
-									}}
-									onBlur={textSearchHandler}
-								/>
-								{renderListSelect('platformList', 'Platform', Object.values(GamePlatform))}
-								{renderListSelect('genreList', 'Genre', Object.values(GameGenre))}
-								{renderListSelect('typeList', 'Type', Object.values(GameType))}
-								<Select
-									sx={{ width: '170px' }}
-									value={
-										gamesInquiry.search.isFeatured === undefined
-											? 'ALL'
-											: gamesInquiry.search.isFeatured
-											? 'FEATURED'
-											: 'NOT_FEATURED'
-									}
-									onChange={(e: any) => featuredFilterHandler(e.target.value)}
-								>
-									<MenuItem value={'ALL'}>Featured: All</MenuItem>
-									<MenuItem value={'FEATURED'}>Featured</MenuItem>
-									<MenuItem value={'NOT_FEATURED'}>Not featured</MenuItem>
-								</Select>
-							</Stack>
-							<Divider />
-						</Box>
-						<GamePanelList
-							games={games}
-							anchorEl={anchorEl}
-							menuIconClickHandler={menuIconClickHandler}
-							menuIconCloseHandler={menuIconCloseHandler}
-							updateGameHandler={updateGameHandler}
-							removeGameHandler={removeGameHandler}
-						/>
+	/** PRESENTATION (status counts are read-only queries, one row each) **/
+	const [density, setDensity] = useAdminDensity();
+	const countQuery = (gameStatus?: GameStatus) => ({
+		fetchPolicy: 'network-only' as const,
+		variables: { input: { page: 1, limit: 1, search: gameStatus ? { gameStatus } : {} } },
+	});
+	const allCount = useQuery(GET_ALL_GAMES_BY_ADMIN, countQuery());
+	const activeCount = useQuery(GET_ALL_GAMES_BY_ADMIN, countQuery(GameStatus.ACTIVE));
+	const upcomingCount = useQuery(GET_ALL_GAMES_BY_ADMIN, countQuery(GameStatus.UPCOMING));
+	const deleteCount = useQuery(GET_ALL_GAMES_BY_ADMIN, countQuery(GameStatus.DELETE));
+	const totalOf = (result: T) => result.data?.getAllGamesByAdmin?.metaCounter?.[0]?.total ?? (result.data ? 0 : undefined);
 
-						<TablePagination
-							rowsPerPageOptions={[10, 20, 40, 60]}
-							component="div"
-							count={gamesTotal}
-							rowsPerPage={gamesInquiry?.limit}
-							page={gamesInquiry?.page - 1}
-							onPageChange={changePageHandler}
-							onRowsPerPageChange={changeRowsPerPageHandler}
-						/>
-					</TabContext>
-				</Box>
-			</Box>
-		</Box>
+	// A status change or removal moves games between tabs, so the counts follow the list
+	useEffect(() => {
+		[allCount, activeCount, upcomingCount, deleteCount].forEach((query) => query.refetch().catch(() => undefined));
+	}, [games]);
+
+	const counts: Record<string, number | undefined> = {
+		ALL: totalOf(allCount),
+		[GameStatus.ACTIVE]: totalOf(activeCount),
+		[GameStatus.UPCOMING]: totalOf(upcomingCount),
+		[GameStatus.DELETE]: totalOf(deleteCount),
+	};
+	const tabs: AdminTab<GameStatus | 'ALL'>[] = statusTabs.map((tab) => ({ ...tab, count: counts[tab.value] }));
+
+	return (
+		<div className="gv-admin-page">
+			<AdminPageHeader
+				kicker="Manage"
+				title="Games"
+				desc="The full catalog. Feature a game with the switch, change its status from the chip in each row."
+			/>
+
+			<section className="gv-admin-panel" aria-label="Game list">
+				<AdminTabs tabs={tabs} value={statusValue} onChange={tabChangeHandler} label="Game status" />
+
+				<div className="gv-admin-toolbar">
+					<AdminSearch
+						value={searchText}
+						placeholder="Search title, developer, publisher"
+						onChange={setSearchText}
+						onSubmit={textSearchHandler}
+						onClear={() => {
+							setSearchText('');
+							const { text, ...search } = gamesInquiry.search;
+							setGamesInquiry({ ...gamesInquiry, page: 1, search });
+						}}
+					/>
+					{renderListSelect('platformList', 'Platform', Object.values(GamePlatform))}
+					{renderListSelect('genreList', 'Genre', Object.values(GameGenre))}
+					{renderListSelect('typeList', 'Type', Object.values(GameType))}
+					<label className="gv-admin-select">
+						<span>Featured</span>
+						<Select
+							value={
+								gamesInquiry.search.isFeatured === undefined
+									? 'ALL'
+									: gamesInquiry.search.isFeatured
+									? 'FEATURED'
+									: 'NOT_FEATURED'
+							}
+							onChange={(e: any) => featuredFilterHandler(e.target.value)}
+							MenuProps={{ className: 'gv-admin-menu' }}
+						>
+							<MenuItem value={'ALL'}>All</MenuItem>
+							<MenuItem value={'FEATURED'}>Featured</MenuItem>
+							<MenuItem value={'NOT_FEATURED'}>Not featured</MenuItem>
+						</Select>
+					</label>
+					<DensityToggle density={density} onChange={setDensity} />
+				</div>
+
+				<GamePanelList
+					games={games}
+					loading={getAllGamesByAdminLoading}
+					error={Boolean(getAllGamesByAdminError)}
+					density={density}
+					anchorEl={anchorEl}
+					menuIconClickHandler={menuIconClickHandler}
+					menuIconCloseHandler={menuIconCloseHandler}
+					updateGameHandler={updateGameHandler}
+					removeGameHandler={removeGameHandler}
+				/>
+
+				<TablePagination
+					className="gv-admin-pagination"
+					rowsPerPageOptions={[10, 20, 40, 60]}
+					component="div"
+					count={gamesTotal}
+					rowsPerPage={gamesInquiry?.limit}
+					page={gamesInquiry?.page - 1}
+					onPageChange={changePageHandler}
+					onRowsPerPageChange={changeRowsPerPageHandler}
+				/>
+			</section>
+		</div>
 	);
 };
 

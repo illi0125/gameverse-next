@@ -206,3 +206,66 @@ export const GET_COMMENTS = gql`
 		}
 	}
 `;
+
+/**************************
+ *    SUPPORT (CS)        *
+ *************************/
+
+export const GET_ALL_NOTICES_BY_ADMIN = gql`
+	query GetAllNoticesByAdmin($input: AllNoticesInquiry!) {
+		getAllNoticesByAdmin(input: $input) {
+			list {
+				_id
+				noticeCategory
+				noticeStatus
+				noticeTopic
+				noticeTitle
+				noticeContent
+				noticeEvent
+				memberId
+				createdAt
+				updatedAt
+				memberData {
+					_id
+					memberNick
+					memberImage
+					memberType
+					memberStatus
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ALL_INQUIRIES_BY_ADMIN = gql`
+	query GetAllInquiriesByAdmin($input: AllInquiriesInquiry!) {
+		getAllInquiriesByAdmin(input: $input) {
+			list {
+				_id
+				inquiryTopic
+				inquiryStatus
+				inquiryTitle
+				inquiryContent
+				answerContent
+				answeredAt
+				answeredBy
+				memberId
+				createdAt
+				updatedAt
+				memberData {
+					_id
+					memberNick
+					memberImage
+					memberType
+					memberStatus
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;

@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import withAdminLayout from '../../../libs/components/layout/LayoutAdmin';
-import { Box, Stack, MenuItem } from '@mui/material';
-import { List, ListItem } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import Select from '@mui/material/Select';
-import { TabContext } from '@mui/lab';
+import MenuItem from '@mui/material/MenuItem';
 import TablePagination from '@mui/material/TablePagination';
+import {
+	AdminPageHeader,
+	AdminTab,
+	AdminTabs,
+	DensityToggle,
+	useAdminDensity,
+} from '../../../libs/components/admin/ui/AdminUi';
 import CommunityArticleList from '../../../libs/components/admin/community/CommunityArticleList';
+import { communityBoards } from '../../../libs/components/community/communityMeta';
 import { AllBoardArticlesInquiry } from '../../../libs/types/board-article/board-article.input';
 import { BoardArticle } from '../../../libs/types/board-article/board-article';
 import { BoardArticleCategory, BoardArticleStatus } from '../../../libs/enums/board-article.enum';
@@ -122,8 +126,6 @@ const AdminCommunity: NextPage = ({ initialInquiry, ...props }: any) => {
 	const updateArticleHandler = async (updateData: BoardArticleUpdate) => {
 		try {
 			await updateBoardArticleByAdmin({ variables: { input: updateData } });
-			console.log('+updateData: ', updateData);
-
 			menuIconCloseHandler();
 			await getAllBoardArticlesByAdminRefetch({ input: communityInquiry });
 		} catch (err: any) {
@@ -136,85 +138,88 @@ const AdminCommunity: NextPage = ({ initialInquiry, ...props }: any) => {
 		try {
 			if (await sweetConfirmAlert('Are you sure to remove?')) {
 				await removeBoardArticleByAdmin({ variables: { input: id } });
-				await getAllBoardArticlesByAdminRefetch({ variables: { input: communityInquiry } });
+				await getAllBoardArticlesByAdminRefetch({ input: communityInquiry });
 			}
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
 		}
 	};
 
-	console.log('+communityInquiry', communityInquiry);
-	console.log('+articles', articles);
+	/** PRESENTATION (status counts are read-only queries, one row each) **/
+	const [density, setDensity] = useAdminDensity();
+	const countQuery = (articleStatus?: BoardArticleStatus) => ({
+		fetchPolicy: 'network-only' as const,
+		variables: { input: { page: 1, limit: 1, search: articleStatus ? { articleStatus } : {} } },
+	});
+	const allCount = useQuery(GET_ALL_BOARD_ARTICLES_BY_ADMIN, countQuery());
+	const activeCount = useQuery(GET_ALL_BOARD_ARTICLES_BY_ADMIN, countQuery(BoardArticleStatus.ACTIVE));
+	const deleteCount = useQuery(GET_ALL_BOARD_ARTICLES_BY_ADMIN, countQuery(BoardArticleStatus.DELETE));
+	const totalOf = (result: T) =>
+		result.data?.getAllBoardArticlesByAdmin?.metaCounter?.[0]?.total ?? (result.data ? 0 : undefined);
+
+	// A status change or removal moves articles between tabs, so the counts follow the list
+	useEffect(() => {
+		[allCount, activeCount, deleteCount].forEach((query) => query.refetch().catch(() => undefined));
+	}, [articles]);
+
+	const statusTabs: AdminTab[] = [
+		{ value: 'ALL', label: 'All', count: totalOf(allCount) },
+		{ value: 'ACTIVE', label: 'Active', count: totalOf(activeCount) },
+		{ value: 'DELETE', label: 'Deleted', count: totalOf(deleteCount) },
+	];
 
 	return (
-		<Box component={'div'} className={'content'}>
-			<Typography variant={'h2'} className={'tit'} sx={{ mb: '24px' }}>
-				Arricle List
-			</Typography>
-			<Box component={'div'} className={'table-wrap'}>
-				<Box component={'div'} sx={{ width: '100%', typography: 'body1' }}>
-					<TabContext value={value}>
-						<Box component={'div'}>
-							<List className={'tab-menu'}>
-								<ListItem
-									onClick={(e: any) => tabChangeHandler(e, 'ALL')}
-									value="ALL"
-									className={value === 'ALL' ? 'li on' : 'li'}
-								>
-									All
-								</ListItem>
-								<ListItem
-									onClick={(e: any) => tabChangeHandler(e, 'ACTIVE')}
-									value="ACTIVE"
-									className={value === 'ACTIVE' ? 'li on' : 'li'}
-								>
-									Active
-								</ListItem>
-								<ListItem
-									onClick={(e: any) => tabChangeHandler(e, 'DELETE')}
-									value="DELETE"
-									className={value === 'DELETE' ? 'li on' : 'li'}
-								>
-									Delete
-								</ListItem>
-							</List>
-							<Divider />
-							<Stack className={'search-area'} sx={{ m: '24px' }}>
-								<Select sx={{ width: '160px', mr: '20px' }} value={searchType}>
-									<MenuItem value={'ALL'} onClick={() => searchTypeHandler('ALL')}>
-										ALL
-									</MenuItem>
-									{Object.values(BoardArticleCategory).map((category: string) => (
-										<MenuItem value={category} onClick={() => searchTypeHandler(category)} key={category}>
-											{category}
-										</MenuItem>
-									))}
-								</Select>
-							</Stack>
-							<Divider />
-						</Box>
-						<CommunityArticleList
-							articles={articles}
-							anchorEl={anchorEl}
-							menuIconClickHandler={menuIconClickHandler}
-							menuIconCloseHandler={menuIconCloseHandler}
-							updateArticleHandler={updateArticleHandler}
-							removeArticleHandler={removeArticleHandler}
-						/>
+		<div className="gv-admin-page">
+			<AdminPageHeader
+				kicker="Manage"
+				title="Community"
+				desc="Articles across all four boards. Delete or restore from the status chip; deleted articles can also be removed for good."
+			/>
 
-						<TablePagination
-							rowsPerPageOptions={[10, 20, 40, 60]}
-							component="div"
-							count={articleTotal}
-							rowsPerPage={communityInquiry?.limit}
-							page={communityInquiry?.page - 1}
-							onPageChange={changePageHandler}
-							onRowsPerPageChange={changeRowsPerPageHandler}
-						/>
-					</TabContext>
-				</Box>
-			</Box>
-		</Box>
+			<section className="gv-admin-panel" aria-label="Article list">
+				<AdminTabs tabs={statusTabs} value={value} onChange={(next) => tabChangeHandler(null, next)} label="Article status" />
+
+				<div className="gv-admin-toolbar">
+					<label className="gv-admin-select">
+						<span>Board</span>
+						<Select value={searchType} MenuProps={{ className: 'gv-admin-menu' }}>
+							<MenuItem value={'ALL'} onClick={() => searchTypeHandler('ALL')}>
+								All boards
+							</MenuItem>
+							{communityBoards.map((board) => (
+								<MenuItem value={board.value} onClick={() => searchTypeHandler(board.value)} key={board.value}>
+									{board.label}
+								</MenuItem>
+							))}
+						</Select>
+					</label>
+					<DensityToggle density={density} onChange={setDensity} />
+				</div>
+
+				<CommunityArticleList
+					articles={articles ?? []}
+					loading={getAllBoardArticlesByAdminLoading}
+					error={Boolean(getAllBoardArticlesByAdminError)}
+					density={density}
+					anchorEl={anchorEl}
+					menuIconClickHandler={menuIconClickHandler}
+					menuIconCloseHandler={menuIconCloseHandler}
+					updateArticleHandler={updateArticleHandler}
+					removeArticleHandler={removeArticleHandler}
+				/>
+
+				<TablePagination
+					className="gv-admin-pagination"
+					rowsPerPageOptions={[10, 20, 40, 60]}
+					component="div"
+					count={articleTotal}
+					rowsPerPage={communityInquiry?.limit}
+					page={communityInquiry?.page - 1}
+					onPageChange={changePageHandler}
+					onRowsPerPageChange={changeRowsPerPageHandler}
+				/>
+			</section>
+		</div>
 	);
 };
 

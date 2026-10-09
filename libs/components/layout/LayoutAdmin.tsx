@@ -1,24 +1,17 @@
 import type { ComponentType } from 'react';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import MenuList from '../admin/AdminMenuList';
-import Toolbar from '@mui/material/Toolbar';
+import Head from 'next/head';
+import Link from 'next/link';
+import MenuList, { adminPageTitle } from '../admin/AdminMenuList';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import { Menu, MenuItem } from '@mui/material';
-import Drawer from '@mui/material/Drawer';
-import AppBar from '@mui/material/AppBar';
-import Avatar from '@mui/material/Avatar';
-import IconButton from '@mui/material/IconButton';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import Tooltip from '@mui/material/Tooltip';
+import { ArrowSquareOut, List, SignOut } from 'phosphor-react';
 import { getJwtToken, logOut, updateUserInfo } from '../../auth';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 import { REACT_APP_API_URL } from '../../config';
 import { MemberType } from '../../enums/member.enum';
-const drawerWidth = 280;
 
 const withAdminLayout = (Component: ComponentType) => {
 	return (props: object) => {
@@ -60,122 +53,105 @@ const withAdminLayout = (Component: ComponentType) => {
 
 		if (!user || user?.memberType !== MemberType.ADMIN) return null;
 
+		const { section, title: pageTitle } = adminPageTitle(router.pathname);
+		const avatar = user?.memberImage ? `${REACT_APP_API_URL}/${user?.memberImage}` : '/img/profile/defaultUser.svg';
+
 		return (
-			<main id="pc-wrap" className="admin">
-				<Box component={'div'} sx={{ display: 'flex' }}>
-					<AppBar
-						position="fixed"
-						sx={{
-							width: `calc(100% - ${drawerWidth}px)`,
-							ml: `${drawerWidth}px`,
-							boxShadow: 'rgb(100 116 139 / 12%) 0px 1px 4px',
-							background: 'none',
-						}}
-					>
-						<Toolbar>
-							<Tooltip title="Open settings">
-								<IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-									<Avatar
-										src={
-											user?.memberImage ? `${REACT_APP_API_URL}/${user?.memberImage}` : '/img/profile/defaultUser.svg'
-										}
-									/>
-								</IconButton>
-							</Tooltip>
-							<Menu
-								sx={{ mt: '45px' }}
-								id="menu-appbar"
-								className={'pop-menu'}
-								anchorEl={anchorElUser}
-								anchorOrigin={{
-									vertical: 'top',
-									horizontal: 'right',
-								}}
-								keepMounted
-								transformOrigin={{
-									vertical: 'top',
-									horizontal: 'right',
-								}}
-								open={Boolean(anchorElUser)}
-								onClose={handleCloseUserMenu}
-							>
-								<Box
-									component={'div'}
-									onClick={handleCloseUserMenu}
-									sx={{
-										width: '200px',
-									}}
-								>
-									<Stack sx={{ px: '20px', my: '12px' }}>
-										<Typography variant={'h6'} component={'h6'} sx={{ mb: '4px' }}>
-											{user?.memberNick}
-										</Typography>
-										<Typography variant={'subtitle1'} component={'p'} color={'#757575'}>
-											{user?.memberPhone}
-										</Typography>
-									</Stack>
-									<Divider />
-									<Box component={'div'} sx={{ p: 1, py: '6px' }} onClick={logoutHandler}>
-										<MenuItem sx={{ px: '16px', py: '6px' }}>
-											<Typography variant={'subtitle1'} component={'span'}>
-												Logout
-											</Typography>
-										</MenuItem>
-									</Box>
-								</Box>
-							</Menu>
-						</Toolbar>
-					</AppBar>
+			<main id="pc-wrap" className="gv-admin">
+				<Head>
+					<title>{`${pageTitle} · Admin | Gameverse`}</title>
+				</Head>
+				<a href="#bunker" className="gv-admin-skip">
+					Skip to content
+				</a>
 
-					<Drawer
-						sx={{
-							width: drawerWidth,
-							flexShrink: 0,
-							'& .MuiDrawer-paper': {
-								width: drawerWidth,
-								boxSizing: 'border-box',
-							},
-						}}
-						variant="permanent"
-						anchor="left"
-						className="aside"
-					>
-						<Toolbar sx={{ flexDirection: 'column', alignItems: 'flexStart' }}>
-							<Stack className={'logo-box'}>
-								<img src={'/img/logo/logoText.svg'} alt={'logo'} />
-							</Stack>
+				<aside className={`gv-admin-aside ${openMenu ? 'is-open' : ''}`} aria-label="Admin navigation">
+					<div className="gv-admin-aside__brand">
+						<Link href="/_admin" className="gv-admin-aside__logo" aria-label="GameVerse admin home">
+							<img src={'/img/logo/logoWhite.svg'} alt="GameVerse" />
+						</Link>
+						<span className="gv-admin-aside__tag">Control room</span>
+					</div>
 
-							<Stack
-								className="user"
-								direction={'row'}
-								alignItems={'center'}
-								sx={{
-									bgcolor: openMenu ? 'rgba(255, 255, 255, 0.04)' : 'none',
-									borderRadius: '8px',
-									px: '24px',
-									py: '11px',
+					<div className="gv-admin-aside__me">
+						<span className="gv-admin-aside__avatar">
+							<img src={avatar} alt="" />
+						</span>
+						<div>
+							<p className="gv-admin-aside__nick">{user?.memberNick}</p>
+							<p className="gv-admin-aside__role">Administrator</p>
+						</div>
+					</div>
+
+					<MenuList onNavigate={() => setOpenMenu(false)} />
+
+					<div className="gv-admin-aside__foot">
+						<Link href="/" className="gv-admin-aside__link">
+							<ArrowSquareOut size={16} aria-hidden />
+							View site
+						</Link>
+						<button type="button" className="gv-admin-aside__link" onClick={logoutHandler}>
+							<SignOut size={16} aria-hidden />
+							Logout
+						</button>
+					</div>
+				</aside>
+				{openMenu && <button type="button" className="gv-admin-scrim" aria-label="Close navigation" onClick={() => setOpenMenu(false)} />}
+
+				<div className="gv-admin-main">
+					<header className="gv-admin-topbar">
+						<button
+							type="button"
+							className="gv-admin-topbar__menu"
+							aria-label="Open navigation"
+							aria-expanded={openMenu}
+							onClick={() => setOpenMenu(true)}
+						>
+							<List size={22} aria-hidden />
+						</button>
+						<p className="gv-admin-topbar__crumbs">
+							<span>{section}</span>
+							<span aria-hidden>/</span>
+							<strong>{pageTitle}</strong>
+						</p>
+						<button
+							type="button"
+							className="gv-admin-topbar__me"
+							onClick={handleOpenUserMenu}
+							aria-haspopup="menu"
+							aria-label="Account menu"
+						>
+							<img src={avatar} alt="" />
+							<span>{user?.memberNick}</span>
+						</button>
+						<Menu
+							anchorEl={anchorElUser}
+							anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+							transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+							open={Boolean(anchorElUser)}
+							onClose={handleCloseUserMenu}
+							className="gv-admin-menu"
+						>
+							<li className="gv-admin-menu__who">
+								<strong>{user?.memberNick}</strong>
+								<span>{user?.memberPhone}</span>
+							</li>
+							<MenuItem
+								onClick={() => {
+									handleCloseUserMenu();
+									logoutHandler();
 								}}
 							>
-								<Avatar
-									src={user?.memberImage ? `${REACT_APP_API_URL}/${user?.memberImage}` : '/img/profile/defaultUser.svg'}
-								/>
-								<Typography variant={'body2'} p={1} ml={1}>
-									{user?.memberNick} <br />
-									{user?.memberPhone}
-								</Typography>
-							</Stack>
-						</Toolbar>
+								Logout
+							</MenuItem>
+						</Menu>
+					</header>
 
-						<Divider />
-
-						<MenuList />
-					</Drawer>
-
-					<Box component={'div'} id="bunker" sx={{ flexGrow: 1 }}>
+					<Box component={'div'} id="bunker" className="gv-admin-content">
 						{/*@ts-ignore*/}
 						<Component {...props} setSnackbar={setSnackbar} setTitle={setTitle} />
 					</Box>
-				</Box>
+				</div>
 			</main>
 		);
 	};

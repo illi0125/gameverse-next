@@ -364,3 +364,25 @@ export const UNSUBSCRIBE = gql`
 		}
 	}
 `;
+
+/**************************
+ *    SUPPORT (CS)        *
+ *************************/
+
+export const CREATE_INQUIRY = gql`
+	mutation CreateInquiry($input: InquiryInput!) {
+		createInquiry(input: $input) {
+				_id
+				inquiryTopic
+				inquiryStatus
+				inquiryTitle
+				inquiryContent
+				answerContent
+				answeredAt
+				answeredBy
+				memberId
+				createdAt
+				updatedAt
+		}
+	}
+`;
