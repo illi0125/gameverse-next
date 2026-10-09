@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-	Stack,
-	Typography,
 	Checkbox,
 	OutlinedInput,
 	FormControl,
@@ -11,12 +9,12 @@ import {
 	Tooltip,
 	IconButton,
 } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { GameGenre, GameMode, GamePlatform, GameType } from '../../enums/game.enum';
 import { GameSearch, GamesInquiry } from '../../types/game/game.input';
 import { useRouter } from 'next/router';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import { gamePriceMax, gameReleaseYears } from '../../config';
 import { formatEnumLabel } from '../../utils';
 
@@ -34,13 +32,14 @@ interface FilterType {
 	searchFilter: GamesInquiry;
 	setSearchFilter: any;
 	initialInput: GamesInquiry;
+	/** Presentation only: 'search' renders the title search console, 'panel' the filter groups **/
+	part?: 'search' | 'panel';
 }
 
 const yearOf = (value?: Date | string): number | '' => (value ? new Date(value).getUTCFullYear() : '');
 
 const Filter = (props: FilterType) => {
-	const { searchFilter, setSearchFilter, initialInput } = props;
-	const device = useDeviceDetect();
+	const { searchFilter, setSearchFilter, initialInput, part = 'panel' } = props;
 	const router = useRouter();
 	const [searchText, setSearchText] = useState<string>(searchFilter?.search?.text ?? '');
 	const [showMore, setShowMore] = useState<boolean>(false);
@@ -151,170 +150,181 @@ const Filter = (props: FilterType) => {
 	};
 
 	const renderCheckboxes = (key: ListKey, values: string[]) =>
-		values.map((value: string) => (
-			<Stack className={'input-box'} key={value}>
-				<Checkbox
-					id={`${key}-${value}`}
-					className="game-checkbox"
-					color="default"
-					size="small"
-					value={value}
-					checked={((searchFilter?.search?.[key] as string[]) || []).includes(value)}
-					onChange={(e: any) => listSelectHandler(key, e)}
-				/>
-				<label htmlFor={`${key}-${value}`} style={{ cursor: 'pointer' }}>
-					<Typography className="game-option">{formatEnumLabel(value)}</Typography>
+		values.map((value: string) => {
+			const checked = ((searchFilter?.search?.[key] as string[]) || []).includes(value);
+			return (
+				<label className={`gv-chip ${checked ? 'is-on' : ''}`} htmlFor={`${key}-${value}`} key={value}>
+					<Checkbox
+						id={`${key}-${value}`}
+						className="gv-chip__input"
+						color="default"
+						size="small"
+						value={value}
+						checked={checked}
+						onChange={(e: any) => listSelectHandler(key, e)}
+					/>
+					<span>{formatEnumLabel(value)}</span>
 				</label>
-			</Stack>
-		));
+			);
+		});
 
-	if (device === 'mobile') {
-		return <div>GAMES FILTER</div>;
-	} else {
+	if (part === 'search') {
 		return (
-			<Stack className={'filter-main'}>
-				<Stack className={'find-your-game'} mb={'40px'}>
-					<Typography className={'title-main'}>Find Your Game</Typography>
-					<Stack className={'input-box'}>
-						<OutlinedInput
-							value={searchText}
-							type={'text'}
-							className={'search-input'}
-							placeholder={'Title, developer or publisher'}
-							onChange={(e: any) => setSearchText(e.target.value)}
-							onKeyDown={(event: any) => {
-								if (event.key == 'Enter') textHandler(searchText);
-							}}
-							endAdornment={
-								<CancelRoundedIcon
-									onClick={() => {
-										setSearchText('');
-										textHandler('');
-									}}
-								/>
-							}
-						/>
-						<img src={'/img/icons/search_icon.png'} alt={''} />
-						<Tooltip title="Reset">
-							<IconButton onClick={refreshHandler}>
-								<RefreshIcon />
-							</IconButton>
-						</Tooltip>
-					</Stack>
-				</Stack>
-				<Stack className={'find-your-game'} mb={'30px'}>
-					<Typography className={'title'}>Platform</Typography>
-					{renderCheckboxes('platformList', Object.values(GamePlatform))}
-				</Stack>
-				<Stack className={'find-your-game'} mb={'30px'}>
-					<Typography className={'title'}>Genre</Typography>
-					<Stack
-						className={'game-genre'}
-						style={{ height: showMore ? '310px' : '115px' }}
-						onMouseEnter={() => setShowMore(true)}
-						onMouseLeave={() => {
-							if (!searchFilter?.search?.genreList?.length) setShowMore(false);
-						}}
-					>
-						{renderCheckboxes('genreList', Object.values(GameGenre))}
-					</Stack>
-				</Stack>
-				<Stack className={'find-your-game'} mb={'30px'}>
-					<Typography className={'title'}>Game Mode</Typography>
-					{renderCheckboxes('modeList', Object.values(GameMode))}
-				</Stack>
-				<Stack className={'find-your-game'} mb={'30px'}>
-					<Typography className={'title'}>Pricing</Typography>
+			<div className="gv-cat-search" role="search" aria-label="Search games">
+				<span className="gv-cat-search__prompt" aria-hidden>
+					Search the catalog
+				</span>
+				<OutlinedInput
+					value={searchText}
+					type={'text'}
+					className={'gv-cat-search__input'}
+					placeholder={'Title, developer or publisher'}
+					inputProps={{ 'aria-label': 'Title, developer or publisher' }}
+					onChange={(e: any) => setSearchText(e.target.value)}
+					onKeyDown={(event: any) => {
+						if (event.key == 'Enter') textHandler(searchText);
+					}}
+					endAdornment={
+						searchText ? (
+							<CancelRoundedIcon
+								className="gv-cat-search__clear"
+								aria-label="Clear search"
+								onClick={() => {
+									setSearchText('');
+									textHandler('');
+								}}
+							/>
+						) : undefined
+					}
+				/>
+				<button type="button" className="gv-cat-search__go" aria-label="Search" onClick={() => textHandler(searchText)}>
+					<SearchRoundedIcon aria-hidden />
+				</button>
+				<Tooltip title="Reset all filters">
+					<IconButton className="gv-cat-search__reset" aria-label="Reset all filters" onClick={refreshHandler}>
+						<RefreshIcon />
+					</IconButton>
+				</Tooltip>
+			</div>
+		);
+	}
+
+	return (
+		<div className={'gv-cat-filter'}>
+			<fieldset className={'gv-cat-filter__group'}>
+				<legend className={'gv-cat-filter__title'}>Platform</legend>
+				<div className="gv-cat-filter__chips">{renderCheckboxes('platformList', Object.values(GamePlatform))}</div>
+			</fieldset>
+			<fieldset className={'gv-cat-filter__group'}>
+				<legend className={'gv-cat-filter__title'}>Genre</legend>
+				<div
+					className={`gv-cat-filter__chips gv-cat-filter__chips--genre ${showMore ? 'is-open' : ''}`}
+					onMouseEnter={() => setShowMore(true)}
+					onMouseLeave={() => {
+						if (!searchFilter?.search?.genreList?.length) setShowMore(false);
+					}}
+					onFocus={() => setShowMore(true)}
+				>
+					{renderCheckboxes('genreList', Object.values(GameGenre))}
+				</div>
+			</fieldset>
+			<fieldset className={'gv-cat-filter__group'}>
+				<legend className={'gv-cat-filter__title'}>Game mode</legend>
+				<div className="gv-cat-filter__chips">{renderCheckboxes('modeList', Object.values(GameMode))}</div>
+			</fieldset>
+			<fieldset className={'gv-cat-filter__group'}>
+				<legend className={'gv-cat-filter__title'}>Pricing</legend>
+				<div className="gv-cat-filter__chips">
 					{renderCheckboxes('typeList', Object.values(GameType))}
-					<Stack className={'input-box'}>
+					<label className={`gv-chip ${searchFilter?.search?.isFeatured === true ? 'is-on' : ''}`} htmlFor={'featured'}>
 						<Checkbox
 							id={'featured'}
-							className="game-checkbox"
+							className="gv-chip__input"
 							color="default"
 							size="small"
 							checked={searchFilter?.search?.isFeatured === true}
 							onChange={featuredHandler}
 						/>
-						<label htmlFor={'featured'} style={{ cursor: 'pointer' }}>
-							<Typography className="game-option">Featured only</Typography>
-						</label>
-					</Stack>
-				</Stack>
-				<Stack className={'find-your-game'} mb={'30px'}>
-					<Typography className={'title'}>Release Year</Typography>
-					<Stack className="range-input">
-						<FormControl fullWidth>
-							<InputLabel id="release-start-label">From</InputLabel>
-							<Select
-								labelId="release-start-label"
-								value={yearOf(searchFilter?.search?.releaseDateRange?.start)}
-								label="From"
-								onChange={(e: any) => releaseYearHandler(e, 'start')}
-								MenuProps={MenuProps}
-							>
-								<MenuItem value={''}>Any</MenuItem>
-								{gameReleaseYears.map((year: number) => (
-									<MenuItem
-										value={year}
-										key={year}
-										disabled={year > (yearOf(searchFilter?.search?.releaseDateRange?.end) || Infinity)}
-									>
-										{year}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-						<div className="central-divider"></div>
-						<FormControl fullWidth>
-							<InputLabel id="release-end-label">To</InputLabel>
-							<Select
-								labelId="release-end-label"
-								value={yearOf(searchFilter?.search?.releaseDateRange?.end)}
-								label="To"
-								onChange={(e: any) => releaseYearHandler(e, 'end')}
-								MenuProps={MenuProps}
-							>
-								<MenuItem value={''}>Any</MenuItem>
-								{gameReleaseYears.map((year: number) => (
-									<MenuItem
-										value={year}
-										key={year}
-										disabled={year < (yearOf(searchFilter?.search?.releaseDateRange?.start) || 0)}
-									>
-										{year}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-					</Stack>
-				</Stack>
-				<Stack className={'find-your-game'}>
-					<Typography className={'title'}>Price Range</Typography>
-					<Stack className="range-input">
-						<input
-							type="number"
-							placeholder="$ min"
-							min={0}
-							value={searchFilter?.search?.pricesRange?.start ?? ''}
-							onChange={(e: any) => {
-								if (e.target.value === '' || e.target.value >= 0) priceHandler(e.target.value, 'start');
-							}}
-						/>
-						<div className="central-divider"></div>
-						<input
-							type="number"
-							placeholder="$ max"
-							min={0}
-							value={searchFilter?.search?.pricesRange?.end ?? ''}
-							onChange={(e: any) => {
-								if (e.target.value === '' || e.target.value >= 0) priceHandler(e.target.value, 'end');
-							}}
-						/>
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	}
+						<span>Featured only</span>
+					</label>
+				</div>
+			</fieldset>
+			<fieldset className={'gv-cat-filter__group'}>
+				<legend className={'gv-cat-filter__title'}>Release year</legend>
+				<div className="gv-cat-filter__range">
+					<FormControl fullWidth size="small">
+						<InputLabel id="release-start-label">From</InputLabel>
+						<Select
+							labelId="release-start-label"
+							value={yearOf(searchFilter?.search?.releaseDateRange?.start)}
+							label="From"
+							onChange={(e: any) => releaseYearHandler(e, 'start')}
+							MenuProps={MenuProps}
+						>
+							<MenuItem value={''}>Any</MenuItem>
+							{gameReleaseYears.map((year: number) => (
+								<MenuItem
+									value={year}
+									key={year}
+									disabled={year > (yearOf(searchFilter?.search?.releaseDateRange?.end) || Infinity)}
+								>
+									{year}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+					<span className="gv-cat-filter__dash" aria-hidden />
+					<FormControl fullWidth size="small">
+						<InputLabel id="release-end-label">To</InputLabel>
+						<Select
+							labelId="release-end-label"
+							value={yearOf(searchFilter?.search?.releaseDateRange?.end)}
+							label="To"
+							onChange={(e: any) => releaseYearHandler(e, 'end')}
+							MenuProps={MenuProps}
+						>
+							<MenuItem value={''}>Any</MenuItem>
+							{gameReleaseYears.map((year: number) => (
+								<MenuItem
+									value={year}
+									key={year}
+									disabled={year < (yearOf(searchFilter?.search?.releaseDateRange?.start) || 0)}
+								>
+									{year}
+								</MenuItem>
+							))}
+						</Select>
+					</FormControl>
+				</div>
+			</fieldset>
+			<fieldset className={'gv-cat-filter__group'}>
+				<legend className={'gv-cat-filter__title'}>Price range ($)</legend>
+				<div className="gv-cat-filter__range">
+					<input
+						type="number"
+						placeholder="Min"
+						aria-label="Minimum price"
+						min={0}
+						value={searchFilter?.search?.pricesRange?.start ?? ''}
+						onChange={(e: any) => {
+							if (e.target.value === '' || e.target.value >= 0) priceHandler(e.target.value, 'start');
+						}}
+					/>
+					<span className="gv-cat-filter__dash" aria-hidden />
+					<input
+						type="number"
+						placeholder="Max"
+						aria-label="Maximum price"
+						min={0}
+						value={searchFilter?.search?.pricesRange?.end ?? ''}
+						onChange={(e: any) => {
+							if (e.target.value === '' || e.target.value >= 0) priceHandler(e.target.value, 'end');
+						}}
+					/>
+				</div>
+			</fieldset>
+		</div>
+	);
 };
 
 export default Filter;

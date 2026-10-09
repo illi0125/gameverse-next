@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
+import StoreLinks from '../../libs/components/game/StoreLinks';
 import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
@@ -446,6 +447,7 @@ const GameDetail: NextPage = ({ initialComment, ...props }: any) => {
 								</Stack>
 							</Stack>
 							<Stack className={'right-config'}>
+								<StoreLinks game={game} />
 								<Stack className={'info-box'}>
 									<Typography className={'main-title'}>Listed By</Typography>
 									{owner ? (

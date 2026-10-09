@@ -1,0 +1,174 @@
+/** OFFICIAL STORE LINKS — "Get it" menu on catalog cards + "Where to get it" block on game detail.
+ *  Values follow docs/GAMEVERSE_DESIGN_SYSTEM.md (ink / signal, mono labels, cut corners).
+ */
+
+/* Card trigger (inside .gv-cat-card__foot) */
+.gv-catalog .gv-store-trigger {
+	position: relative;
+	z-index: 2;
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	gap: 2px;
+	height: 34px;
+	padding: 0 6px 0 11px;
+	border: 1.5px solid #000000;
+	background: transparent;
+	color: #000000;
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 0.75rem;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+
+	svg {
+		width: 18px;
+		height: 18px;
+	}
+
+	&:hover,
+	&[aria-expanded='true'] {
+		background: #000000;
+		color: #ffffff;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #000000;
+		outline-offset: 2px;
+	}
+}
+
+/* The menu renders in a portal, outside any page scope */
+.gv-store-menu .MuiPaper-root {
+	min-width: 240px;
+	border: 1.5px solid #000000;
+	border-radius: 0;
+	box-shadow: none;
+
+	.MuiMenuItem-root {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		grid-template-rows: auto auto;
+		column-gap: 16px;
+		padding: 10px 14px;
+		color: #000000;
+
+		&:hover,
+		&.Mui-focusVisible {
+			background: #d7ff3a;
+		}
+	}
+}
+
+.gv-store-menu__label {
+	font-family: 'Archivo', 'Poppins', sans-serif;
+	font-size: 0.9375rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.gv-store-menu__platform {
+	grid-row: 2;
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 0.6875rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: rgba(0, 0, 0, 0.6);
+}
+
+.gv-store-menu__icon {
+	grid-row: 1 / span 2;
+	grid-column: 2;
+	align-self: center;
+	width: 18px !important;
+	height: 18px !important;
+}
+
+/* Detail page block (right sidebar) */
+.gv-store-links {
+	padding-bottom: 20px;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+
+	&__title {
+		margin: 0;
+		font-family: 'Archivo', 'Poppins', sans-serif;
+		font-size: 1.25rem;
+		font-weight: 850;
+		letter-spacing: -0.03em;
+		text-transform: uppercase;
+		color: #000000;
+	}
+
+	&__note {
+		margin-top: 6px;
+		font-family: 'JetBrains Mono', ui-monospace, monospace;
+		font-size: 0.6875rem;
+		letter-spacing: 0.04em;
+		line-height: 1.5;
+		text-transform: uppercase;
+		color: rgba(0, 0, 0, 0.6);
+	}
+
+	&__list {
+		display: grid;
+		gap: 8px;
+		margin: 16px 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__item {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		grid-template-rows: auto auto;
+		column-gap: 12px;
+		align-items: center;
+		padding: 11px 14px 11px 16px;
+		background: #000000;
+		color: #ffffff;
+		text-decoration: none;
+		white-space: normal;
+		transition:
+			background-color 160ms ease,
+			color 160ms ease;
+		clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+
+		svg {
+			grid-row: 1 / span 2;
+			grid-column: 2;
+			width: 18px;
+			height: 18px;
+		}
+
+		&:hover,
+		&:focus-visible {
+			outline: none;
+			background: #d7ff3a;
+			color: #000000;
+
+			.gv-store-links__platform {
+				color: rgba(0, 0, 0, 0.65);
+			}
+		}
+	}
+
+	&__label {
+		font-family: 'Archivo', 'Poppins', sans-serif;
+		font-size: 0.9375rem;
+		font-weight: 700;
+		line-height: 1.2;
+	}
+
+	&__platform {
+		grid-row: 2;
+		font-family: 'JetBrains Mono', ui-monospace, monospace;
+		font-size: 0.6875rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: rgba(255, 255, 255, 0.65);
+	}
+}

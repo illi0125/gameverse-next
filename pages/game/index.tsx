@@ -1,9 +1,12 @@
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 import { NextPage } from 'next';
-import { Box, Button, Menu, MenuItem, Pagination, Stack, Typography } from '@mui/material';
-import GameCard from '../../libs/components/game/GameCard';
+import { Button, Menu, MenuItem, Pagination } from '@mui/material';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import CatalogCard from '../../libs/components/game/CatalogCard';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
+import withLayoutCatalog from '../../libs/components/layout/LayoutCatalog';
+import { MOTION_QUERY, gameCover } from '../../libs/components/homepage/homeMotion';
 import Filter from '../../libs/components/game/Filter';
 import { useRouter } from 'next/router';
 import { GameSearch, GamesInquiry } from '../../libs/types/game/game.input';
@@ -67,6 +70,7 @@ const GameList: NextPage = ({ initialInput, ...props }: any) => {
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const [sortingOpen, setSortingOpen] = useState(false);
+	const rootRef = useRef<HTMLDivElement>(null);
 
 	const filterSortName =
 		gameSortOptions.find((option) => option.sort === searchFilter.sort && option.direction === searchFilter.direction)
@@ -139,77 +143,193 @@ const GameList: NextPage = ({ initialInput, ...props }: any) => {
 		if (option) await pushInput({ ...searchFilter, page: 1, sort: option.sort, direction: option.direction as Direction });
 	};
 
-	if (device === 'mobile') {
-		return <h1>GAMES MOBILE</h1>;
-	} else {
-		return (
-			<div id="game-list-page" style={{ position: 'relative' }}>
-				<div className="container">
-					<Box component={'div'} className={'right'}>
-						<span>Sort by</span>
-						<div>
-							<Button onClick={sortingClickHandler} endIcon={<KeyboardArrowDownRoundedIcon />}>
-								{filterSortName}
-							</Button>
-							<Menu anchorEl={anchorEl} open={sortingOpen} onClose={sortingCloseHandler} sx={{ paddingTop: '5px' }}>
-								{gameSortOptions.map((option) => (
-									<MenuItem
-										onClick={sortingHandler}
-										id={option.id}
-										key={option.id}
-										disableRipple
-										sx={{ boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px' }}
-									>
-										{option.label}
-									</MenuItem>
-								))}
-							</Menu>
-						</div>
-					</Box>
-					<Stack className={'game-page'}>
-						<Stack className={'filter-config'}>
-							<Filter searchFilter={searchFilter} setSearchFilter={setSearchFilter} initialInput={initialInput} />
-						</Stack>
-						<Stack className="main-config" mb={'76px'}>
-							<Stack className={'list-config'}>
-								{games?.length === 0 ? (
-									<div className={'no-data'}>
-										<img src="/img/icons/icoAlert.svg" alt="" />
-										<p>No games found!</p>
-									</div>
-								) : (
-									games.map((game: Game) => {
-										return <GameCard game={game} likeGameHandler={likeGameHandler} key={game?._id} />;
-									})
-								)}
-							</Stack>
-							<Stack className="pagination-config">
-								{games.length !== 0 && (
-									<Stack className="pagination-box">
-										<Pagination
-											page={currentPage}
-											count={Math.ceil(total / searchFilter.limit)}
-											onChange={handlePaginationChange}
-											shape="circular"
-											color="primary"
-										/>
-									</Stack>
-								)}
+	/** PRESENTATION **/
+	const activeFilters = Object.values(searchFilter?.search ?? {}).filter(
+		(value: any) => value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0),
+	).length;
+	const firstShown = total ? (currentPage - 1) * searchFilter.limit + 1 : 0;
+	const lastShown = Math.min(currentPage * searchFilter.limit, total);
+	const showcase = games.filter((game: Game) => game?.gameImages?.length).slice(0, 3);
 
-								{games.length !== 0 && (
-									<Stack className="total-result">
-										<Typography>
-											Total {total} game{total > 1 ? 's' : ''} available
-										</Typography>
-									</Stack>
-								)}
-							</Stack>
-						</Stack>
-					</Stack>
+	useEffect(() => {
+		const root = rootRef.current;
+		if (!root) return;
+		gsap.registerPlugin(ScrollTrigger);
+
+		const mm = gsap.matchMedia();
+		mm.add(MOTION_QUERY, () => {
+			// The page's single load moment: headline lines rise out of their masks
+			gsap.from(root.querySelectorAll('.gv-cat-hero__word'), {
+				yPercent: 110,
+				duration: 0.9,
+				ease: 'power4.out',
+				stagger: 0.08,
+				delay: 0.1,
+			});
+			// The atmosphere drifts slowly as the hero scrolls away
+			gsap.to(root.querySelector('.gv-cat-hero__atmos'), {
+				scale: 1.12,
+				ease: 'none',
+				scrollTrigger: { trigger: root.querySelector('.gv-cat-hero'), start: 'top top', end: 'bottom top', scrub: 0.5 },
+			});
+		});
+
+		return () => mm.revert();
+	}, []);
+
+	return (
+		<div className="gv-catalog" ref={rootRef}>
+			<section className="gv-cat-hero" aria-labelledby="catalog-title">
+				<div className="gv-cat-hero__atmos" aria-hidden>
+					{showcase[0] ? (
+						<img key={showcase[0]._id} src={gameCover(showcase[0])} alt="" decoding="async" />
+					) : (
+						<img src="/img/gameverse/hero.svg" alt="" />
+					)}
+					<span className="gv-cat-hero__tint" />
+					<span className="gv-cat-hero__grain" />
 				</div>
-			</div>
-		);
-	}
+				<div className="gv-cat-hero__grid" aria-hidden>
+					<span className="gv-cat-hero__rule gv-cat-hero__rule--v" />
+					<span className="gv-cat-hero__rule gv-cat-hero__rule--h" />
+					<span className="gv-cat-hero__mark" />
+				</div>
+
+				<div className="gv-cat-hero__inner">
+					<p className="gv-chapter gv-chapter--dark" aria-hidden>
+						<span>00</span>Catalog
+					</p>
+					<h1 className="gv-cat-hero__title" id="catalog-title">
+						<span className="gv-cat-hero__line">
+							<span className="gv-cat-hero__mask">
+								<span className="gv-cat-hero__word">All</span>
+							</span>
+						</span>
+						<span className="gv-cat-hero__line gv-cat-hero__line--2">
+							<span className="gv-cat-hero__mask">
+								<span className="gv-cat-hero__word">games.</span>
+							</span>
+						</span>
+					</h1>
+					<p className="gv-cat-hero__lead">
+						Filter by platform, genre, mode and price, sort the results, and open any game for the full details.
+					</p>
+					<p className="gv-cat-hero__readout">
+						<span>{getGamesLoading && !games.length ? 'Loading games' : `${total} game${total === 1 ? '' : 's'} found`}</span>
+						<span>
+							{activeFilters} filter{activeFilters === 1 ? '' : 's'} active
+						</span>
+						<span>Sorted by {filterSortName}</span>
+					</p>
+				</div>
+
+				{showcase.length > 0 && (
+					<div className={`gv-cat-hero__stack has-${showcase.length}`} aria-hidden>
+						{showcase.map((game: Game) => (
+							<span className="gv-cat-hero__plate" key={game._id}>
+								<img src={gameCover(game)} alt="" decoding="async" />
+							</span>
+						))}
+					</div>
+				)}
+
+				<div className="gv-cat-hero__console">
+					<Filter searchFilter={searchFilter} setSearchFilter={setSearchFilter} initialInput={initialInput} part="search" />
+				</div>
+			</section>
+
+			<section className="gv-cat-results" aria-labelledby="results-title">
+				<div className="gv-cat-results__inner">
+					<aside className="gv-cat-results__filters" aria-label="Filters">
+						<details className="gv-cat-results__drawer" open={device !== 'mobile'}>
+							<summary className="gv-cat-results__summary">
+								Filters{activeFilters > 0 && <span className="gv-cat-results__count">{activeFilters}</span>}
+							</summary>
+							<Filter searchFilter={searchFilter} setSearchFilter={setSearchFilter} initialInput={initialInput} part="panel" />
+						</details>
+					</aside>
+
+					<div className="gv-cat-results__main">
+						<header className="gv-cat-results__head">
+							<div>
+								<p className="gv-chapter" aria-hidden>
+									<span>01</span>Results
+								</p>
+								<h2 className="gv-cat-results__title" id="results-title">
+									{total} game{total === 1 ? '' : 's'}
+								</h2>
+								<p className="gv-cat-results__range">
+									{total ? `Showing ${firstShown}–${lastShown} of ${total}` : 'Nothing to show yet'}
+								</p>
+							</div>
+							<div className="gv-cat-sort">
+								<span className="gv-cat-sort__label" id="sort-label">
+									Sort by
+								</span>
+								<Button
+									className="gv-cat-sort__button"
+									aria-describedby="sort-label"
+									onClick={sortingClickHandler}
+									endIcon={<KeyboardArrowDownRoundedIcon />}
+								>
+									{filterSortName}
+								</Button>
+								<Menu
+									anchorEl={anchorEl}
+									open={sortingOpen}
+									onClose={sortingCloseHandler}
+									className="gv-cat-sort__menu"
+									sx={{ paddingTop: '5px' }}
+								>
+									{gameSortOptions.map((option) => (
+										<MenuItem onClick={sortingHandler} id={option.id} key={option.id} disableRipple>
+											{option.label}
+										</MenuItem>
+									))}
+								</Menu>
+							</div>
+						</header>
+
+						{games?.length === 0 ? (
+							<div className="gv-cat-empty">
+								<p className="gv-cat-empty__title">{getGamesLoading ? 'Loading games…' : 'No games match these filters.'}</p>
+								{!getGamesLoading && (
+									<button type="button" className="gv-cat-empty__reset" onClick={() => pushInput(initialInput)}>
+										Reset all filters
+									</button>
+								)}
+							</div>
+						) : (
+							<ul className="gv-cat-grid" aria-label="Games">
+								{games.map((game: Game, index: number) => {
+									const feature = index === 0 && currentPage === 1 && games.length >= 3;
+									return (
+										<li className={feature ? 'is-feature' : ''} key={game?._id}>
+											<CatalogCard game={game} likeGameHandler={likeGameHandler} feature={feature} />
+										</li>
+									);
+								})}
+							</ul>
+						)}
+
+						{games.length !== 0 && (
+							<nav className="gv-cat-pagination" aria-label="Pages">
+								<Pagination
+									page={currentPage}
+									count={Math.ceil(total / searchFilter.limit)}
+									onChange={handlePaginationChange}
+									shape="rounded"
+								/>
+								<p className="gv-cat-pagination__total">
+									Total {total} game{total > 1 ? 's' : ''} available
+								</p>
+							</nav>
+						)}
+					</div>
+				</div>
+			</section>
+		</div>
+	);
 };
 
 GameList.defaultProps = {
@@ -222,4 +342,4 @@ GameList.defaultProps = {
 	},
 };
 
-export default withLayoutBasic(GameList);
+export default withLayoutCatalog(GameList);
