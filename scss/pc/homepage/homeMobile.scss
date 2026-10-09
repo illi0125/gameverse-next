@@ -1,0 +1,949 @@
+/** HOMEPAGE — MOBILE ADAPTATION **/
+/*
+ * Phones, narrow windows and short landscape screens. Every rule sits behind a narrow, short or
+ * touch-only query, so the desktop compositions in homepage.scss stay exactly as they are.
+ * Breakpoints: narrow = below the 900px scene breakpoint; short = phone landscape.
+ */
+
+$gv-narrow: '(max-width: 899px)';
+$gv-short: '(max-width: 932px) and (max-height: 520px) and (orientation: landscape)';
+
+/** SHELL — readable HUD text, 44px touch targets **/
+
+@media #{$gv-narrow} {
+	/* Mono HUD labels never drop below 12px on small screens */
+	.gv-home {
+		.gv-hero__caption-index,
+		.gv-hero__caption-kicker,
+		.gv-hero__caption-meta,
+		.gv-hero__prompt,
+		.gv-plate__count-label,
+		.gv-plate__index,
+		.gv-plate__flag,
+		.gv-plate__meta,
+		.gv-fan-card__flag,
+		.gv-fan-card__meta,
+		.gv-board__meta,
+		.gv-agent-tile__role,
+		.gv-comms__board span,
+		.gv-news-plate__rank,
+		.gv-news-plate__meta,
+		.gv-log-entry__time,
+		.gv-log-entry__meta,
+		.gv-world-plate__index {
+			font-size: 0.75rem;
+		}
+	}
+
+	#pc-wrap.gv-home-shell #footer .footer-container {
+		.main .left .footer-box span,
+		.second span {
+			font-size: 12px;
+		}
+
+		/* Footer links: full 44px rows instead of 18px text */
+		.main .right .bottom div a,
+		.main .right .bottom div > span {
+			display: block;
+			margin-top: 4px;
+			padding-block: 13px;
+		}
+
+		.main .right .top div input {
+			min-height: 44px;
+		}
+	}
+
+	.gv-home .gv-promo__all {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+	.gv-home .gv-plate__like,
+	.gv-home .gv-board__like,
+	.gv-home .gv-board__like.is-compact {
+		height: 44px;
+		min-width: 52px;
+		justify-content: center;
+	}
+
+	.gv-home .gv-board__row-title {
+		display: block;
+		padding-block: 15px;
+	}
+
+	.gv-home .gv-comms__board a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+
+	.gv-home .gv-hero__console .filter-rooms button {
+		height: 44px;
+	}
+
+	/* 05: the indented second line must fit a 360px screen */
+	.gv-home .gv-comms__title {
+		font-size: clamp(2.5rem, 12.2vw, 6rem);
+	}
+
+	.gv-home .gv-comms__title-line--2 {
+		margin-left: 10%;
+	}
+}
+
+/** TOUCH — hover states would stick after a tap; a press state replaces them **/
+
+@media (hover: none) {
+	.gv-home {
+		.gv-cta--solid:hover:not(:focus-visible) {
+			background: #ffffff;
+		}
+
+		.gv-cta--line:hover:not(:focus-visible)::before {
+			background: rgba(10, 6, 28, 0.78);
+		}
+
+		.gv-ink-cta:hover:not(:focus-visible) {
+			background: transparent;
+			color: var(--gv-ink);
+		}
+
+		.gv-ink-cta--solid:hover:not(:focus-visible) {
+			background: var(--gv-ink);
+			color: #ffffff;
+		}
+
+		.gv-hero__console .select-box .box:not(.on):hover,
+		.gv-hero__console .advanced-filter:hover {
+			background: transparent;
+		}
+
+		.gv-hero__console .search-btn:hover:not(:focus-visible) {
+			background: var(--gv-signal);
+		}
+
+		.gv-hero__console .filter-rooms button:hover {
+			border-color: var(--gv-hair);
+			color: #ffffff;
+		}
+
+		.gv-promo__track a:hover:not(:focus-visible) {
+			color: #ffffff;
+			-webkit-text-stroke-color: rgba(255, 255, 255, 0.72);
+		}
+
+		.gv-promo__track .is-outline a:hover:not(:focus-visible) {
+			color: transparent;
+		}
+
+		.gv-plate__like:hover:not(:focus-visible) {
+			background: var(--gv-ink);
+			color: #ffffff;
+		}
+
+		.gv-board__like:hover:not(:focus-visible) {
+			background: #ffffff;
+			color: var(--gv-ink);
+		}
+
+		.gv-board__like.is-compact:hover:not(:focus-visible) {
+			background: rgba(255, 255, 255, 0.12);
+			color: #ffffff;
+		}
+
+		.gv-fan-card:hover:not(:focus-visible) .gv-fan-card__art {
+			transform: none;
+		}
+
+		.gv-agent-tile:not(.is-active):hover .gv-agent-tile__portrait img {
+			filter: grayscale(1) contrast(1.05);
+		}
+
+		.gv-log-entry:hover {
+			background: transparent;
+		}
+
+		/* Press feedback */
+		.gv-fan-card:active .gv-fan-card__art,
+		.gv-agent-tile:active .gv-agent-tile__portrait,
+		.gv-news-plate:active .gv-news-plate__art {
+			transform: scale(0.97);
+			transition-duration: 120ms;
+		}
+
+		.gv-log-entry:active {
+			background: rgba(0, 0, 0, 0.06);
+		}
+	}
+}
+
+/** 00 TITLE SCREEN — headline first, then the art, then the copy and the console **/
+
+/* Cover ticks are a narrow-screen control; desktop advances covers with the scroll */
+.gv-home .gv-hero__ticks {
+	display: none;
+}
+
+@media #{$gv-narrow} {
+	/* The open filter menu drops below the console, over the banner */
+	.gv-home .gv-hero {
+		z-index: 2;
+
+		/* No cartridge exit here, so the stage needs no clipping; the art layer clips itself instead,
+		   which also stops focus inside a menu from scrolling the artwork */
+		&__stage {
+			gap: 22px;
+			padding: calc(64px + 22px) var(--gv-gutter) 28px;
+			overflow: visible;
+			clip-path: none;
+		}
+
+		&__atmos {
+			overflow: hidden;
+		}
+
+		&__grid {
+			inset: 8px;
+		}
+
+		/* The under-header hairline follows the 64px header */
+		&__rule--h1 {
+			display: block;
+			top: calc(64px - 8px);
+		}
+
+		&__title {
+			order: 1;
+			padding-top: 0;
+			font-size: min(15.5vw, 11vh);
+		}
+
+		&__line--1 {
+			margin-left: 4%;
+		}
+
+		&__line--2 {
+			margin-left: 14%;
+		}
+
+		&__plate {
+			order: 2;
+		}
+
+		&__plate-art {
+			aspect-ratio: 4 / 3;
+			max-height: 46vh;
+			max-height: 46svh;
+		}
+
+		&__caption {
+			margin-top: -40px;
+			margin-left: 14px;
+			min-width: 0;
+			max-width: calc(100% - 28px);
+			padding: 14px 16px 0;
+		}
+
+		&__intro {
+			order: 3;
+			max-width: none;
+		}
+
+		&__lead {
+			max-width: 46ch;
+		}
+
+		&__actions {
+			margin-top: 18px;
+
+			.gv-cta {
+				flex: 1 1 auto;
+				padding-inline: 14px;
+			}
+		}
+
+		&__console {
+			order: 4;
+		}
+
+		/* Cover ticks: one per slide; the active one fills while the timer runs */
+		&__ticks {
+			display: flex;
+			gap: 6px;
+			margin-top: 6px;
+		}
+
+		&__tick {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			min-width: 44px;
+			height: 44px;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			cursor: pointer;
+
+			span {
+				position: relative;
+				flex: 1;
+				height: 2px;
+				overflow: hidden;
+				background: rgba(255, 255, 255, 0.24);
+
+				&::after {
+					content: '';
+					position: absolute;
+					inset: 0;
+					background: var(--gv-signal);
+					transform: scaleX(0);
+					transform-origin: left;
+				}
+			}
+
+			&.is-active span::after {
+				transform: none;
+			}
+
+			&:focus-visible {
+				outline: 2px solid var(--gv-signal);
+				outline-offset: 2px;
+			}
+		}
+	}
+
+	.gv-home .gv-hero-chapter.is-playing .gv-hero__tick.is-active span::after {
+		animation: gv-hero-tick 5s linear both;
+	}
+
+	/* Console: Platform · Genre / Pricing · Advanced, then a full-width search bar */
+	.gv-home .gv-hero__console {
+		.search-box {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.select-box,
+		.search-box-other {
+			display: contents;
+		}
+
+		.select-box .box,
+		.advanced-filter {
+			height: 56px;
+			padding-inline: 16px;
+			border-right: 1px solid var(--gv-hair);
+			border-bottom: 1px solid var(--gv-hair);
+		}
+
+		.select-box .box:nth-child(2),
+		.advanced-filter {
+			border-right: 0;
+		}
+
+		.search-btn {
+			grid-column: 1 / -1;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			width: auto;
+			height: 52px;
+
+			&::after {
+				content: 'Search';
+				font-family: var(--gv-mono);
+				font-size: 0.75rem;
+				font-weight: 500;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: #000000;
+			}
+		}
+
+		/* Menus open downward under the console on small screens */
+		.filter-rooms {
+			top: calc(100% + 8px);
+			bottom: auto;
+			background: #06030f;
+			transform: translateY(-6px);
+
+			&.on {
+				transform: none;
+			}
+		}
+	}
+
+	/* Advanced search modal: fluid, scrollable sheet instead of a fixed 662px dialog (portalled, so scoped by the modal root) */
+	.MuiModal-root .advanced-filter-modal {
+		box-sizing: border-box;
+		width: calc(100vw - 32px);
+		max-height: calc(100vh - 32px);
+		max-height: calc(100svh - 32px);
+		padding: 24px 16px 18px;
+		overflow-y: auto;
+
+		.close {
+			top: 12px;
+			right: 8px;
+			width: 44px;
+			height: 44px;
+		}
+
+		.top,
+		.middle,
+		.bottom {
+			box-sizing: border-box;
+			width: 100%;
+		}
+
+		.top {
+			padding-right: 44px;
+		}
+
+		.middle .row-box {
+			flex-direction: column;
+			gap: 28px;
+
+			&[style] {
+				margin-top: 28px !important;
+			}
+
+			.box {
+				width: 100%;
+			}
+
+			.inside .MuiFormControl-root {
+				flex: 1;
+				width: auto !important;
+			}
+
+			.inside .minus-line {
+				margin-inline: 10px;
+			}
+		}
+
+		.bottom {
+			align-items: center;
+			gap: 16px;
+
+			div {
+				min-height: 44px;
+			}
+
+			button {
+				flex: 1;
+				max-width: 185px;
+				height: 48px;
+			}
+		}
+	}
+}
+
+@keyframes gv-hero-tick {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: none;
+	}
+}
+
+/* Phone landscape: headline and copy on the left, the art on the right */
+@media #{$gv-short} {
+	.gv-home .gv-hero {
+		&__stage {
+			display: grid;
+			grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+			align-items: start;
+			column-gap: 28px;
+			row-gap: 18px;
+		}
+
+		&__title {
+			grid-column: 1;
+			grid-row: 1;
+			font-size: min(8vw, 16vh);
+		}
+
+		&__plate {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+		}
+
+		&__plate-art {
+			max-height: none;
+		}
+
+		&__intro {
+			grid-column: 1;
+			grid-row: 2;
+		}
+
+		&__console {
+			grid-column: 1 / -1;
+			grid-row: 3;
+		}
+	}
+
+	.gv-home .gv-hero__console .search-box {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+
+	.gv-home .gv-hero__console .select-box .box:nth-child(2) {
+		border-right: 1px solid var(--gv-hair);
+	}
+}
+
+/** BANNER — the 3D shelf becomes a drifting strip of cut-corner tiles (HomeShelf) **/
+
+.gv-home .gv-shelf-strip {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	overflow: hidden;
+
+	&__track {
+		display: flex;
+		align-items: center;
+		width: max-content;
+		height: 100%;
+		animation: gv-shelf-drift 60s linear infinite;
+	}
+
+	&__tile {
+		flex: none;
+		height: 66%;
+		aspect-ratio: 3 / 4;
+		margin-right: 14px;
+		overflow: hidden;
+		background: #120a33;
+		@include gv-cut(12px, 50%);
+
+		&:nth-child(even) {
+			height: 54%;
+			transform: translateY(10%);
+		}
+
+		&:nth-child(3n) {
+			aspect-ratio: 1 / 1;
+		}
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+}
+
+@keyframes gv-shelf-drift {
+	to {
+		transform: translateX(-50%);
+	}
+}
+
+@media #{$gv-narrow} {
+	.gv-home .gv-promo__shelf {
+		height: clamp(200px, 56vw, 300px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-home .gv-shelf-strip__track {
+		animation: none;
+	}
+}
+
+/** 01 TRENDING — swipe rail; the like counter moves onto the cover **/
+
+.gv-home .gv-trend__progress-label--swipe {
+	display: none;
+}
+
+@media #{$gv-narrow} {
+	.gv-home .gv-trend {
+		.gv-rail {
+			grid-auto-columns: min(82vw, 380px);
+			gap: 18px;
+		}
+
+		/* Position indicator under the rail */
+		&__progress {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			margin-top: 8px;
+			padding-inline: var(--gv-gutter);
+			font-family: var(--gv-mono);
+			font-size: 0.75rem;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--gv-muted);
+		}
+
+		&__progress-label--scroll {
+			display: none;
+		}
+
+		&__progress-label--swipe {
+			display: inline;
+		}
+
+		&__progress-rail {
+			position: relative;
+			flex: 1;
+			height: 1px;
+			background: var(--gv-rule);
+		}
+
+		&__progress-bar {
+			position: absolute;
+			inset: -1px 0;
+			background: var(--gv-ink);
+			transform-origin: left;
+		}
+	}
+
+	/* The rotated counter sits on the cover's right edge, so it no longer peeks in from the next plate */
+	.gv-home .gv-trend .gv-plate {
+		&__art {
+			aspect-ratio: 1 / 1;
+		}
+
+		&__count {
+			position: absolute;
+			z-index: 2;
+			top: 36px;
+			right: 0;
+			gap: 8px;
+			padding: 10px 7px;
+			background: var(--gv-ink);
+			color: #ffffff;
+			pointer-events: none;
+		}
+
+		&__count-num {
+			font-size: 1.75rem;
+		}
+
+		&__count-label {
+			color: rgba(255, 255, 255, 0.7);
+		}
+	}
+}
+
+/** 02 COLLECTION — count on one line, the deal-in runs once (PopularGames) **/
+
+@media #{$gv-narrow} {
+	.gv-home .gv-collection {
+		&__count {
+			align-items: center;
+		}
+
+		&__count-label {
+			max-width: 14ch;
+			padding-bottom: 0;
+		}
+
+		&__desc {
+			margin-top: 14px;
+		}
+	}
+
+	.gv-home .gv-fan__item {
+		width: min(60vw, 240px);
+	}
+}
+
+/** 03 LEADERBOARD — spotlight and ranks on one screen; a tap on a rank picks the spotlight (TopGames) **/
+
+@media #{$gv-narrow} {
+	.gv-home .gv-board {
+		&__scene {
+			flex-wrap: nowrap;
+			align-items: flex-end;
+			gap: 14px;
+			margin-top: 28px;
+		}
+
+		&__numeral {
+			flex: none;
+			font-size: clamp(84px, 26vw, 150px);
+		}
+
+		&__detail {
+			flex: 1;
+			min-width: 0;
+			padding-bottom: 4px;
+		}
+
+		&__title {
+			font-size: clamp(1.375rem, 6.4vw, 2.25rem);
+			overflow-wrap: anywhere;
+
+			a {
+				display: inline-block;
+				margin-block: -6px;
+				padding-block: 12px;
+			}
+		}
+
+		&__meta {
+			margin-top: 8px;
+		}
+
+		&__foot {
+			flex-wrap: wrap;
+			gap: 10px 14px;
+			margin-top: 12px;
+			padding-top: 10px;
+		}
+
+		&__list {
+			margin-top: 24px;
+
+			li {
+				padding: 0 0 0 0;
+				column-gap: 12px;
+			}
+		}
+
+		/* Rank + thumbnail form one button on narrow screens */
+		&__row-pick {
+			grid-column: span 2;
+			display: grid;
+			grid-template-columns: 34px 56px;
+			align-items: center;
+			gap: 12px;
+			min-height: 56px;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			color: inherit;
+			text-align: left;
+			cursor: pointer;
+
+			&:focus-visible {
+				outline: 2px solid var(--gv-signal);
+				outline-offset: -2px;
+			}
+
+			&:active .gv-board__row-thumb {
+				transform: scale(0.94);
+			}
+		}
+
+		&__row-thumb {
+			transition: transform 140ms var(--gv-ease);
+		}
+
+		&__list li > .gv-board__like {
+			margin-right: 8px;
+		}
+	}
+}
+
+/* The assemble moment: scattered covers converge once (TopGames, motion allowed only) */
+@media (max-width: 899px) and (prefers-reduced-motion: no-preference) {
+	.gv-home .gv-board__tiles {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: block;
+		pointer-events: none;
+	}
+
+	.gv-home .gv-board__tile {
+		position: absolute;
+		width: 22vw;
+		aspect-ratio: 3 / 4;
+		margin: -14vw 0 0 -11vw;
+		overflow: hidden;
+		visibility: hidden;
+		@include gv-cut(10px, 50%);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+}
+
+/** 04 CHARACTER SELECT — portrait rail; the centred portrait is the selected one (TopAgents) **/
+
+@media #{$gv-narrow} {
+	.gv-home .gv-roster {
+		&__word {
+			margin-top: 20px;
+		}
+
+		&__stage {
+			gap: 24px;
+			margin-top: 12px;
+		}
+
+		&__selected {
+			padding-top: 0;
+		}
+
+		&__selected-stats {
+			margin-bottom: 18px;
+		}
+
+		&__grid {
+			display: flex;
+			gap: 16px;
+			margin-inline: calc(-1 * var(--gv-gutter));
+			padding: 12px calc(50vw - 22vw) 8px;
+			overflow-x: auto;
+			overscroll-behavior-x: contain;
+			scroll-snap-type: x mandatory;
+			scrollbar-width: none;
+
+			&::-webkit-scrollbar {
+				display: none;
+			}
+		}
+
+		&__item {
+			flex: none;
+			width: 44vw;
+			max-width: 260px;
+			scroll-snap-align: center;
+		}
+	}
+}
+
+@media #{$gv-short} {
+	.gv-home .gv-roster__item {
+		width: 26vw;
+	}
+
+	.gv-home .gv-roster__grid {
+		padding-inline: calc(50vw - 13vw);
+	}
+}
+
+/** 05 COMMS — the free-board date joins the meta, so titles get the full width **/
+
+@media #{$gv-narrow} {
+	.gv-home .gv-comms__news-list {
+		gap: 36px 16px;
+	}
+
+	.gv-home .gv-log-entry {
+		grid-template-columns: 64px minmax(0, 1fr);
+		grid-template-areas:
+			'thumb text'
+			'thumb time';
+		align-items: start;
+		row-gap: 6px;
+
+		&__thumb {
+			grid-area: thumb;
+		}
+
+		&__text {
+			grid-area: text;
+		}
+
+		&__time {
+			grid-area: time;
+			color: rgba(0, 0, 0, 0.65);
+		}
+	}
+}
+
+/** 06 WORLD MAP — the event plates become a swipe rail (Events) **/
+
+.gv-home .gv-world__controls {
+	display: none;
+}
+
+@media #{$gv-narrow} {
+	.gv-home .gv-world {
+		&__controls {
+			display: block;
+			margin-top: 4px;
+		}
+
+		&__list {
+			display: flex;
+			gap: 18px;
+			margin-inline: calc(-1 * var(--gv-gutter));
+			padding: 0 var(--gv-gutter) 12px;
+			overflow-x: auto;
+			overscroll-behavior-x: contain;
+			scroll-snap-type: x mandatory;
+			scroll-padding-inline: var(--gv-gutter);
+			scrollbar-width: none;
+
+			&::-webkit-scrollbar {
+				display: none;
+			}
+
+			> li {
+				flex: none;
+				width: min(84vw, 440px);
+				scroll-snap-align: start;
+			}
+		}
+	}
+
+	.gv-home .gv-world-plate {
+		gap: 14px;
+
+		&__where {
+			display: table;
+			margin-bottom: 10px;
+		}
+
+		&__where + &__title::before {
+			display: none;
+		}
+
+		&__title {
+			font-size: clamp(1.75rem, 8.4vw, 2.75rem);
+		}
+
+		&__desc,
+		&.is-right .gv-world-plate__desc {
+			margin-top: 8px;
+			padding: 4px 0 0;
+		}
+	}
+}
+
+@media #{$gv-short} {
+	.gv-home .gv-world__list > li {
+		width: min(52vw, 440px);
+	}
+}
+
+/* Rail arrows (Trending, Events): square, chapter ink, no legacy radius */
+@media #{$gv-narrow} {
+	.gv-home .gv-rail-controls .gv-icon-btn {
+		border-radius: 0;
+		border-color: var(--gv-rule, rgba(0, 0, 0, 0.14));
+		color: var(--gv-ink);
+
+		&:disabled {
+			opacity: 0.35;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-ink);
+			outline-offset: 2px;
+		}
+
+		&:active:not(:disabled) {
+			transform: scale(0.94);
+		}
+	}
+}

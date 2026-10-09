@@ -551,6 +551,37 @@
 	}
 }
 
+/* Phone landscape: a labelled launcher would cover a third of the screen height's content */
+@media (max-width: 932px) and (max-height: 520px) and (orientation: landscape) {
+	.gv-chat .gv-chat__launcher {
+		width: 52px;
+		padding: 0;
+		justify-content: center;
+	}
+
+	.gv-chat .gv-chat__launcher-label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+}
+
+/* Touch: the hover fill would stick after a tap */
+@media (hover: none) {
+	.gv-chat:not(.is-open) .gv-chat__launcher:hover:not(:focus-visible) {
+		background: var(--gv-ink);
+		border-color: var(--gv-ink);
+	}
+
+	.gv-chat.is-open .gv-chat__launcher:hover:not(:focus-visible) {
+		background: #ffffff;
+		border-color: var(--gv-ink);
+	}
+}
+
 @media (max-height: 520px) {
 	.gv-chat .gv-chat__window {
 		height: calc(100vh - 52px - 2 * var(--gv-chat-gap) - 24px);

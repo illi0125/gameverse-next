@@ -189,6 +189,21 @@ Rules:
 
 Fallbacks: below 900px wide, below 560px tall, or with reduced motion, there's no pinning. Stages become normal flow, tracks become scroll-snap rails (`useHomeRail` with arrow controls), fans become snap rows, and hero covers auto-advance every 5s (narrow screens, motion allowed).
 
+**Mobile homepage** (`scss/pc/homepage/homeMobile.scss`, imported after `homepage.scss`; every rule is behind `$gv-narrow` = `max-width: 899px`, `$gv-short` = phone landscape `max-width: 932px and max-height: 520px`, or `hover: none`, so desktop compositions are untouched):
+
+| Chapter | Phone composition | Touch / motion |
+| --- | --- | --- |
+| 00 Title | Headline first (`min(15.5vw, 11vh)`), then the 4:3 cut plate with its caption, then lead + both CTAs on one row, then the console as a 2×2 grid (Platform · Genre / Pricing · Advanced) with a full-width Signal **Search** bar; menus drop below the console. Landscape: headline + copy left, plate right | Cover ticks in the caption (`.gv-hero__tick`, buttons, `aria-pressed`): tap to show a cover; the active tick fills over 5s. The timer restarts on every change and pauses while the stage is off screen |
+| Banner | The 3D shelf is replaced by a drifting strip of the same cut-corner tiles (`HomeShelf`: `max-width: 899px` or `hover: none`); three.js loads only where the 3D shelf shows | CSS loop, 60s; off with reduced motion |
+| 01 Trending | Snap rail, 82vw square-cover plates; the rotated like counter becomes an ink tab on the cover's right edge | "Swipe" bar under the rail shows how much of the row has been seen |
+| 02 Collection | Count and label on one line, snap row of 60vw cards | Once: cards deal out of a stack (0.8s); the count ticks up when it appears |
+| 03 Leaderboard | Numeral beside the detail, ranked list right under it (both fit about one screen) | Rank + thumbnail is a button (`.gv-board__row-pick`) that picks the spotlight; the title stays the link. Once: scattered covers converge (motion allowed only) |
+| 04 Character select | Readout above a centre-snapping portrait rail (44vw, 26vw landscape) | The centred portrait is the selected one (IntersectionObserver on the rail); tap opens the profile |
+| 05 Comms | 2-column news plates; the free-board date joins the meta line | Once: news plates land tilted and settle |
+| 06 World map | Snap rail of 84vw plates, location chip above the title, arrow controls in the head | — |
+
+Rules for phones: touch targets ≥ 44px; mono HUD text ≥ 12px; under `hover: none` hover fills and lifts are reset and `:active` press states (scale `.94–.97`) replace them; at most one short, unpinned, never-scrubbed moment per chapter (`MOBILE_MOTION_QUERY` in `homeMotion.ts`), triggered `once`; `ScrollTrigger.config({ ignoreMobileResize: true })`; the credits loop pauses off screen.
+
 After data loads, call `ScrollTrigger.refresh()` and depend effects on list length (`[items.length]`). Pages with scenes should use the `useHomeScrollMemory` pattern so Back restores the position.
 
 ## 9. Responsive
@@ -201,9 +216,9 @@ After data loads, call `ScrollTrigger.refresh()` and depend effects on list leng
 | `≥ 1200` | Chapter index visible |
 | `≥ 1280` | Agents grid 5 columns |
 
-- `useDeviceDetect()` returns `mobile` by user agent: the mobile layout (`#mobile-wrap`) renders a subset of chapters. Narrow **desktop** windows use the CSS fallbacks above. Design both.
+- The homepage no longer branches on `useDeviceDetect()`: phones and narrow desktop windows get the same `#pc-wrap` markup and the mobile rules above.
 - Guard horizontal overflow: giant words and marquees live inside `overflow: hidden` chapters, and fixed-width legacy containers must shrink (see the `#mobile-wrap.gv-home-shell #footer .footer-container` fix).
-- Test at 1440×900, 820px desktop and 390px mobile UA. `document.documentElement.scrollWidth` must equal the viewport width.
+- Test at 1440×900, 1280×800, 820px desktop and 360 / 390 / 430px mobile UA plus 844×390 landscape. `document.documentElement.scrollWidth` must equal the viewport width.
 
 ## 10. Accessibility
 

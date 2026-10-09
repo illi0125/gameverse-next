@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { Game } from '../../types/game/game';
 import { GamesInquiry } from '../../types/game/game.input';
 import TrendPlate from './TrendPlate';
@@ -20,7 +19,6 @@ interface TrendGamesProps {
 
 const TrendGames = (props: TrendGamesProps) => {
 	const { initialInput } = props;
-	const device = useDeviceDetect();
 	const [trendGames, setTrendGames] = useState<Game[]>([]);
 	const rail = useHomeRail(trendGames.length);
 	const rootRef = useRef<HTMLElement>(null);
@@ -116,6 +114,24 @@ const TrendGames = (props: TrendGamesProps) => {
 			};
 		});
 
+		mm.add('(max-width: 899px)', () => {
+			// Swipe rail: the bar shows how much of the row has been seen
+			const track = rail.trackRef.current;
+			const bar = root.querySelector<HTMLElement>('.gv-trend__progress-bar');
+			if (!track || !bar) return;
+			const update = () => {
+				const seen = track.scrollWidth > 0 ? (track.scrollLeft + track.clientWidth) / track.scrollWidth : 1;
+				gsap.set(bar, { scaleX: Math.min(1, seen) });
+			};
+			update();
+			track.addEventListener('scroll', update, { passive: true });
+			window.addEventListener('resize', update);
+			return () => {
+				track.removeEventListener('scroll', update);
+				window.removeEventListener('resize', update);
+			};
+		});
+
 		return () => mm.revert();
 	}, [trendGames.length]);
 
@@ -149,7 +165,7 @@ const TrendGames = (props: TrendGamesProps) => {
 							</Link>
 						</p>
 					) : (
-						<RailTrack rail={rail} label="Trending games" itemClassName={device === 'mobile' ? 'is-compact' : ''}>
+						<RailTrack rail={rail} label="Trending games">
 							{trendGames.map((game: Game, index: number) => (
 								<TrendPlate key={game._id} game={game} index={index} likeGameHandler={likeGameHandler} />
 							))}
@@ -158,7 +174,8 @@ const TrendGames = (props: TrendGamesProps) => {
 				</div>
 
 				<div className="gv-trend__progress" aria-hidden>
-					<span className="gv-trend__progress-label">Keep scrolling</span>
+					<span className="gv-trend__progress-label gv-trend__progress-label--scroll">Keep scrolling</span>
+					<span className="gv-trend__progress-label gv-trend__progress-label--swipe">Swipe</span>
 					<span className="gv-trend__progress-rail">
 						<span className="gv-trend__progress-bar" />
 					</span>

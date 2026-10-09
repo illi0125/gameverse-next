@@ -8,7 +8,7 @@ import { GamesInquiry } from '../../types/game/game.input';
 import { useQuery } from '@apollo/client';
 import { GET_GAMES } from '../../../apollo/user/query';
 import { T } from '../../types/common';
-import { SCENE_QUERY, pad } from './homeMotion';
+import { MOBILE_MOTION_QUERY, SCENE_QUERY, pad } from './homeMotion';
 
 /** Fan order: the most viewed game in the centre, then alternating left and right **/
 const fanPosition = (index: number) => (index === 0 ? 0 : index % 2 ? -(index + 1) / 2 : index / 2);
@@ -95,6 +95,46 @@ const PopularGames = (props: PopularGamesProps) => {
 
 			return () => {
 				if (counter) counter.textContent = pad(Number(counter.dataset.total) || 0);
+			};
+		});
+
+		mm.add(MOBILE_MOTION_QUERY, () => {
+			// Narrow screens: once, the stack deals out into the row while the count ticks up
+			const list = root.querySelector<HTMLElement>('.gv-fan');
+			const cards = root.querySelectorAll<HTMLElement>('.gv-fan__item');
+			const counter = root.querySelector<HTMLElement>('.gv-collection__count-num');
+			if (!list) return;
+			const odometer = { value: 0 };
+			const total = Number(counter?.dataset.total) || 0;
+
+			gsap.from(cards, {
+				xPercent: (index: number) => -100 * index,
+				x: (index: number) => index * 6,
+				rotation: (index: number) => (index % 2 ? 3 : -3),
+				duration: 0.8,
+				ease: 'power3.out',
+				stagger: 0.03,
+				scrollTrigger: { trigger: list, start: 'top 85%', once: true },
+			});
+
+			// The count has its own trigger: it ticks up the moment it appears, never sits at 00
+			if (counter) {
+				gsap.to(odometer, {
+					value: total,
+					duration: 0.7,
+					ease: 'power2.out',
+					onStart: () => {
+						counter.textContent = pad(0);
+					},
+					onUpdate: () => {
+						counter.textContent = pad(Math.round(odometer.value));
+					},
+					scrollTrigger: { trigger: counter, start: 'top 92%', once: true },
+				});
+			}
+
+			return () => {
+				if (counter) counter.textContent = pad(total);
 			};
 		});
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useMediaQuery } from '@mui/material';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
@@ -15,7 +16,7 @@ import { Message } from '../../enums/common.enum';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import { userVar } from '../../../apollo/store';
 import { formatEnumLabel, formatGameOriginalPrice, formatGamePrice, hasGameDiscount } from '../../utils';
-import { SCENE_QUERY, gameCover, gameDetailHref, pad } from './homeMotion';
+import { MOBILE_MOTION_QUERY, SCENE_QUERY, gameCover, gameDetailHref, pad } from './homeMotion';
 
 /** Where the cover tiles start before they converge into the first rank (percent of the stage) **/
 const tileScatter = [
@@ -56,6 +57,9 @@ const TopGames = (props: TopGamesProps) => {
 	const [topGames, setTopGames] = useState<Game[]>([]);
 	const [active, setActive] = useState(0);
 	const rootRef = useRef<HTMLElement>(null);
+	const sceneRef = useRef<HTMLDivElement>(null);
+	/** Without the scroll scene, a tap on a row's rank picks the spotlight **/
+	const pickable = useMediaQuery('(max-width: 899px)');
 
 	/** APOLLO REQUESTS **/
 	const [likeTargetGame] = useMutation(LIKE_TARGET_GAME);
@@ -89,6 +93,18 @@ const TopGames = (props: TopGamesProps) => {
 	};
 
 	const current = topGames[Math.min(active, topGames.length - 1)];
+
+	const pickHandler = (index: number) => {
+		setActive(index);
+		// Bring the spotlight back into view if the list has scrolled it away
+		const scene = sceneRef.current;
+		const headerClearance = 80;
+		const top = scene?.getBoundingClientRect().top ?? 0;
+		if (scene && top < headerClearance) {
+			const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			window.scrollTo({ top: window.scrollY + top - headerClearance, behavior: reduceMotion ? 'auto' : 'smooth' });
+		}
+	};
 
 	/** LIFECYCLES **/
 	useEffect(() => {
@@ -129,6 +145,29 @@ const TopGames = (props: TopGamesProps) => {
 				.to(q('.gv-board__frame'), { scale: 0.62, rotation: 4, yPercent: -8, '--gv-stage-cut': '56px', duration: 0.1, ease: 'power2.in' }, 0.9);
 
 			return () => setActive(0);
+		});
+
+		mm.add(MOBILE_MOTION_QUERY, () => {
+			// Narrow screens: once, the scattered covers converge into the spotlight as the chapter arrives
+			gsap.fromTo(
+				root.querySelectorAll('.gv-board__tile'),
+				{
+					left: (index: number) => `${tileScatter[index % tileScatter.length][0]}%`,
+					top: (index: number) => `${tileScatter[index % tileScatter.length][1] * 0.6}%`,
+					scale: 1,
+					autoAlpha: 1,
+				},
+				{
+					left: '30%',
+					top: '34%',
+					scale: 2.2,
+					autoAlpha: 0,
+					duration: 0.9,
+					ease: 'power2.in',
+					stagger: 0.04,
+					scrollTrigger: { trigger: root, start: 'top 70%', once: true },
+				},
+			);
 		});
 
 		return () => mm.revert();
@@ -177,7 +216,7 @@ const TopGames = (props: TopGamesProps) => {
 					) : (
 						<>
 							{current && (
-								<div className="gv-board__scene">
+								<div className="gv-board__scene" ref={sceneRef}>
 									<span className="gv-board__numeral" key={`n-${active}`} aria-hidden>
 										{pad(active + 1)}
 									</span>
@@ -211,12 +250,29 @@ const TopGames = (props: TopGamesProps) => {
 							<ol className="gv-board__list" aria-label="Top ranked games">
 								{topGames.map((game: Game, index: number) => (
 									<li key={game._id} className={index === active ? 'is-active' : ''}>
-										<span className="gv-board__row-rank" aria-hidden>
-											{pad(index + 1)}
-										</span>
-										<span className="gv-board__row-thumb" aria-hidden>
-											<img src={gameCover(game)} alt="" loading="lazy" decoding="async" />
-										</span>
+										{pickable ? (
+											<button
+												type="button"
+												className="gv-board__row-pick"
+												aria-pressed={index === active}
+												aria-label={`Show ${game.gameTitle} in the spotlight`}
+												onClick={() => pickHandler(index)}
+											>
+												<span className="gv-board__row-rank">{pad(index + 1)}</span>
+												<span className="gv-board__row-thumb">
+													<img src={gameCover(game)} alt="" loading="lazy" decoding="async" />
+												</span>
+											</button>
+										) : (
+											<>
+												<span className="gv-board__row-rank" aria-hidden>
+													{pad(index + 1)}
+												</span>
+												<span className="gv-board__row-thumb" aria-hidden>
+													<img src={gameCover(game)} alt="" loading="lazy" decoding="async" />
+												</span>
+											</>
+										)}
 										<Link href={gameDetailHref(game)} className="gv-board__row-title">
 											{game.gameTitle}
 										</Link>

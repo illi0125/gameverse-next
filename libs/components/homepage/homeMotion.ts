@@ -6,6 +6,9 @@ export const SCENE_QUERY = '(min-width: 900px) and (min-height: 560px) and (pref
 
 export const MOTION_QUERY = '(prefers-reduced-motion: no-preference)';
 
+/** Narrow screens with motion allowed: one short, unpinned moment per chapter, never scrubbed **/
+export const MOBILE_MOTION_QUERY = '(max-width: 899px) and (prefers-reduced-motion: no-preference)';
+
 export const pad = (value: number) => String(value).padStart(2, '0');
 
 export const gameCover = (game?: Game, position = 0): string =>

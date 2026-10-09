@@ -8,7 +8,7 @@ import { useQuery } from '@apollo/client';
 import { GET_BOARD_ARTICLES } from '../../../apollo/user/query';
 import { BoardArticleCategory } from '../../enums/board-article.enum';
 import { T } from '../../types/common';
-import { SCENE_QUERY } from './homeMotion';
+import { MOBILE_MOTION_QUERY, SCENE_QUERY } from './homeMotion';
 
 const CommunityBoards = () => {
 	const [searchCommunity, setSearchCommunity] = useState({
@@ -73,6 +73,18 @@ const CommunityBoards = () => {
 						scrollTrigger: { trigger: item, start: 'top bottom', end: 'center center', scrub: 0.5 },
 					},
 				);
+			});
+		});
+
+		mm.add(MOBILE_MOTION_QUERY, () => {
+			// Narrow screens: once, the news plates land tilted and settle
+			gsap.from(root.querySelectorAll('.gv-comms__news-item'), {
+				rotation: (index: number) => (index % 2 ? 5 : -5),
+				yPercent: 12,
+				duration: 0.7,
+				ease: 'power3.out',
+				stagger: 0.08,
+				scrollTrigger: { trigger: root.querySelector('.gv-comms__news-list'), start: 'top 85%', once: true },
 			});
 		});
 

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SCENE_QUERY, pad } from './homeMotion';
+import { RailControls, useHomeRail } from './HomeRail';
 
 interface EventData {
 	eventTitle: string;
@@ -56,6 +57,8 @@ const EventCard = ({ event, index }: { event: EventData; index: number }) => {
 
 const Events = () => {
 	const rootRef = useRef<HTMLElement>(null);
+	/** Narrow screens: the plates become a swipe rail (on desktop the list never scrolls, so no controls show) **/
+	const rail = useHomeRail(eventsData.length);
 
 	/** LIFECYCLES **/
 	useEffect(() => {
@@ -97,8 +100,11 @@ const Events = () => {
 						Events
 					</h2>
 					<p className="gv-world__desc">Community events worth your attention.</p>
+					<div className="gv-world__controls">
+						<RailControls rail={rail} label="event" />
+					</div>
 				</header>
-				<ul className="gv-world__list" aria-label="Events">
+				<ul className="gv-world__list" aria-label="Events" ref={rail.trackRef as unknown as React.RefObject<HTMLUListElement>}>
 					{eventsData.map((event: EventData, index: number) => (
 						<li key={event?.eventTitle}>
 							<EventCard event={event} index={index} />

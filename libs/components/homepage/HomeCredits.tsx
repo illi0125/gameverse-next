@@ -21,10 +21,13 @@ const HomeCredits = () => {
 				repeat: -1,
 			});
 
+			loop.pause();
 			const trigger = ScrollTrigger.create({
 				trigger: root,
 				start: 'top bottom',
 				end: 'bottom top',
+				// Off screen the loop stops, so it costs nothing while the visitor is elsewhere on the page
+				onToggle: (self) => (self.isActive ? loop.play() : loop.pause()),
 				onUpdate: (self) => {
 					const boost = 1 + Math.min(Math.abs(self.getVelocity()) / 300, 8);
 					gsap.to(loop, { timeScale: boost * (self.direction < 0 ? -1 : 1), duration: 0.2, overwrite: true });

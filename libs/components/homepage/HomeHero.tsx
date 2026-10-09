@@ -38,6 +38,9 @@ const pad = (value: number) => String(value).padStart(2, '0');
 const HomeHero = ({ search, visual }: HomeHeroProps) => {
 	const rootRef = useRef<HTMLDivElement>(null);
 	const [active, setActive] = useState(0);
+	/** Narrow screens: covers advance on a timer while the title screen is on screen **/
+	const [autoplay, setAutoplay] = useState(false);
+	const [inView, setInView] = useState(true);
 
 	/** APOLLO REQUESTS **/
 	const { data: getGamesData } = useQuery(GET_GAMES, {
@@ -56,6 +59,8 @@ const HomeHero = ({ search, visual }: HomeHeroProps) => {
 		const root = rootRef.current;
 		if (!root) return;
 		gsap.registerPlugin(ScrollTrigger);
+		// Phones: the address bar showing or hiding must not re-measure every trigger mid-scroll
+		ScrollTrigger.config({ ignoreMobileResize: true });
 
 		const mm = gsap.matchMedia();
 		mm.add('(min-width: 900px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)', () => {
@@ -93,12 +98,9 @@ const HomeHero = ({ search, visual }: HomeHeroProps) => {
 		});
 
 		mm.add('(max-width: 899px) and (prefers-reduced-motion: no-preference)', () => {
-			// No scroll runway on narrow screens: covers advance on a slow timer instead
-			const timer = window.setInterval(() => {
-				const count = Number(root.dataset.slides) || 1;
-				setActive((prev) => (prev + 1) % count);
-			}, 5000);
-			return () => window.clearInterval(timer);
+			// No scroll runway on narrow screens: covers advance on a slow timer instead (see the effect below)
+			setAutoplay(true);
+			return () => setAutoplay(false);
 		});
 
 		mm.add('(prefers-reduced-motion: no-preference)', () => {
@@ -138,8 +140,28 @@ const HomeHero = ({ search, visual }: HomeHeroProps) => {
 		ScrollTrigger.refresh();
 	}, [slides.length]);
 
+	useEffect(() => {
+		// The timer only runs while the title screen is visible, so it never advances unseen
+		const stage = rootRef.current?.querySelector('.gv-hero__stage');
+		if (!stage || typeof IntersectionObserver === 'undefined') return;
+		const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.25 });
+		observer.observe(stage);
+		return () => observer.disconnect();
+	}, []);
+
+	useEffect(() => {
+		// Restarts on every change, so a tapped tick gets its full five seconds
+		if (!autoplay || !inView || slides.length < 2) return;
+		const timer = window.setTimeout(() => setActive((prev) => (prev + 1) % slides.length), 5000);
+		return () => window.clearTimeout(timer);
+	}, [autoplay, inView, active, slides.length]);
+
 	return (
-		<div className="gv-hero-chapter" ref={rootRef} data-slides={Math.max(slides.length, 1)}>
+		<div
+			className={`gv-hero-chapter ${autoplay && inView ? 'is-playing' : ''}`}
+			ref={rootRef}
+			data-slides={Math.max(slides.length, 1)}
+		>
 			<section className="gv-hero" aria-labelledby="gv-hero-title">
 				<div className="gv-hero__stage">
 					<div className="gv-hero__atmos" aria-hidden>
@@ -197,6 +219,23 @@ const HomeHero = ({ search, visual }: HomeHeroProps) => {
 										{current.gameGenres?.slice(0, 2).map(formatEnumLabel).join(' / ')}
 									</span>
 								</Link>
+								{/* Narrow screens only: tap a tick to show that cover; the active one fills over five seconds */}
+								{slides.length > 1 && (
+									<span className="gv-hero__ticks">
+										{slides.map((game: Game, index: number) => (
+											<button
+												type="button"
+												key={game._id}
+												className={`gv-hero__tick ${index === active ? 'is-active' : ''}`}
+												aria-label={`Show ${game.gameTitle}`}
+												aria-pressed={index === active}
+												onClick={() => setActive(index)}
+											>
+												<span />
+											</button>
+										))}
+									</span>
+								)}
 							</figcaption>
 						)}
 					</figure>

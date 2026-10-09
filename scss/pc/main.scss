@@ -4,6 +4,7 @@
 
 @import '/scss/pc/homepage/homepage';
 @import '/scss/pc/homepage/homeIntro.scss';
+@import '/scss/pc/homepage/homeMobile.scss';
 @import '/scss/pc/common/gvAlert.scss';
 @import '/scss/pc/common/gvCursor.scss';
 @import '/scss/pc/common/gvNavDrawer.scss';
@@ -479,6 +480,12 @@ body::-webkit-scrollbar {
 		.container {
 			gap: 12px;
 
+			.logo-box a {
+				display: flex;
+				align-items: center;
+				min-height: 44px;
+			}
+
 			.logo-box img {
 				display: block;
 				width: 128px;
@@ -499,7 +506,7 @@ body::-webkit-scrollbar {
 				}
 
 				.join-box {
-					height: 40px;
+					height: 44px;
 					padding-inline: 16px;
 
 					svg {
@@ -513,8 +520,8 @@ body::-webkit-scrollbar {
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			width: 40px;
-			height: 40px;
+			width: 44px;
+			height: 44px;
 			padding: 0;
 			color: #ffffff;
 			background: transparent;

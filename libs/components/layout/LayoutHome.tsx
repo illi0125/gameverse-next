@@ -5,7 +5,7 @@ import Top from '../Top';
 import Footer from '../Footer';
 import { Stack } from '@mui/material';
 import HomeHero from '../homepage/HomeHero';
-import FiberContainer from '../common/FiberContainer';
+import HomeShelf from '../homepage/HomeShelf';
 import HeaderFilter from '../homepage/HeaderFilter';
 import { userVar } from '../../../apollo/store';
 import { useReactiveVar } from '@apollo/client';
@@ -41,7 +41,7 @@ const withLayoutMain = (Component: any) => {
 					</Stack>
 
 					<Stack id={'main'} className={'gv-home'}>
-						<HomeHero search={<HeaderFilter />} visual={<FiberContainer />} />
+						<HomeHero search={<HeaderFilter />} visual={<HomeShelf />} />
 						<Component {...props} />
 					</Stack>
 

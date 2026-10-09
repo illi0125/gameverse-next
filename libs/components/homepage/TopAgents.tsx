@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
 import TopAgentCard from './TopAgentCard';
 import { Member } from '../../types/member/member';
 import { AgentsInquiry } from '../../types/member/member.input';
@@ -18,7 +17,6 @@ interface TopAgentsProps {
 
 const TopAgents = (props: TopAgentsProps) => {
 	const { initialInput } = props;
-	const device = useDeviceDetect();
 	const [topAgents, setTopAgents] = useState<Member[]>([]);
 	const [selected, setSelected] = useState(0);
 	const rootRef = useRef<HTMLElement>(null);
@@ -67,6 +65,25 @@ const TopAgents = (props: TopAgentsProps) => {
 			});
 		});
 
+		mm.add('(max-width: 899px)', () => {
+			// Character-select rail: the portrait in the middle of the screen is the selected one
+			const rail = root.querySelector<HTMLElement>('.gv-roster__grid');
+			const items = Array.from(root.querySelectorAll<HTMLElement>('.gv-roster__item'));
+			if (!rail || typeof IntersectionObserver === 'undefined') return;
+			const observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (!entry.isIntersecting) return;
+						const index = items.indexOf(entry.target as HTMLElement);
+						if (index >= 0) setSelected(index);
+					});
+				},
+				{ root: rail, rootMargin: '0px -45% 0px -45%' },
+			);
+			items.forEach((item) => observer.observe(item));
+			return () => observer.disconnect();
+		});
+
 		return () => mm.revert();
 	}, [agents.length]);
 
@@ -108,7 +125,7 @@ const TopAgents = (props: TopAgentsProps) => {
 							</Link>
 						</div>
 
-						<ul className={`gv-roster__grid ${device === 'mobile' ? 'is-compact' : ''}`} aria-label="Top developers">
+						<ul className="gv-roster__grid" aria-label="Top developers">
 							{agents.map((agent: Member, index: number) => (
 								<li className="gv-roster__item" key={agent?._id}>
 									<TopAgentCard agent={agent} index={index} active={index === selected} onSelect={setSelected} />
