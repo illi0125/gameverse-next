@@ -1,13 +1,19 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { NextPage } from 'next';
+import Head from 'next/head';
+import Link from 'next/link';
+import moment from 'moment';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import GameBigCard from '../../libs/components/common/GameBigCard';
+import withLayoutCatalog from '../../libs/components/layout/LayoutCatalog';
+import CatalogCard from '../../libs/components/game/CatalogCard';
 import ReviewCard from '../../libs/components/agent/ReviewCard';
-import { Box, Button, Pagination, Stack, Typography } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
+import { Pagination } from '@mui/material';
+import EastIcon from '@mui/icons-material/East';
 import { useReactiveVar } from '@apollo/client';
 import { useRouter } from 'next/router';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { MOTION_QUERY, SCENE_QUERY } from '../../libs/components/homepage/homeMotion';
 import { Game } from '../../libs/types/game/game';
 import { Member } from '../../libs/types/member/member';
 import { sweetErrorHandling } from '../../libs/sweetAlert';
@@ -24,8 +30,7 @@ import { GET_COMMENTS, GET_MEMBER, GET_GAMES } from '../../apollo/user/query';
 import { Messages } from '../../libs/config';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 import { T } from '../../libs/types/common';
-
-
+import { memberTypeLabel } from '../../libs/utils';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -201,124 +206,343 @@ const AgentDetail: NextPage = ({ initialInput, initialComment, ...props }: any) 
 	};
 
 
-	if (device === 'mobile') {
-		return <div>DEVELOPER DETAIL PAGE MOBILE</div>;
-	} else {
+	/** PRESENTATION **/
+	const rootRef = useRef<HTMLDivElement>(null);
+	const name = agent?.memberFullName ?? agent?.memberNick ?? '';
+	const nameChars = Math.max(name.length, 4);
+	const portrait = agent?.memberImage ? `${REACT_APP_API_URL}/${agent.memberImage}` : '/img/profile/defaultUser.svg';
+	const gamePages = Math.ceil(gameTotal / searchFilter.limit) || 1;
+	const firstGame = gameTotal ? (searchFilter.page - 1) * searchFilter.limit + 1 : 0;
+	const lastGame = Math.min(searchFilter.page * searchFilter.limit, gameTotal);
+	const readout = [
+		{ label: 'Games', value: agent?.memberGames },
+		{ label: 'Followers', value: agent?.memberFollowers },
+		{ label: 'Following', value: agent?.memberFollowings },
+		{ label: 'Likes', value: agent?.memberLikes },
+		{ label: 'Views', value: agent?.memberViews },
+		{ label: 'Articles', value: agent?.memberArticles },
+	];
+
+	const jumpTo = (event: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+		const target = document.getElementById(id);
+		if (!target) return;
+		event.preventDefault();
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY, behavior: reduceMotion ? 'auto' : 'smooth' });
+	};
+
+	// Scroll motion for the loaded developer; re-runs when another profile opens on the same page
+	useEffect(() => {
+		const root = rootRef.current;
+		if (!root || !agent?._id) return;
+		gsap.registerPlugin(ScrollTrigger);
+
+		const mm = gsap.matchMedia();
+		mm.add(MOTION_QUERY, () => {
+			// The page's single load moment: the name rises out of its mask
+			gsap.from(root.querySelectorAll('.gv-dd-hero__word'), {
+				yPercent: 110,
+				duration: 0.9,
+				ease: 'power4.out',
+				stagger: 0.08,
+				delay: 0.1,
+			});
+			const hero = root.querySelector('.gv-dd-hero');
+			gsap.to(root.querySelector('.gv-dd-hero .gv-cat-hero__atmos'), {
+				scale: 1.12,
+				ease: 'none',
+				scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.5 },
+			});
+			gsap.to(root.querySelector('.gv-dd-hero__portrait'), {
+				yPercent: -10,
+				ease: 'none',
+				scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.6 },
+			});
+		});
+
+		ScrollTrigger.refresh();
+		return () => mm.revert();
+	}, [agent?._id]);
+
+	// Library cards tilt in and level out as they cross the viewport
+	useEffect(() => {
+		const root = rootRef.current;
+		if (!root || agentGames.length === 0) return;
+		gsap.registerPlugin(ScrollTrigger);
+
+		const mm = gsap.matchMedia();
+		mm.add(SCENE_QUERY, () => {
+			root.querySelectorAll<HTMLElement>('.gv-dd-library .gv-cat-grid > li').forEach((item, index) => {
+				gsap.fromTo(
+					item,
+					{ rotation: index % 2 === 0 ? -5 : 5, yPercent: 12, scale: 0.94 },
+					{
+						rotation: 0,
+						yPercent: 0,
+						scale: 1,
+						ease: 'none',
+						scrollTrigger: { trigger: item, start: 'top bottom', end: 'top 64%', scrub: 0.6 },
+					},
+				);
+			});
+		});
+
+		ScrollTrigger.refresh();
+		return () => mm.revert();
+	}, [agentGames.length, searchFilter.page]);
+
+	if (!agent) {
+		const loading = !getMemberError && (getMemberLoading || !agentId);
 		return (
-			<Stack className={'agent-detail-page'}>
-				<Stack className={'container'}>
-					<Stack className={'agent-info'}>
-						<img
-							src={agent?.memberImage ? `${REACT_APP_API_URL}/${agent?.memberImage}` : '/img/profile/defaultUser.svg'}
-							alt=""
-						/>
-						<Box component={'div'} className={'info'} onClick={() => redirectToMemberPageHandler(agent?._id as string)}>
-							<strong>{agent?.memberFullName ?? agent?.memberNick}</strong>
-							<div>
-								<img src="/img/icons/call.svg" alt="" />
-								<span>{agent?.memberPhone}</span>
-							</div>
-						</Box>
-					</Stack>
-					<Stack className={'agent-home-list'}>
-						<Stack className={'card-wrap'}>
-							{agentGames?.map((game: Game) => {
-								return (
-									<div className={'wrap-main'} key={game?._id}>
-										<GameBigCard game={game} likeGameHandler={likeGameHandler} />
-									</div>
-								);
-							})}
-						</Stack>
-						<Stack className={'pagination'}>
-							{gameTotal ? (
-								<>
-									<Stack className="pagination-box">
-										<Pagination
-											page={searchFilter.page}
-											count={Math.ceil(gameTotal / searchFilter.limit) || 1}
-											onChange={gamePaginationChangeHandler}
-											shape="circular"
-											color="primary"
-										/>
-									</Stack>
-									<span>
-										Total {gameTotal} game{gameTotal > 1 ? 's' : ''} available
-									</span>
-								</>
-							) : (
-								<div className={'no-data'}>
-									<img src="/img/icons/icoAlert.svg" alt="" />
-									<p>No games found!</p>
-								</div>
-							)}
-						</Stack>
-					</Stack>
-					<Stack className={'review-box'}>
-						<Stack className={'main-intro'}>
-							<span>Reviews</span>
-							<p>we are glad to see you again</p>
-						</Stack>
-						{commentTotal !== 0 && (
-							<Stack className={'review-wrap'}>
-								<Box component={'div'} className={'title-box'}>
-									<StarIcon />
-									<span>
-										{commentTotal} review{commentTotal > 1 ? 's' : ''}
-									</span>
-								</Box>
-								{agentComments?.map((comment: Comment) => {
-									return <ReviewCard comment={comment} key={comment?._id} />;
-								})}
-								<Box component={'div'} className={'pagination-box'}>
-									<Pagination
-										page={commentInquiry.page}
-										count={Math.ceil(commentTotal / commentInquiry.limit) || 1}
-										onChange={commentPaginationChangeHandler}
-										shape="circular"
-										color="primary"
-									/>
-								</Box>
-							</Stack>
+			<div className="gv-catalog gv-gd gv-dd" ref={rootRef}>
+				<Head>
+					<title>{loading ? 'Developer | Gameverse' : 'Developer not found | Gameverse'}</title>
+				</Head>
+				<section className="gv-gd-state" aria-live="polite">
+					<div className="gv-cat-hero__grid" aria-hidden>
+						<span className="gv-cat-hero__rule gv-cat-hero__rule--v" />
+						<span className="gv-cat-hero__rule gv-cat-hero__rule--h" />
+						<span className="gv-cat-hero__mark" />
+					</div>
+					<div className="gv-gd-state__inner">
+						<p className="gv-chapter gv-chapter--dark" aria-hidden>
+							<span>00</span>Developer
+						</p>
+						{loading ? (
+							<p className="gv-gd-state__readout">Loading developer…</p>
+						) : (
+							<>
+								<h1 className="gv-gd-state__title">Developer not found.</h1>
+								<p className="gv-gd-state__lead">The profile may have been removed or the link is incomplete.</p>
+								<Link href="/developer" className="gv-gd-cta gv-gd-cta--solid">
+									All developers
+								</Link>
+							</>
+						)}
+					</div>
+				</section>
+			</div>
+		);
+	}
+
+	return (
+		<div className="gv-catalog gv-gd gv-dd" ref={rootRef}>
+			<Head>
+				<title>{`${name} | Gameverse`}</title>
+			</Head>
+
+			{/** 00 PROFILE — night, duotone of the portrait, giant name, live readout **/}
+			<section className="gv-dd-hero" aria-labelledby="developer-name">
+				<div className="gv-cat-hero__atmos" aria-hidden>
+					<img key={agent._id} src={portrait} alt="" decoding="async" />
+					<span className="gv-cat-hero__tint" />
+					<span className="gv-cat-hero__grain" />
+				</div>
+				<div className="gv-cat-hero__grid" aria-hidden>
+					<span className="gv-cat-hero__rule gv-cat-hero__rule--v" />
+					<span className="gv-cat-hero__rule gv-cat-hero__rule--h" />
+					<span className="gv-cat-hero__mark" />
+				</div>
+
+				<div className="gv-dd-hero__inner">
+					<div className="gv-dd-hero__copy">
+						<nav className="gv-gd-hero__crumbs" aria-label="Breadcrumb">
+							<Link href="/developer">All developers</Link>
+							<span aria-hidden>/</span>
+							<span>{agent.memberNick}</span>
+						</nav>
+
+						<div className="gv-gd-hero__flags">
+							<span className="gv-gd-flag">{memberTypeLabel(agent.memberType)}</span>
+							<span className="gv-gd-flag gv-gd-flag--line">Joined {moment(agent.createdAt).format('MMM YYYY')}</span>
+						</div>
+
+						<h1
+							className="gv-dd-hero__name"
+							id="developer-name"
+							style={{ '--dd-chars': nameChars } as React.CSSProperties}
+						>
+							<span className="gv-dd-hero__mask">
+								<span className="gv-dd-hero__word">{name}</span>
+							</span>
+						</h1>
+
+						{(agent.memberAddress || agent.memberPhone) && (
+							<p className="gv-gd-hero__credits">
+								{agent.memberAddress && <span>{agent.memberAddress}</span>}
+								{agent.memberPhone && <span>{agent.memberPhone}</span>}
+							</p>
 						)}
 
-						<Stack className={'leave-review-config'}>
-							<Typography className={'main-title'}>Leave A Review</Typography>
-							<Typography className={'review-title'}>Review</Typography>
+						{agent.memberDesc && <p className="gv-gd-hero__lead">{agent.memberDesc}</p>}
+
+						<div className="gv-gd-hero__actions">
+							<button
+								type="button"
+								className="gv-gd-cta gv-gd-cta--solid"
+								onClick={() => redirectToMemberPageHandler(agent?._id as string)}
+							>
+								Full profile
+							</button>
+							<a href="#library" className="gv-gd-like" onClick={(event) => jumpTo(event, 'library')}>
+								{gameTotal} game{gameTotal === 1 ? '' : 's'}
+								<EastIcon aria-hidden />
+							</a>
+						</div>
+
+						<dl className="gv-gd-hero__readout">
+							{readout.map((item) => (
+								<div key={item.label}>
+									<dt>{item.label}</dt>
+									<dd>{item.value ?? 0}</dd>
+								</div>
+							))}
+						</dl>
+					</div>
+
+					<div className="gv-dd-hero__portrait" aria-hidden>
+						<img src={portrait} alt="" decoding="async" />
+						<span className="gv-dd-hero__tag">{agent.memberNick}</span>
+					</div>
+				</div>
+			</section>
+
+			{/** 01 LIBRARY — paper: the developer's games as catalog cards **/}
+			<section className="gv-dd-library" id="library" aria-labelledby="library-title">
+				<div className="gv-dd-library__inner">
+					<header className="gv-dd-library__head">
+						<div>
+							<p className="gv-chapter" aria-hidden>
+								<span>01</span>Library
+							</p>
+							<h2 className="gv-dd-library__title" id="library-title">
+								<span className="gv-dd-library__line">Games by</span>
+								<span className="gv-dd-library__line gv-dd-library__line--2">{agent.memberNick}</span>
+							</h2>
+						</div>
+						<p className="gv-dd-library__range">
+							{gameTotal ? `Showing ${firstGame}–${lastGame} of ${gameTotal}` : 'Nothing listed yet'}
+						</p>
+					</header>
+
+					{gameTotal ? (
+						<>
+							<ul className="gv-cat-grid" aria-label={`Games by ${agent.memberNick}`}>
+								{agentGames?.map((game: Game, index: number) => {
+									const feature = index === 0 && searchFilter.page === 1 && agentGames.length >= 3;
+									return (
+										<li className={feature ? 'is-feature' : ''} key={game?._id}>
+											<CatalogCard game={game} likeGameHandler={likeGameHandler} feature={feature} />
+										</li>
+									);
+								})}
+							</ul>
+							<nav className="gv-cat-pagination" aria-label="Game pages">
+								{gamePages > 1 ? (
+									<Pagination
+										page={searchFilter.page}
+										count={gamePages}
+										onChange={gamePaginationChangeHandler}
+										shape="rounded"
+									/>
+								) : (
+									<span />
+								)}
+								<p className="gv-cat-pagination__total">
+									Total {gameTotal} game{gameTotal > 1 ? 's' : ''} available
+								</p>
+							</nav>
+						</>
+					) : (
+						<div className="gv-cat-empty">
+							<p className="gv-cat-empty__title">{getGamesLoading ? 'Loading games…' : 'No games found.'}</p>
+							<Link href="/game" className="gv-cat-empty__reset">
+								Browse all games
+							</Link>
+						</div>
+					)}
+				</div>
+			</section>
+
+			{/** 02 REVIEWS — ultraviolet: review log and the review form **/}
+			<section className="gv-gd-comms gv-dd-reviews" id="reviews" aria-labelledby="reviews-title">
+				<div className="gv-gd-comms__inner">
+					<header className="gv-gd-comms__head">
+						<p className="gv-chapter" aria-hidden>
+							<span>02</span>Reviews
+						</p>
+						<h2 className="gv-gd-comms__title" id="reviews-title">
+							Reviews
+						</h2>
+						<p className="gv-gd-comms__count">
+							{commentTotal} review{commentTotal === 1 ? '' : 's'}
+						</p>
+					</header>
+
+					<div className="gv-gd-comms__body">
+						<div className="gv-gd-comms__log">
+							{commentTotal !== 0 ? (
+								<>
+									<ol className="gv-gd-log">
+										{agentComments?.map((comment: Comment) => {
+											return <ReviewCard comment={comment} key={comment?._id} />;
+										})}
+									</ol>
+									{Math.ceil(commentTotal / commentInquiry.limit) > 1 && (
+										<nav className="gv-cat-pagination" aria-label="Review pages">
+											<Pagination
+												page={commentInquiry.page}
+												count={Math.ceil(commentTotal / commentInquiry.limit) || 1}
+												onChange={commentPaginationChangeHandler}
+												shape="rounded"
+											/>
+										</nav>
+									)}
+								</>
+							) : (
+								<p className="gv-gd-comms__empty">No reviews yet. Be the first to leave one.</p>
+							)}
+						</div>
+
+						<form
+							className="gv-gd-form"
+							onSubmit={(event) => {
+								event.preventDefault();
+								if (!(insertCommentData.commentContent === '' || user?._id === '')) createCommentHandler();
+							}}
+						>
+							<label className="gv-gd-form__label" htmlFor="developer-review">
+								Leave a review
+							</label>
 							<textarea
+								id="developer-review"
+								className="gv-gd-form__input"
+								placeholder={user?._id ? `What is it like to play ${agent.memberNick}'s games?` : 'Login to leave a review'}
 								onChange={({ target: { value } }: any) => {
 									setInsertCommentData({ ...insertCommentData, commentContent: value });
 								}}
 								value={insertCommentData.commentContent}
 							></textarea>
-							<Box className={'submit-btn'} component={'div'}>
-								<Button
-									className={'submit-review'}
+							<div className="gv-gd-form__foot">
+								{!user?._id && (
+									<Link href="/account/join" className="gv-gd-form__login">
+										Log in to review
+									</Link>
+								)}
+								<button
+									type="submit"
+									className="gv-gd-ink-cta gv-gd-ink-cta--solid"
 									disabled={insertCommentData.commentContent === '' || user?._id === ''}
-									onClick={createCommentHandler}
 								>
-									<Typography className={'title'}>Submit Review</Typography>
-									<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
-										<g clipPath="url(#clip0_6975_3642)">
-											<path
-												d="M16.1571 0.5H6.37936C6.1337 0.5 5.93491 0.698792 5.93491 0.944458C5.93491 1.19012 6.1337 1.38892 6.37936 1.38892H15.0842L0.731781 15.7413C0.558156 15.915 0.558156 16.1962 0.731781 16.3698C0.818573 16.4566 0.932323 16.5 1.04603 16.5C1.15974 16.5 1.27345 16.4566 1.36028 16.3698L15.7127 2.01737V10.7222C15.7127 10.9679 15.9115 11.1667 16.1572 11.1667C16.4028 11.1667 16.6016 10.9679 16.6016 10.7222V0.944458C16.6016 0.698792 16.4028 0.5 16.1571 0.5Z"
-												fill="#181A20"
-											/>
-										</g>
-										<defs>
-											<clipPath id="clip0_6975_3642">
-												<rect width="16" height="16" fill="white" transform="translate(0.601562 0.5)" />
-											</clipPath>
-										</defs>
-									</svg>
-								</Button>
-							</Box>
-						</Stack>
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	}
+									Submit review
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</section>
+		</div>
+	);
 };
 
 AgentDetail.defaultProps = {
@@ -341,4 +565,4 @@ AgentDetail.defaultProps = {
 	},
 };
 
-export default withLayoutBasic(AgentDetail);
+export default withLayoutCatalog(AgentDetail);

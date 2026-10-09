@@ -1,0 +1,263 @@
+/** DEVELOPER DETAIL — redesigned /developer/detail page (docs/GAMEVERSE_DESIGN_SYSTEM.md)
+ *  Root is `.gv-catalog.gv-gd.gv-dd` inside LayoutCatalog's `.gv-catalog-shell`, so it reuses catalog.scss
+ *  (hero atmosphere, grid + CatalogCard, pagination, empty state) and gameDetail.scss (crumbs, flags, credits,
+ *  readout, CTAs, comment log/form, loading state). Chapters: Profile (void) → Library (paper)
+ *  → Reviews (ultraviolet) → footer (void).
+ */
+
+.gv-dd {
+	.gv-dd-hero__mask,
+	.gv-dd-hero__word,
+	.gv-dd-library__line {
+		display: block;
+		line-height: inherit;
+	}
+}
+
+/** 00 PROFILE — night, duotone of the portrait, giant name, sharp portrait plate **/
+
+.gv-dd .gv-dd-hero {
+	display: flex;
+	min-height: max(100vh, 700px);
+	min-height: max(100svh, 700px);
+	overflow: hidden;
+	background: var(--gv-void);
+	color: #ffffff;
+
+	&__inner {
+		position: relative;
+		z-index: 2;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) clamp(260px, 26vw, 420px);
+		align-items: center;
+		gap: 6vw;
+		width: 100%;
+		padding: calc(87px + clamp(28px, 5vh, 56px)) calc(var(--gv-frame) + 6vw) clamp(56px, 9vh, 96px) var(--gv-inset);
+	}
+
+	&__copy {
+		min-width: 0;
+	}
+
+	/* Size follows the name's length so a short nick and a full name both fill the column */
+	&__name {
+		margin: 18px 0 0;
+		font-family: var(--gv-display);
+		font-size: min(calc(50vw / (var(--dd-chars) * 0.7)), 16vw, 30vh);
+		font-weight: 850;
+		line-height: 0.82;
+		letter-spacing: -0.06em;
+		text-transform: uppercase;
+		overflow-wrap: anywhere;
+	}
+
+	&__mask {
+		overflow: hidden;
+		padding-top: 0.08em;
+		margin-top: -0.08em;
+	}
+
+	&__portrait {
+		position: relative;
+		aspect-ratio: 4 / 5;
+		overflow: hidden;
+		background: #120a33;
+		@include gv-cut(28px, 56%);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: transform 900ms var(--gv-ease);
+		}
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		&__portrait:hover img {
+			transform: scale(1.04);
+		}
+	}
+
+	&__tag {
+		position: absolute;
+		left: 14px;
+		bottom: 14px;
+		padding: 5px 8px;
+		background: var(--gv-signal);
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.06em;
+		line-height: 1;
+		text-transform: uppercase;
+		color: var(--gv-ink);
+	}
+
+	/* The games jump reuses the line chip; it is a link here */
+	.gv-gd-like {
+		text-decoration: none;
+
+		svg {
+			width: 18px;
+			height: 18px;
+		}
+	}
+}
+
+/** 01 LIBRARY — paper, catalog grid **/
+
+.gv-dd .gv-dd-library {
+	position: relative;
+	z-index: 2;
+	background: #ffffff;
+	@include gv-sheet-edge(#ffffff, 31%);
+
+	&__inner {
+		padding: clamp(64px, 9vw, 120px) 6vw clamp(72px, 9vw, 128px) var(--gv-inset);
+	}
+
+	&__head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 20px 32px;
+		margin-bottom: clamp(40px, 5vw, 64px);
+	}
+
+	&__title {
+		margin: 18px 0 0;
+		font-family: var(--gv-display);
+		font-size: clamp(3rem, 8vw, 7.5rem);
+		font-weight: 850;
+		line-height: 0.84;
+		letter-spacing: -0.055em;
+		text-transform: uppercase;
+		overflow-wrap: anywhere;
+	}
+
+	&__line--2 {
+		margin-left: 14%;
+	}
+
+	&__range {
+		font-family: var(--gv-mono);
+		font-size: 0.75rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--gv-muted);
+	}
+}
+
+/** 02 REVIEWS — the game page's comment chapter, on an ultraviolet field **/
+
+.gv-dd .gv-dd-reviews {
+	background: var(--gv-uv);
+	color: var(--gv-ink);
+
+	&::before {
+		background: var(--gv-uv);
+	}
+
+	.gv-gd-comms__count,
+	.gv-gd-entry__date {
+		color: rgba(0, 0, 0, 0.72);
+	}
+
+	.gv-gd-entry {
+		border-bottom-color: rgba(0, 0, 0, 0.2);
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.05);
+		}
+	}
+
+	.gv-gd-entry__text {
+		color: rgba(0, 0, 0, 0.82);
+	}
+
+	.gv-gd-entry__avatar {
+		background: rgba(255, 255, 255, 0.3);
+	}
+
+	/* Ultraviolet is the solid CTA's hover colour; on this field it inverts to paper instead */
+	.gv-gd-ink-cta--solid:not(:disabled):hover,
+	.gv-gd-ink-cta--solid:focus-visible {
+		background: #ffffff;
+		color: var(--gv-ink);
+	}
+
+	.gv-gd-ink-cta--solid:disabled {
+		opacity: 0.45;
+	}
+
+	.gv-gd-form__login:hover {
+		color: #ffffff;
+	}
+
+	.gv-cat-pagination .MuiPaginationItem-root:hover {
+		background: rgba(0, 0, 0, 0.08);
+	}
+}
+
+.gv-dd .gv-gd-entry__name--static {
+	display: inline-block;
+	cursor: default;
+
+	&:hover {
+		text-decoration: none;
+	}
+}
+
+.gv-dd .gv-gd-entry__reply {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 10px;
+	font-family: var(--gv-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+
+	svg {
+		width: 16px;
+		height: 16px;
+	}
+}
+
+/** RESPONSIVE **/
+
+@media (max-width: 899px) {
+	.gv-dd .gv-dd-hero {
+		min-height: 0;
+
+		&__inner {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 32px;
+			padding: calc(87px + 32px) var(--gv-gutter) 56px;
+		}
+
+		&__name {
+			font-size: min(calc(86vw / (var(--dd-chars) * 0.7)), 28vw);
+		}
+
+		/* Portrait leads on narrow screens, kept small so the name stays in view */
+		&__portrait {
+			order: -1;
+			width: min(260px, 62%);
+		}
+	}
+
+	.gv-dd .gv-dd-library__inner {
+		padding: 56px var(--gv-gutter) 72px;
+	}
+}
+
+#mobile-wrap.gv-catalog-shell .gv-dd .gv-dd-hero__inner {
+	padding-top: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-dd .gv-dd-hero__portrait img {
+		transition: none;
+	}
+}
