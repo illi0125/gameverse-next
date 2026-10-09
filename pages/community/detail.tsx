@@ -1,25 +1,38 @@
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import ChatIcon from '@mui/icons-material/Chat';
 import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import EditIcon from '@mui/icons-material/Edit';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Backdrop, Button, IconButton, Pagination, Stack, Tab, Tabs, Typography } from '@mui/material';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
+import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
+import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
+import { Dialog, Pagination } from '@mui/material';
 import { NextPage } from 'next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import dynamic from 'next/dynamic';
+import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Moment from 'react-moment';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { GET_COMMENTS } from '../../apollo/admin/query';
 import { userVar } from '../../apollo/store';
 import { CREATE_COMMENT, LIKE_TARGET_BOARD_ARTICLE, UPDATE_COMMENT } from '../../apollo/user/mutation';
-import { GET_BOARD_ARTICLE } from '../../apollo/user/query';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
+import { GET_BOARD_ARTICLE, GET_BOARD_ARTICLES } from '../../apollo/user/query';
+import withLayoutCatalog from '../../libs/components/layout/LayoutCatalog';
+import {
+	articleHref,
+	articleImage,
+	boardMeta,
+	communityBoards,
+	readingMinutes,
+} from '../../libs/components/community/communityMeta';
+import { MOTION_QUERY, SCENE_QUERY } from '../../libs/components/homepage/homeMotion';
 import { Messages } from '../../libs/config';
 import { CommentGroup, CommentStatus } from '../../libs/enums/comment.enum';
+import { Direction } from '../../libs/enums/common.enum';
+import { MemberStatus } from '../../libs/enums/member.enum';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import {
 	sweetConfirmAlert,
@@ -32,6 +45,7 @@ import { Comment } from '../../libs/types/comment/comment';
 import { CommentInput, CommentsInquiry } from '../../libs/types/comment/comment.input';
 import { CommentUpdate } from '../../libs/types/comment/comment.update';
 import { T } from '../../libs/types/common';
+import { memberTypeLabel } from '../../libs/utils';
 //@ts-ignore
 const ToastViewerComponent = dynamic(() => import('../../libs/components/community/TViewer'), { ssr: false });
 
@@ -121,7 +135,7 @@ const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
 				pathname: '/community',
 				query: { articleCategory: value },
 			},
-			'/community',
+			undefined,
 			{ shallow: true },
 		);
 	};
@@ -253,305 +267,571 @@ const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
 		setSearchFilter({ ...searchFilter, page: value });
 	};
 
-	if (device === 'mobile') {
-		return <div>COMMUNITY DETAIL PAGE MOBILE</div>;
-	} else {
+	/** PRESENTATION + UI-only extras (related posts, reading progress, copy link) **/
+	/** Fallback when the Clipboard API is unavailable or blocked (older browsers, non-secure origins) **/
+	const legacyCopy = (text: string) => {
+		const field = document.createElement('textarea');
+		field.value = text;
+		field.setAttribute('readonly', '');
+		field.style.position = 'fixed';
+		field.style.opacity = '0';
+		document.body.appendChild(field);
+		field.select();
+		const ok = document.execCommand('copy');
+		document.body.removeChild(field);
+		if (!ok) throw new Error('copy failed');
+	};
+	const rootRef = useRef<HTMLDivElement>(null);
+	const progressRef = useRef<HTMLSpanElement>(null);
+	const [copied, setCopied] = useState<boolean>(false);
+
+	const { data: relatedData } = useQuery(GET_BOARD_ARTICLES, {
+		fetchPolicy: 'cache-and-network',
+		skip: !boardArticle?.articleCategory,
+		variables: {
+			input: { page: 1, limit: 4, sort: 'createdAt', direction: Direction.DESC, search: { articleCategory: boardArticle?.articleCategory } },
+		},
+	});
+	const related: BoardArticle[] = (relatedData?.getBoardArticles?.list ?? [])
+		.filter((item: BoardArticle) => item._id !== boardArticle?._id)
+		.slice(0, 3);
+
+	const board = boardMeta(boardArticle?.articleCategory ?? articleCategory);
+	const author = boardArticle?.memberData;
+	const isLiked = Boolean(boardArticle?.meLiked?.[0]?.myFavorite);
+	const title = boardArticle?.articleTitle ?? '';
+	const titleSize = title.length <= 16 ? 'is-short' : title.length <= 34 ? 'is-mid' : 'is-long';
+	const minutes = readingMinutes(boardArticle?.articleContent);
+	const commentPages = Math.ceil(total / searchFilter.limit) || 1;
+
+	const copyLink = async () => {
+		try {
+			const url = window.location.href;
+			if (navigator.clipboard?.writeText) {
+				await navigator.clipboard.writeText(url).catch(() => legacyCopy(url));
+			} else legacyCopy(url);
+			setCopied(true);
+			window.setTimeout(() => setCopied(false), 2000);
+		} catch (err: any) {
+			sweetMixinErrorAlert('Could not copy the link').then();
+		}
+	};
+
+	const jumpTo = (event: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+		const target = document.getElementById(id);
+		if (!target) return;
+		event.preventDefault();
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 96, behavior: reduceMotion ? 'auto' : 'smooth' });
+	};
+
+	// Reading progress: how much of the article body has scrolled past (written to a CSS variable, no re-render)
+	useEffect(() => {
+		const body = rootRef.current?.querySelector<HTMLElement>('.gv-cd-article');
+		const bar = progressRef.current;
+		if (!body || !bar) return;
+		let frame = 0;
+		const update = () => {
+			frame = 0;
+			// Share of the article that has entered the viewport: 0 before it appears, 1 once its end is visible
+			const rect = body.getBoundingClientRect();
+			const value = rect.height > 0 ? Math.min(1, Math.max(0, (window.innerHeight - rect.top) / rect.height)) : 0;
+			bar.style.setProperty('--gv-progress', String(value));
+		};
+		const onScroll = () => {
+			if (!frame) frame = window.requestAnimationFrame(update);
+		};
+		update();
+		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('resize', onScroll);
+		return () => {
+			window.removeEventListener('scroll', onScroll);
+			window.removeEventListener('resize', onScroll);
+			if (frame) window.cancelAnimationFrame(frame);
+		};
+	}, [boardArticle?._id]);
+
+	useEffect(() => {
+		const root = rootRef.current;
+		if (!root || !boardArticle?._id) return;
+		gsap.registerPlugin(ScrollTrigger);
+
+		const mm = gsap.matchMedia();
+		mm.add(MOTION_QUERY, () => {
+			// The page's single load moment: the title rises out of its mask
+			gsap.from(root.querySelectorAll('.gv-cd-hero__word'), {
+				yPercent: 110,
+				duration: 0.9,
+				ease: 'power4.out',
+				delay: 0.1,
+			});
+			const hero = root.querySelector('.gv-cd-hero');
+			gsap.to(root.querySelector('.gv-cd-hero .gv-cat-hero__atmos'), {
+				scale: 1.12,
+				ease: 'none',
+				scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: 0.5 },
+			});
+		});
+		mm.add(SCENE_QUERY, () => {
+			const plate = root.querySelector('.gv-cd-hero__plate');
+			if (plate) {
+				gsap.to(plate, {
+					yPercent: -12,
+					ease: 'none',
+					scrollTrigger: { trigger: root.querySelector('.gv-cd-hero'), start: 'top top', end: 'bottom top', scrub: 0.6 },
+				});
+			}
+		});
+		ScrollTrigger.refresh();
+		return () => mm.revert();
+	}, [boardArticle?._id]);
+
+	if (!boardArticle) {
+		const unavailable = Boolean(articleId) && !boardArticleLoading && Boolean(getBoardArticleError);
 		return (
-			<div id="community-detail-page">
-				<div className="container">
-					<Stack className="main-box">
-						<Stack className="left-config">
-							<Stack className={'image-info'}>
-								<img src={'/img/logo/logoText.svg'} />
-								<Stack className={'community-name'}>
-									<Typography className={'name'}>Community Board Article</Typography>
-								</Stack>
-							</Stack>
-							<Tabs
-								orientation="vertical"
-								aria-label="lab API tabs example"
-								TabIndicatorProps={{
-									style: { display: 'none' },
-								}}
-								onChange={tabChangeHandler}
-								value={articleCategory}
-							>
-								<Tab
-									value={'FREE'}
-									label={'Free Board'}
-									className={`tab-button ${articleCategory === 'FREE' ? 'active' : ''}`}
-								/>
-								<Tab
-									value={'RECOMMEND'}
-									label={'Recommendation'}
-									className={`tab-button ${articleCategory === 'RECOMMEND' ? 'active' : ''}`}
-								/>
-								<Tab
-									value={'NEWS'}
-									label={'News'}
-									className={`tab-button ${articleCategory === 'NEWS' ? 'active' : ''}`}
-								/>
-								<Tab
-									value={'HUMOR'}
-									label={'Humor'}
-									className={`tab-button ${articleCategory === 'HUMOR' ? 'active' : ''}`}
-								/>
-							</Tabs>
-						</Stack>
-						<div className="community-detail-config">
-							<Stack className="title-box">
-								<Stack className="left">
-									<Typography className="title">{articleCategory} BOARD</Typography>
-									<Typography className="sub-title">
-										Express your opinions freely here without content restrictions
-									</Typography>
-								</Stack>
-								<Button
-									onClick={() =>
-										router.push({
-											pathname: '/mypage',
-											query: {
-												category: 'writeArticle',
-											},
-										})
-									}
-									className="right"
+			<div className="gv-catalog gv-gd gv-cd" ref={rootRef}>
+				<Head>
+					<title>{unavailable ? 'Post not available | Gameverse' : 'Community | Gameverse'}</title>
+				</Head>
+				<section className="gv-gd-state" aria-live="polite">
+					<div className="gv-cat-hero__grid" aria-hidden>
+						<span className="gv-cat-hero__rule gv-cat-hero__rule--v" />
+						<span className="gv-cat-hero__rule gv-cat-hero__rule--h" />
+						<span className="gv-cat-hero__mark" />
+					</div>
+					<div className="gv-gd-state__inner">
+						<p className="gv-chapter gv-chapter--dark" aria-hidden>
+							<span>00</span>Post
+						</p>
+						{unavailable ? (
+							<>
+								<h1 className="gv-gd-state__title">Post not available.</h1>
+								<p className="gv-gd-state__lead">It may have been removed, or the link is incomplete.</p>
+								<Link
+									href={{ pathname: '/community', query: { articleCategory: board.value } }}
+									className="gv-gd-cta gv-gd-cta--solid"
 								>
-									Write
-								</Button>
-							</Stack>
-							<div className="config">
-								<Stack className="first-box-config">
-									<Stack className="content-and-info">
-										<Stack className="content">
-											<Typography className="content-data">{boardArticle?.articleTitle}</Typography>
-											<Stack className="member-info">
-												<img
-													src={memberImage}
-													alt=""
-													className="member-img"
-													onClick={() => goMemberPage(boardArticle?.memberData?._id)}
-												/>
-												<Typography className="member-nick" onClick={() => goMemberPage(boardArticle?.memberData?._id)}>
-													{boardArticle?.memberData?.memberNick}
-												</Typography>
-												<Stack className="divider"></Stack>
-												<Moment className={'time-added'} format={'DD.MM.YY HH:mm'}>
-													{boardArticle?.createdAt}
-												</Moment>
-											</Stack>
-										</Stack>
-										<Stack className="info">
-											<Stack className="icon-info">
-												{boardArticle?.meLiked && boardArticle?.meLiked[0]?.myFavorite ? (
-													<ThumbUpAltIcon
-														sx={{ cursor: 'pointer' }}
-														onClick={() => likeBoardArticleHandler(user, boardArticle?._id)}
-													/>
-												) : (
-													<ThumbUpOffAltIcon
-														sx={{ cursor: 'pointer' }}
-														onClick={() => likeBoardArticleHandler(user, boardArticle?._id)}
-													/>
-												)}
-
-												<Typography className="text">{boardArticle?.articleLikes}</Typography>
-											</Stack>
-											<Stack className="divider"></Stack>
-											<Stack className="icon-info">
-												<VisibilityIcon />
-												<Typography className="text">{boardArticle?.articleViews}</Typography>
-											</Stack>
-											<Stack className="divider"></Stack>
-											<Stack className="icon-info">
-												{total > 0 ? <ChatIcon /> : <ChatBubbleOutlineRoundedIcon />}
-
-												<Typography className="text">{total}</Typography>
-											</Stack>
-										</Stack>
-									</Stack>
-									<Stack>
-										<ToastViewerComponent markdown={boardArticle?.articleContent} className={'ytb_play'} />
-									</Stack>
-									<Stack className="like-and-dislike">
-										<Stack className="top">
-											<Button>
-												{boardArticle?.meLiked && boardArticle?.meLiked[0]?.myFavorite ? (
-													<ThumbUpAltIcon
-														sx={{ cursor: 'pointer' }}
-														onClick={() => likeBoardArticleHandler(user, boardArticle?._id)}
-													/>
-												) : (
-													<ThumbUpOffAltIcon
-														sx={{ cursor: 'pointer' }}
-														onClick={() => likeBoardArticleHandler(user, boardArticle?._id)}
-													/>
-												)}
-												<Typography className="text">{boardArticle?.articleLikes}</Typography>
-											</Button>
-										</Stack>
-									</Stack>
-								</Stack>
-								<Stack
-									className="second-box-config"
-									sx={{ borderBottom: total > 0 ? 'none' : '1px solid #eee', border: '1px solid #eee' }}
-								>
-									<Typography className="title-text">Comments ({total})</Typography>
-									<Stack className="leave-comment">
-										<input
-											type="text"
-											placeholder="Leave a comment"
-											value={comment}
-											onChange={(e) => {
-												if (e.target.value.length > 100) return;
-												setWordsCnt(e.target.value.length);
-												setComment(e.target.value);
-											}}
-										/>
-										<Stack className="button-box">
-											<Typography>{wordsCnt}/100</Typography>
-											<Button onClick={creteCommentHandler}>comment</Button>
-										</Stack>
-									</Stack>
-								</Stack>
-								{total > 0 && (
-									<Stack className="comments">
-										<Typography className="comments-title">Comments</Typography>
-									</Stack>
-								)}
-								{comments?.map((commentData, index) => {
-									return (
-										<Stack className="comments-box" key={commentData?._id}>
-											<Stack className="main-comment">
-												<Stack className="member-info">
-													<Stack
-														className="name-date"
-														onClick={() => goMemberPage(commentData?.memberData?._id as string)}
-													>
-														<img src={getCommentMemberImage(commentData?.memberData?.memberImage)} alt="" />
-														<Stack className="name-date-column">
-															<Typography className="name">{commentData?.memberData?.memberNick}</Typography>
-															<Typography className="date">
-																<Moment className={'time-added'} format={'DD.MM.YY HH:mm'}>
-																	{commentData?.createdAt}
-																</Moment>
-															</Typography>
-														</Stack>
-													</Stack>
-													{commentData?.memberId === user?._id && (
-														<Stack className="buttons">
-															<IconButton
-																onClick={() => {
-																	setUpdatedCommentId(commentData?._id);
-																	updateButtonHandler(commentData?._id, CommentStatus.DELETE);
-																}}
-															>
-																<DeleteForeverIcon sx={{ color: '#757575', cursor: 'pointer' }} />
-															</IconButton>
-															<IconButton
-																onClick={(e: any) => {
-																	setUpdatedComment(commentData?.commentContent);
-																	setUpdatedCommentWordsCnt(commentData?.commentContent?.length);
-																	setUpdatedCommentId(commentData?._id);
-																	setOpenBackdrop(true);
-																}}
-															>
-																<EditIcon sx={{ color: '#757575' }} />
-															</IconButton>
-															<Backdrop
-																sx={{
-																	top: '40%',
-																	right: '25%',
-																	left: '25%',
-																	width: '1000px',
-																	height: 'fit-content',
-																	borderRadius: '10px',
-																	color: '#ffffff',
-																	zIndex: 999,
-																}}
-																open={openBackdrop}
-															>
-																<Stack
-																	sx={{
-																		width: '100%',
-																		height: '100%',
-																		background: 'white',
-																		border: '1px solid #b9b9b9',
-																		padding: '15px',
-																		gap: '10px',
-																		borderRadius: '10px',
-																		boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
-																	}}
-																>
-																	<Typography variant="h4" color={'#b9b9b9'}>
-																		Update comment
-																	</Typography>
-																	<Stack gap={'20px'}>
-																		<input
-																			autoFocus
-																			value={updatedComment}
-																			onChange={(e) => updateCommentInputHandler(e.target.value)}
-																			type="text"
-																			style={{
-																				border: '1px solid #b9b9b9',
-																				outline: 'none',
-																				height: '40px',
-																				padding: '0px 10px',
-																				borderRadius: '5px',
-																			}}
-																		/>
-																		<Stack width={'100%'} flexDirection={'row'} justifyContent={'space-between'}>
-																			<Typography variant="subtitle1" color={'#b9b9b9'}>
-																				{updatedCommentWordsCnt}/100
-																			</Typography>
-																			<Stack sx={{ flexDirection: 'row', alignSelf: 'flex-end', gap: '10px' }}>
-																				<Button
-																					variant="outlined"
-																					color="inherit"
-																					onClick={() => cancelButtonHandler()}
-																				>
-																					Cancel
-																				</Button>
-																				<Button
-																					variant="contained"
-																					color="inherit"
-																					onClick={() => updateButtonHandler(updatedCommentId, undefined)}
-																				>
-																					Update
-																				</Button>
-																			</Stack>
-																		</Stack>
-																	</Stack>
-																</Stack>
-															</Backdrop>
-														</Stack>
-													)}
-												</Stack>
-												<Stack className="content">
-													<Typography>{commentData?.commentContent}</Typography>
-												</Stack>
-											</Stack>
-										</Stack>
-									);
-								})}
-								{total > 0 && (
-									<Stack className="pagination-box">
-										<Pagination
-											count={Math.ceil(total / searchFilter.limit) || 1}
-											page={searchFilter.page}
-											shape="circular"
-											color="primary"
-											onChange={paginationHandler}
-										/>
-									</Stack>
-								)}
-							</div>
-						</div>
-					</Stack>
-				</div>
+									Back to {board.label}
+								</Link>
+							</>
+						) : (
+							<p className="gv-gd-state__readout">Loading post…</p>
+						)}
+					</div>
+				</section>
 			</div>
 		);
 	}
+
+	return (
+		<div className="gv-catalog gv-gd gv-cd" ref={rootRef}>
+			<Head>
+				<title>{`${title} | Gameverse Community`}</title>
+			</Head>
+
+			<span className="gv-cd-progress" ref={progressRef} aria-hidden />
+
+			{/** 00 POST — night, duotone of the post image, title, byline, actions **/}
+			<section className="gv-cd-hero" aria-labelledby="post-title">
+				<div className="gv-cat-hero__atmos" aria-hidden>
+					<img key={boardArticle._id} src={articleImage(boardArticle)} alt="" decoding="async" />
+					<span className="gv-cat-hero__tint" />
+					<span className="gv-cat-hero__grain" />
+				</div>
+				<div className="gv-cat-hero__grid" aria-hidden>
+					<span className="gv-cat-hero__rule gv-cat-hero__rule--v" />
+					<span className="gv-cat-hero__rule gv-cat-hero__rule--h" />
+					<span className="gv-cat-hero__mark" />
+				</div>
+
+				<div className="gv-cd-hero__inner">
+					<div className="gv-cd-hero__copy">
+						<nav className="gv-gd-hero__crumbs" aria-label="Breadcrumb">
+							<Link href={{ pathname: '/community', query: { articleCategory: board.value } }}>Community</Link>
+							<span aria-hidden>/</span>
+							<Link href={{ pathname: '/community', query: { articleCategory: board.value } }}>{board.label}</Link>
+						</nav>
+
+						<div className="gv-gd-hero__flags">
+							<span className="gv-gd-flag">{board.label}</span>
+							<span className="gv-gd-flag gv-gd-flag--line">{minutes} min read</span>
+						</div>
+
+						<h1 className={`gv-cd-hero__title ${titleSize}`} id="post-title">
+							<span className="gv-cd-hero__mask">
+								<span className="gv-cd-hero__word">{title}</span>
+							</span>
+						</h1>
+
+						<div className="gv-cd-byline">
+							<span className="gv-cd-byline__avatar" aria-hidden>
+								<img src={author ? memberImage : '/img/profile/defaultUser.svg'} alt="" />
+							</span>
+							<div className="gv-cd-byline__text">
+								{author?._id ? (
+									<button type="button" className="gv-cd-byline__name" onClick={() => goMemberPage(author._id)}>
+										{author.memberNick}
+									</button>
+								) : (
+									<span className="gv-cd-byline__name gv-cd-byline__name--gone">Deleted account</span>
+								)}
+								<span className="gv-cd-byline__meta">
+									{author && <span>{memberTypeLabel(author.memberType)}</span>}
+									<Moment format={'DD MMM YYYY, HH:mm'}>{boardArticle.createdAt}</Moment>
+								</span>
+							</div>
+						</div>
+
+						<div className="gv-gd-hero__actions">
+							<button
+								type="button"
+								className={`gv-gd-like ${isLiked ? 'is-liked' : ''}`}
+								aria-pressed={isLiked}
+								aria-label={`${isLiked ? 'Unlike' : 'Like'} this post, ${boardArticle.articleLikes} likes`}
+								disabled={likeLoading}
+								onClick={() => likeBoardArticleHandler(user, boardArticle?._id)}
+							>
+								{isLiked ? <FavoriteRoundedIcon aria-hidden /> : <FavoriteBorderRoundedIcon aria-hidden />}
+								{boardArticle.articleLikes}
+							</button>
+							<a href="#comments" className="gv-gd-like" onClick={(event) => jumpTo(event, 'comments')}>
+								<ChatBubbleOutlineRoundedIcon aria-hidden />
+								{total} comment{total === 1 ? '' : 's'}
+							</a>
+							<button type="button" className="gv-gd-like" onClick={copyLink}>
+								<LinkRoundedIcon aria-hidden />
+								<span aria-live="polite">{copied ? 'Link copied' : 'Copy link'}</span>
+							</button>
+						</div>
+
+						<dl className="gv-gd-hero__readout">
+							<div>
+								<dt>Views</dt>
+								<dd>{boardArticle.articleViews}</dd>
+							</div>
+							<div>
+								<dt>Likes</dt>
+								<dd>{boardArticle.articleLikes}</dd>
+							</div>
+							<div>
+								<dt>Comments</dt>
+								<dd>{total}</dd>
+							</div>
+							<div>
+								<dt>Board</dt>
+								<dd>{board.label}</dd>
+							</div>
+						</dl>
+					</div>
+
+					<div className="gv-cd-hero__plate" aria-hidden>
+						<img src={articleImage(boardArticle)} alt="" decoding="async" />
+					</div>
+				</div>
+			</section>
+
+			{/** 01 READ — paper: long-form body, sticky action rail, board switcher **/}
+			<section className="gv-cd-read" aria-label="Post">
+				<div className="gv-cd-read__inner">
+					<aside className="gv-cd-rail" aria-label="Post actions">
+						<button
+							type="button"
+							className={`gv-cd-rail__btn ${isLiked ? 'is-liked' : ''}`}
+							aria-pressed={isLiked}
+							aria-label={`${isLiked ? 'Unlike' : 'Like'} this post, ${boardArticle.articleLikes} likes`}
+							disabled={likeLoading}
+							onClick={() => likeBoardArticleHandler(user, boardArticle?._id)}
+						>
+							{isLiked ? <FavoriteRoundedIcon aria-hidden /> : <FavoriteBorderRoundedIcon aria-hidden />}
+							<span>{boardArticle.articleLikes}</span>
+						</button>
+						<a
+							href="#comments"
+							className="gv-cd-rail__btn"
+							aria-label={`Go to comments, ${total}`}
+							onClick={(event) => jumpTo(event, 'comments')}
+						>
+							<ChatBubbleOutlineRoundedIcon aria-hidden />
+							<span>{total}</span>
+						</a>
+						<button type="button" className="gv-cd-rail__btn" aria-label="Copy link to this post" onClick={copyLink}>
+							<LinkRoundedIcon aria-hidden />
+							<span>{copied ? 'Copied' : 'Link'}</span>
+						</button>
+					</aside>
+
+					<article className="gv-cd-article">
+						<p className="gv-chapter" aria-hidden>
+							<span>01</span>Read
+						</p>
+						<div className="gv-cd-content">
+							<ToastViewerComponent markdown={boardArticle?.articleContent} className={'ytb_play'} />
+						</div>
+
+						<div className="gv-cd-end">
+							<p className="gv-cd-end__title">Enjoyed this post?</p>
+							<button
+								type="button"
+								className={`gv-cd-end__like ${isLiked ? 'is-liked' : ''}`}
+								aria-pressed={isLiked}
+								aria-label={`${isLiked ? 'Unlike' : 'Like'} this post, ${boardArticle.articleLikes} likes`}
+								disabled={likeLoading}
+								onClick={() => likeBoardArticleHandler(user, boardArticle?._id)}
+							>
+								{isLiked ? <FavoriteRoundedIcon aria-hidden /> : <FavoriteBorderRoundedIcon aria-hidden />}
+								{isLiked ? 'Liked' : 'Like'} · {boardArticle.articleLikes}
+							</button>
+						</div>
+					</article>
+
+					<nav className="gv-cd-boards" aria-label="Boards">
+						<p className="gv-cd-boards__title">Boards</p>
+						<ul>
+							{communityBoards.map((item) => (
+								<li key={item.value}>
+									<button
+										type="button"
+										className={`gv-cd-boards__item ${item.value === board.value ? 'is-current' : ''}`}
+										aria-current={item.value === board.value ? 'true' : undefined}
+										onClick={(event) => tabChangeHandler(event, item.value)}
+									>
+										{item.label}
+									</button>
+								</li>
+							))}
+						</ul>
+						<button
+							type="button"
+							className="gv-cd-boards__write"
+							onClick={() =>
+								router.push({
+									pathname: '/mypage',
+									query: {
+										category: 'writeArticle',
+									},
+								})
+							}
+						>
+							<EditRoundedIcon aria-hidden />
+							Write a post
+						</button>
+					</nav>
+				</div>
+			</section>
+
+			{/** 02 COMMENTS — ultraviolet: form first, then the log **/}
+			<section className="gv-gd-comms gv-cd-comments" id="comments" aria-labelledby="comments-title">
+				<div className="gv-gd-comms__inner">
+					<header className="gv-gd-comms__head">
+						<p className="gv-chapter" aria-hidden>
+							<span>02</span>Thread
+						</p>
+						<h2 className="gv-gd-comms__title" id="comments-title">
+							Comments
+						</h2>
+						<p className="gv-gd-comms__count">
+							{total} comment{total === 1 ? '' : 's'}
+						</p>
+					</header>
+
+					<div className="gv-gd-comms__body">
+						<div className="gv-gd-comms__log">
+							{total > 0 ? (
+								<>
+									<ol className="gv-gd-log">
+										{comments?.map((commentData) => {
+											const commenter =
+												commentData?.memberData?.memberStatus === MemberStatus.DELETE ? null : commentData?.memberData;
+											const isMine = commentData?.memberId === user?._id;
+											return (
+												<li className={`gv-gd-entry ${isMine ? 'is-mine' : ''}`} key={commentData?._id}>
+													<time className="gv-gd-entry__date" dateTime={String(commentData?.createdAt)}>
+														<Moment format={'DD MMM, HH:mm'}>{commentData?.createdAt}</Moment>
+													</time>
+													<span className="gv-gd-entry__avatar" aria-hidden>
+														<img src={getCommentMemberImage(commenter?.memberImage)} alt="" loading="lazy" />
+													</span>
+													<div className="gv-gd-entry__body">
+														{commenter?._id ? (
+															<button
+																type="button"
+																className="gv-gd-entry__name"
+																onClick={() => goMemberPage(commentData?.memberData?._id as string)}
+															>
+																{commenter.memberNick}
+																{commentData?.memberId === boardArticle.memberId && (
+																	<span className="gv-cd-op">Author</span>
+																)}
+															</button>
+														) : (
+															<span className="gv-gd-entry__name gv-cd-gone">Deleted account</span>
+														)}
+														<p className="gv-gd-entry__text">{commentData?.commentContent}</p>
+														{isMine && (
+															<div className="gv-cd-own">
+																<button
+																	type="button"
+																	onClick={() => {
+																		setUpdatedComment(commentData?.commentContent);
+																		setUpdatedCommentWordsCnt(commentData?.commentContent?.length);
+																		setUpdatedCommentId(commentData?._id);
+																		setOpenBackdrop(true);
+																	}}
+																>
+																	<EditRoundedIcon aria-hidden />
+																	Edit
+																</button>
+																<button
+																	type="button"
+																	onClick={() => {
+																		setUpdatedCommentId(commentData?._id);
+																		updateButtonHandler(commentData?._id, CommentStatus.DELETE);
+																	}}
+																>
+																	<DeleteOutlineRoundedIcon aria-hidden />
+																	Delete
+																</button>
+															</div>
+														)}
+													</div>
+												</li>
+											);
+										})}
+									</ol>
+									{commentPages > 1 && (
+										<nav className="gv-cat-pagination" aria-label="Comment pages">
+											<Pagination
+												count={commentPages}
+												page={searchFilter.page}
+												shape="rounded"
+												onChange={paginationHandler}
+											/>
+										</nav>
+									)}
+								</>
+							) : (
+								<p className="gv-gd-comms__empty">No comments yet. Start the thread.</p>
+							)}
+						</div>
+
+						<form
+							className="gv-gd-form"
+							onSubmit={(event) => {
+								event.preventDefault();
+								creteCommentHandler();
+							}}
+						>
+							<label className="gv-gd-form__label" htmlFor="post-comment">
+								Leave a comment
+							</label>
+							<textarea
+								id="post-comment"
+								className="gv-gd-form__input gv-cd-form__input"
+								placeholder={user?._id ? 'Add to the thread' : 'Login to leave a comment'}
+								value={comment}
+								maxLength={100}
+								onChange={(e) => {
+									if (e.target.value.length > 100) return;
+									setWordsCnt(e.target.value.length);
+									setComment(e.target.value);
+								}}
+							/>
+							<div className="gv-gd-form__foot">
+								<span className={`gv-cd-count ${wordsCnt >= 90 ? 'is-near' : ''}`} aria-live="polite">
+									{wordsCnt}/100
+								</span>
+								{!user?._id && (
+									<Link href="/account/join" className="gv-gd-form__login">
+										Log in to comment
+									</Link>
+								)}
+								<button type="submit" className="gv-gd-ink-cta gv-gd-ink-cta--solid" disabled={!comment}>
+									Comment
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</section>
+
+			{/** 03 MORE — signal: newer posts on the same board **/}
+			{related.length > 0 && (
+				<section className="gv-cd-more" aria-labelledby="more-title">
+					<div className="gv-cd-more__inner">
+						<header className="gv-cd-more__head">
+							<div>
+								<p className="gv-chapter" aria-hidden>
+									<span>03</span>Keep reading
+								</p>
+								<h2 className="gv-cd-more__title" id="more-title">
+									More on {board.short}
+								</h2>
+							</div>
+							<Link href={{ pathname: '/community', query: { articleCategory: board.value } }} className="gv-gd-ink-cta">
+								All {board.label}
+							</Link>
+						</header>
+						<ul className="gv-cd-more__list">
+							{related.map((item: BoardArticle) => (
+								<li key={item._id} className="gv-cd-more__item">
+									<Link href={articleHref(item)} className="gv-cd-more__hit" aria-hidden tabIndex={-1} />
+									<span className="gv-cd-more__art" aria-hidden>
+										<img src={articleImage(item)} alt="" loading="lazy" decoding="async" />
+									</span>
+									<h3 className="gv-cd-more__post">
+										<Link href={articleHref(item)}>{item.articleTitle}</Link>
+									</h3>
+									<p className="gv-cd-more__meta">
+										<Moment format="DD MMM YYYY">{item.createdAt}</Moment>
+										<span>{item.articleLikes ?? 0} likes</span>
+										<span>{item.articleComments ?? 0} comments</span>
+									</p>
+								</li>
+							))}
+						</ul>
+					</div>
+				</section>
+			)}
+
+			<Dialog
+				open={openBackdrop}
+				onClose={cancelButtonHandler}
+				className="gv-cd-dialog"
+				aria-labelledby="edit-comment-title"
+				fullWidth
+				maxWidth="sm"
+			>
+				<form
+					className="gv-cd-dialog__panel"
+					onSubmit={(event) => {
+						event.preventDefault();
+						updateButtonHandler(updatedCommentId, undefined);
+					}}
+				>
+					<h2 className="gv-cd-dialog__title" id="edit-comment-title">
+						Edit comment
+					</h2>
+					<textarea
+						autoFocus
+						className="gv-cd-dialog__input"
+						value={updatedComment}
+						maxLength={100}
+						aria-label="Comment text"
+						onChange={(e) => updateCommentInputHandler(e.target.value)}
+					/>
+					<div className="gv-cd-dialog__foot">
+						<span className="gv-cd-dialog__count">{updatedCommentWordsCnt}/100</span>
+						<button type="button" className="gv-cd-dialog__cancel" onClick={() => cancelButtonHandler()}>
+							Cancel
+						</button>
+						<button type="submit" className="gv-cd-dialog__save">
+							Update
+						</button>
+					</div>
+				</form>
+			</Dialog>
+		</div>
+	);
 };
 
 CommunityDetail.defaultProps = {
@@ -564,4 +844,4 @@ CommunityDetail.defaultProps = {
 	},
 };
 
-export default withLayoutBasic(CommunityDetail);
+export default withLayoutCatalog(CommunityDetail);

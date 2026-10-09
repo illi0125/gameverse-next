@@ -1,0 +1,1024 @@
+/** COMMUNITY DETAIL — redesigned /community/detail page (docs/GAMEVERSE_DESIGN_SYSTEM.md)
+ *  Root is `.gv-catalog.gv-gd.gv-cd` inside LayoutCatalog's `.gv-catalog-shell`: reuses catalog.scss (atmosphere,
+ *  pagination) and gameDetail.scss (crumbs, flags, readout, line chips, CTAs, comment log/form, loading state).
+ *  Chapters: Post (void) → Read (paper) → Thread (ultraviolet) → Keep reading (signal) → footer (void).
+ */
+
+.gv-cd {
+	.gv-cd-hero__mask,
+	.gv-cd-hero__word {
+		display: block;
+		line-height: inherit;
+	}
+
+	/* Line chips are buttons and links here; keep them consistent and show the busy state */
+	.gv-gd-like {
+		text-decoration: none;
+
+		svg {
+			width: 18px;
+			height: 18px;
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: progress;
+		}
+	}
+}
+
+/* Reading progress along the top edge (scaleX from --gv-progress, set by the page) */
+.gv-cd .gv-cd-progress {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1300;
+	height: 3px;
+	background: var(--gv-signal);
+	transform: scaleX(var(--gv-progress, 0));
+	transform-origin: 0 50%;
+	pointer-events: none;
+}
+
+/** 00 POST — night hero **/
+
+.gv-cd .gv-cd-hero {
+	display: flex;
+	min-height: max(92vh, 680px);
+	min-height: max(92svh, 680px);
+	overflow: hidden;
+	background: var(--gv-void);
+	color: #ffffff;
+
+	&__inner {
+		position: relative;
+		z-index: 2;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) clamp(280px, 32vw, 520px);
+		align-items: center;
+		gap: 5vw;
+		width: 100%;
+		padding: calc(87px + clamp(28px, 5vh, 56px)) calc(var(--gv-frame) + 6vw) clamp(56px, 9vh, 96px) var(--gv-inset);
+	}
+
+	&__copy {
+		min-width: 0;
+	}
+
+	&__title {
+		margin: 18px 0 0;
+		font-family: var(--gv-display);
+		font-weight: 850;
+		line-height: 0.9;
+		letter-spacing: -0.05em;
+		text-transform: uppercase;
+		overflow-wrap: anywhere;
+
+		&.is-short {
+			font-size: min(8.4vw, 15vh);
+		}
+
+		&.is-mid {
+			font-size: min(6vw, 11vh);
+		}
+
+		&.is-long {
+			font-size: min(4.4vw, 8.5vh);
+		}
+	}
+
+	&__mask {
+		overflow: hidden;
+		padding-top: 0.08em;
+		margin-top: -0.08em;
+	}
+
+	&__plate {
+		aspect-ratio: 4 / 3;
+		overflow: hidden;
+		background: #120a33;
+		@include gv-cut(28px, 56%);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+}
+
+.gv-cd .gv-cd-byline {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin-top: clamp(20px, 3vh, 30px);
+
+	&__avatar {
+		flex: none;
+		width: 48px;
+		height: 48px;
+		overflow: hidden;
+		background: rgba(255, 255, 255, 0.12);
+		@include gv-cut(8px, 54%);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			filter: grayscale(1);
+		}
+	}
+
+	&__text {
+		display: grid;
+		gap: 4px;
+	}
+
+	&__name {
+		justify-self: start;
+		padding: 0;
+		border: 0;
+		background: none;
+		font-family: var(--gv-display);
+		font-size: 1.0625rem;
+		font-weight: 800;
+		letter-spacing: -0.01em;
+		text-transform: uppercase;
+		color: #ffffff;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--gv-signal);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-signal);
+			outline-offset: 3px;
+		}
+
+		&--gone {
+			color: var(--gv-haze);
+			cursor: default;
+
+			&:hover {
+				color: var(--gv-haze);
+			}
+		}
+	}
+
+	&__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2px 14px;
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--gv-haze);
+	}
+}
+
+/** 01 READ — paper: action rail, reading column, board switcher **/
+
+.gv-cd .gv-cd-read {
+	position: relative;
+	z-index: 2;
+	background: #ffffff;
+	@include gv-sheet-edge(#ffffff, 31%);
+
+	&__inner {
+		display: grid;
+		grid-template-columns: 64px minmax(0, 720px) minmax(200px, 260px);
+		justify-content: space-between;
+		align-items: start;
+		gap: clamp(28px, 4vw, 64px);
+		padding: clamp(64px, 8vw, 112px) 6vw clamp(72px, 9vw, 128px) var(--gv-inset);
+	}
+}
+
+.gv-cd .gv-cd-rail {
+	position: sticky;
+	top: 112px;
+	display: grid;
+	gap: 10px;
+	margin-top: 44px;
+
+	&__btn {
+		display: grid;
+		place-items: center;
+		gap: 4px;
+		width: 64px;
+		height: 64px;
+		padding: 0;
+		border: 1.5px solid var(--gv-ink);
+		background: #ffffff;
+		color: var(--gv-ink);
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition:
+			background-color 160ms ease,
+			color 160ms ease,
+			transform 140ms var(--gv-ease);
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+
+		/* app.scss sets a font on every span */
+		span {
+			font-family: var(--gv-mono);
+			line-height: 1;
+		}
+
+		&.is-liked svg {
+			color: #ff3d5e;
+		}
+
+		&:hover {
+			background: var(--gv-ink);
+			color: #ffffff;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-ink);
+			outline-offset: 3px;
+		}
+
+		&:active {
+			transform: scale(0.96);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: progress;
+		}
+	}
+}
+
+.gv-cd .gv-cd-article {
+	min-width: 0;
+}
+
+/* Long-form body: the Toast UI viewer, restyled for comfortable reading */
+.gv-cd .gv-cd-content {
+	margin-top: 28px;
+
+	.gv-viewer__loading {
+		font-family: var(--gv-mono);
+		font-size: 0.75rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--gv-muted);
+	}
+
+	.toastui-editor-contents {
+		font-family: var(--gv-display);
+		font-size: 1.125rem;
+		line-height: 1.75;
+		color: rgba(0, 0, 0, 0.84);
+		overflow-wrap: anywhere;
+
+		/* app.scss sets fonts on div/p/span; every descendant takes the reading face (code keeps mono below) */
+		* {
+			font-family: inherit;
+		}
+
+		p {
+			margin: 0 0 1.15em;
+			font-size: inherit;
+			line-height: inherit;
+			color: inherit;
+		}
+
+		/* The opening paragraph reads as a lead (the viewer may wrap content in one div) */
+		> p:first-child,
+		> div:first-child > p:first-child {
+			font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+			font-weight: 500;
+			line-height: 1.5;
+			letter-spacing: -0.01em;
+			color: var(--gv-ink);
+		}
+
+		h1,
+		h2,
+		h3,
+		h4 {
+			margin: 1.6em 0 0.5em;
+			padding: 0;
+			border: 0;
+			font-family: var(--gv-display);
+			font-weight: 850;
+			line-height: 1;
+			letter-spacing: -0.035em;
+			text-transform: uppercase;
+			color: var(--gv-ink);
+		}
+
+		h1 {
+			font-size: 2.25rem;
+		}
+
+		h2 {
+			font-size: 1.75rem;
+		}
+
+		h3,
+		h4 {
+			font-size: 1.375rem;
+		}
+
+		a {
+			color: var(--gv-ink);
+			text-decoration: underline;
+			text-decoration-color: var(--gv-uv);
+			text-decoration-thickness: 2px;
+			text-underline-offset: 3px;
+
+			&:hover {
+				background: var(--gv-signal);
+			}
+		}
+
+		img {
+			display: block;
+			max-width: 100%;
+			height: auto;
+			margin: 1.6em 0;
+			@include gv-cut(18px, 54%);
+		}
+
+		iframe,
+		video {
+			display: block;
+			width: 100%;
+			height: auto;
+			aspect-ratio: 16 / 9;
+			margin: 1.6em 0;
+			border: 0;
+		}
+
+		blockquote {
+			margin: 1.6em 0;
+			padding: 4px 0 4px 20px;
+			border-left: 3px solid var(--gv-ink);
+
+			p {
+				font-size: 1.25rem;
+				font-weight: 500;
+				color: var(--gv-ink);
+			}
+		}
+
+		ul,
+		ol {
+			margin: 0 0 1.15em;
+			padding-left: 1.3em;
+		}
+
+		li {
+			margin: 0.3em 0;
+		}
+
+		ul > li::before {
+			background-color: var(--gv-ink);
+		}
+
+		code {
+			padding: 2px 6px;
+			background: #f2f2f4;
+			font-family: var(--gv-mono);
+			font-size: 0.875em;
+			color: var(--gv-ink);
+		}
+
+		pre,
+		pre * {
+			font-family: var(--gv-mono);
+		}
+
+		pre {
+			padding: 18px;
+			background: #0b0b10;
+			color: #ffffff;
+
+			code {
+				background: none;
+				color: inherit;
+			}
+		}
+
+		hr {
+			margin: 2em 0;
+			border-top: 2px solid var(--gv-ink);
+		}
+	}
+}
+
+.gv-cd .gv-cd-end {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px 24px;
+	margin-top: clamp(40px, 5vw, 64px);
+	padding-top: 24px;
+	border-top: 2px solid var(--gv-ink);
+
+	&__title {
+		font-family: var(--gv-display);
+		font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+		font-weight: 850;
+		letter-spacing: -0.04em;
+		text-transform: uppercase;
+	}
+
+	&__like {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		height: 52px;
+		padding-inline: 22px;
+		border: 0;
+		background: var(--gv-ink);
+		color: #ffffff;
+		font-family: var(--gv-mono);
+		font-size: 0.8125rem;
+		font-weight: 500;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition:
+			background-color 160ms ease,
+			color 160ms ease,
+			transform 140ms var(--gv-ease);
+		@include gv-cut-btn(12px);
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+
+		&.is-liked svg {
+			color: #ff5470;
+		}
+
+		&:hover,
+		&:focus-visible {
+			outline: none;
+			background: var(--gv-signal);
+			color: var(--gv-ink);
+		}
+
+		&:active {
+			transform: scale(0.97);
+		}
+
+		&:disabled {
+			opacity: 0.6;
+			cursor: progress;
+		}
+	}
+}
+
+.gv-cd .gv-cd-boards {
+	position: sticky;
+	top: 112px;
+	margin-top: 44px;
+
+	&__title {
+		padding-bottom: 12px;
+		border-bottom: 2px solid var(--gv-ink);
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--gv-muted);
+	}
+
+	ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__item {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		padding: 13px 0;
+		border: 0;
+		border-bottom: 1px solid var(--gv-rule);
+		background: none;
+		font-family: var(--gv-display);
+		font-size: 1rem;
+		font-weight: 800;
+		letter-spacing: -0.01em;
+		text-align: left;
+		text-transform: uppercase;
+		color: rgba(0, 0, 0, 0.55);
+		cursor: pointer;
+		transition: color 160ms ease;
+
+		&::before {
+			content: '';
+			width: 8px;
+			height: 8px;
+			background: var(--gv-ink);
+			transform: scale(0);
+			transition: transform 200ms var(--gv-ease);
+		}
+
+		&:hover,
+		&.is-current {
+			color: var(--gv-ink);
+		}
+
+		&.is-current::before {
+			background: var(--gv-uv);
+			transform: scale(1);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-ink);
+			outline-offset: 2px;
+		}
+	}
+
+	&__write {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		height: 44px;
+		margin-top: 20px;
+		padding-inline: 18px;
+		border: 0;
+		background: var(--gv-ink);
+		color: #ffffff;
+		font-family: var(--gv-mono);
+		font-size: 0.75rem;
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition: background-color 160ms ease;
+		@include gv-cut-btn(10px);
+
+		svg {
+			width: 17px;
+			height: 17px;
+		}
+
+		&:hover,
+		&:focus-visible {
+			outline: none;
+			background: var(--gv-uv);
+		}
+	}
+}
+
+/** 02 THREAD — the game page's comment chapter on an ultraviolet field **/
+
+.gv-cd .gv-cd-comments {
+	background: var(--gv-uv);
+	color: var(--gv-ink);
+
+	&::before {
+		background: var(--gv-uv);
+	}
+
+	.gv-gd-comms__count,
+	.gv-gd-entry__date {
+		color: rgba(0, 0, 0, 0.72);
+	}
+
+	.gv-gd-entry {
+		border-bottom-color: rgba(0, 0, 0, 0.2);
+
+		&:hover {
+			background: rgba(0, 0, 0, 0.05);
+		}
+
+		&.is-mine {
+			box-shadow: inset 3px 0 0 var(--gv-ink);
+			padding-left: 14px;
+		}
+	}
+
+	.gv-gd-entry__text {
+		color: rgba(0, 0, 0, 0.84);
+	}
+
+	.gv-gd-entry__avatar {
+		background: rgba(255, 255, 255, 0.3);
+	}
+
+	.gv-gd-ink-cta--solid:not(:disabled):hover,
+	.gv-gd-ink-cta--solid:focus-visible {
+		background: #ffffff;
+		color: var(--gv-ink);
+	}
+
+	.gv-gd-ink-cta--solid:disabled {
+		opacity: 0.45;
+	}
+
+	.gv-gd-form__login:hover {
+		color: #ffffff;
+	}
+
+	.gv-gd-form__foot {
+		justify-content: flex-start;
+
+		.gv-gd-ink-cta {
+			margin-left: auto;
+		}
+	}
+
+	.gv-cat-pagination .MuiPaginationItem-root:hover {
+		background: rgba(0, 0, 0, 0.08);
+	}
+}
+
+.gv-cd .gv-cd-form__input {
+	min-height: 120px;
+}
+
+.gv-cd .gv-cd-count {
+	font-family: var(--gv-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.04em;
+
+	&.is-near {
+		padding: 2px 6px;
+		background: var(--gv-signal);
+	}
+}
+
+.gv-cd .gv-cd-op {
+	margin-left: 8px;
+	padding: 3px 6px;
+	background: var(--gv-ink);
+	font-family: var(--gv-mono);
+	font-size: 0.625rem;
+	font-weight: 500;
+	letter-spacing: 0.06em;
+	vertical-align: 0.15em;
+	color: #ffffff;
+}
+
+.gv-cd .gv-cd-gone {
+	display: inline-block;
+	color: rgba(0, 0, 0, 0.6);
+	cursor: default;
+
+	&:hover {
+		text-decoration: none;
+	}
+}
+
+.gv-cd .gv-cd-own {
+	display: flex;
+	gap: 16px;
+	margin-top: 10px;
+
+	button {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 0;
+		border: 0;
+		background: none;
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--gv-ink);
+		cursor: pointer;
+
+		svg {
+			width: 15px;
+			height: 15px;
+		}
+
+		&:hover {
+			text-decoration: underline;
+			text-underline-offset: 3px;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-ink);
+			outline-offset: 2px;
+		}
+	}
+}
+
+/** 03 KEEP READING — signal: newer posts on the same board **/
+
+.gv-cd .gv-cd-more {
+	position: relative;
+	z-index: 2;
+	background: var(--gv-signal);
+	color: var(--gv-ink);
+	@include gv-sheet-edge(#d7ff3a, 28%, true);
+
+	&__inner {
+		padding: clamp(64px, 9vw, 120px) 6vw clamp(80px, 10vw, 140px) var(--gv-inset);
+	}
+
+	&__head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 20px 32px;
+		margin-bottom: clamp(36px, 4vw, 56px);
+	}
+
+	&__title {
+		margin: 18px 0 0;
+		font-family: var(--gv-display);
+		font-size: clamp(3rem, 7vw, 6.5rem);
+		font-weight: 850;
+		line-height: 0.86;
+		letter-spacing: -0.055em;
+		text-transform: uppercase;
+	}
+
+	&__list {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: clamp(28px, 3vw, 44px) clamp(18px, 2vw, 28px);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__item {
+		position: relative;
+		min-width: 0;
+	}
+
+	&__hit {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+	}
+
+	&__art {
+		display: block;
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
+		background: rgba(0, 0, 0, 0.1);
+		transition: transform 260ms var(--gv-ease);
+		@include gv-cut(18px, 54%);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: transform 600ms var(--gv-ease);
+		}
+	}
+
+	&__post {
+		position: relative;
+		z-index: 2;
+		margin: -0.55em 0 0;
+		font-family: var(--gv-display);
+		font-size: clamp(1.25rem, 1.7vw, 1.625rem);
+		font-weight: 850;
+		line-height: 1.04;
+		letter-spacing: -0.035em;
+		text-transform: uppercase;
+
+		a {
+			padding: 0.06em 0.16em 0 0;
+			background: #ffffff;
+			-webkit-box-decoration-break: clone;
+			box-decoration-break: clone;
+
+			&:hover {
+				text-decoration: underline;
+				text-underline-offset: 4px;
+			}
+
+			&:focus-visible {
+				outline: 2px solid var(--gv-ink);
+				outline-offset: 3px;
+			}
+		}
+	}
+
+	&__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 2px 14px;
+		margin-top: 10px;
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: rgba(0, 0, 0, 0.7);
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		&__item:hover &__art {
+			transform: translateY(-6px);
+		}
+
+		&__item:hover &__art img {
+			transform: scale(1.04);
+		}
+	}
+}
+
+/* Edit dialog renders in a portal outside the page shell, so values are literal */
+.gv-cd-dialog .MuiPaper-root {
+	border: 1.5px solid #000000;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.gv-cd-dialog__panel {
+	display: grid;
+	gap: 14px;
+	padding: 24px;
+}
+
+.gv-cd-dialog__title {
+	margin: 0;
+	font-family: 'Archivo', 'Poppins', sans-serif;
+	font-size: 1.5rem;
+	font-weight: 850;
+	letter-spacing: -0.03em;
+	text-transform: uppercase;
+	color: #000000;
+}
+
+.gv-cd-dialog__input {
+	width: 100%;
+	min-height: 120px;
+	padding: 14px;
+	border: 1.5px solid #000000;
+	border-radius: 0;
+	font-family: 'Archivo', 'Poppins', sans-serif;
+	font-size: 1rem;
+	line-height: 1.5;
+	resize: vertical;
+	outline: none;
+	box-sizing: border-box;
+
+	&:focus {
+		box-shadow: inset 0 0 0 1.5px #000000;
+	}
+}
+
+.gv-cd-dialog__foot {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.gv-cd-dialog__count {
+	margin-right: auto;
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 0.75rem;
+	color: rgba(0, 0, 0, 0.6);
+}
+
+.gv-cd-dialog__cancel,
+.gv-cd-dialog__save {
+	height: 44px;
+	padding-inline: 18px;
+	font-family: 'JetBrains Mono', ui-monospace, monospace;
+	font-size: 0.75rem;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+}
+
+.gv-cd-dialog__cancel {
+	border: 1.5px solid #000000;
+	background: #ffffff;
+	color: #000000;
+
+	&:hover {
+		background: #000000;
+		color: #ffffff;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #000000;
+		outline-offset: 3px;
+	}
+}
+
+.gv-cd-dialog__save {
+	border: 0;
+	background: #000000;
+	color: #ffffff;
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+
+	&:hover,
+	&:focus-visible {
+		outline: none;
+		background: #6f5bff;
+	}
+}
+
+/** RESPONSIVE **/
+
+@media (max-width: 1099px) {
+	.gv-cd .gv-cd-read__inner {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	/* The hero and the end of the post carry the same actions */
+	.gv-cd .gv-cd-rail {
+		display: none;
+	}
+
+	.gv-cd .gv-cd-boards {
+		position: static;
+		margin-top: 0;
+
+		ul {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0 22px;
+		}
+
+		&__item {
+			width: auto;
+			border-bottom: 0;
+		}
+	}
+
+	.gv-cd .gv-cd-more__list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 899px) {
+	.gv-cd .gv-cd-hero {
+		min-height: 0;
+
+		&__inner {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 32px;
+			padding: calc(87px + 32px) var(--gv-gutter) 56px;
+		}
+
+		&__title {
+			&.is-short {
+				font-size: 13vw;
+			}
+
+			&.is-mid {
+				font-size: 9.6vw;
+			}
+
+			&.is-long {
+				font-size: 7.6vw;
+			}
+		}
+	}
+
+	.gv-cd .gv-cd-read__inner,
+	.gv-cd .gv-cd-more__inner {
+		padding: 56px var(--gv-gutter) 72px;
+	}
+
+	.gv-cd .gv-cd-content .toastui-editor-contents {
+		font-size: 1.0625rem;
+	}
+}
+
+@media (max-width: 639px) {
+	.gv-cd .gv-cd-more__list {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+#mobile-wrap.gv-catalog-shell .gv-cd .gv-cd-hero__inner {
+	padding-top: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-cd .gv-cd-more__art,
+	.gv-cd .gv-cd-more__art img,
+	.gv-cd .gv-cd-boards__item::before {
+		transition: none;
+	}
+}
