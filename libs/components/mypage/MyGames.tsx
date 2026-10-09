@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
-import { Pagination, Stack, Typography } from '@mui/material';
+import { Pagination } from '@mui/material';
+import Link from 'next/link';
+import MyPageHead from './MyPageHead';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { MyGameCard } from './MyGameCard';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
@@ -85,79 +87,83 @@ const MyGames: NextPage = ({ initialInput, ...props }: any) => {
 		}
 	};
 
-	if (device === 'mobile') {
-		return <div>GAMEVERSE MY GAMES MOBILE</div>;
-	} else {
-		return (
-			<div id="my-games-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">My Games</Typography>
-						<Typography className="sub-title">We are glad to see you again!</Typography>
-					</Stack>
-				</Stack>
-				<Stack className="game-list-box">
-					<Stack className="tab-name-box">
-						{statusTabs.map((tab) => (
-							<Typography
-								key={tab.status}
-								onClick={() => changeStatusHandler(tab.status)}
-								className={searchFilter.search.gameStatus === tab.status ? 'active-tab-name' : 'tab-name'}
-							>
-								{tab.label}
-							</Typography>
-						))}
-					</Stack>
-					<Stack className="list-box">
-						<Stack className="listing-title-box">
-							<Typography className="title-text">Listing title</Typography>
-							<Typography className="title-text">Date Published</Typography>
-							<Typography className="title-text">Status</Typography>
-							<Typography className="title-text">View</Typography>
-							<Typography className="title-text">Action</Typography>
-						</Stack>
+	const pageCount = Math.ceil(total / searchFilter.limit);
 
-						{agentGames?.length === 0 ? (
-							<div className={'no-data'}>
-								<img src="/img/icons/icoAlert.svg" alt="" />
-								<p>No games found!</p>
-							</div>
-						) : (
-							agentGames.map((game: Game) => {
-								return (
-									<MyGameCard
-										key={game._id}
-										game={game}
-										deleteGameHandler={deleteGameHandler}
-										updateGameHandler={updateGameHandler}
-									/>
-								);
-							})
-						)}
+	return (
+		<div className="gv-mp-section gv-mp-games" id="my-games-panel">
+			<MyPageHead kicker="Studio" title="My games" desc="Everything you list in the catalog. Click a status to switch it, or edit and delete.">
+				<Link href={{ pathname: '/mypage', query: { category: 'addGame' } }} scroll={false} className="gv-mp-btn gv-mp-btn--solid">
+					Add a game
+				</Link>
+			</MyPageHead>
 
-						{agentGames.length !== 0 && (
-							<Stack className="pagination-config">
-								<Stack className="pagination-box">
-									<Pagination
-										count={Math.ceil(total / searchFilter.limit)}
-										page={searchFilter.page}
-										shape="circular"
-										color="primary"
-										onChange={paginationHandler}
-									/>
-								</Stack>
-								<Stack className="total-result">
-									<Typography>
-										{total} game{total > 1 ? 's' : ''} available
-									</Typography>
-								</Stack>
-							</Stack>
-						)}
-					</Stack>
-				</Stack>
+			<div className="gv-mp-tabs" role="tablist" aria-label="Game status">
+				{statusTabs.map((tab) => {
+					const selected = searchFilter.search.gameStatus === tab.status;
+					return (
+						<button
+							type="button"
+							role="tab"
+							aria-selected={selected}
+							key={tab.status}
+							onClick={() => changeStatusHandler(tab.status)}
+							className={`gv-mp-tabs__tab ${selected ? 'is-current' : ''}`}
+						>
+							{tab.label}
+							{selected && !getAgentGamesLoading && <span className="gv-mp-tabs__count">{total}</span>}
+						</button>
+					);
+				})}
 			</div>
-		);
-	}
+
+			<div className="gv-mp-table" role="table" aria-label="My games">
+				<div className="gv-mp-table__head listing-title-box" role="row">
+					<span role="columnheader">Game</span>
+					<span role="columnheader">Published</span>
+					<span role="columnheader">Status</span>
+					<span role="columnheader">Views</span>
+					<span role="columnheader">Actions</span>
+				</div>
+
+				{agentGames?.length === 0 ? (
+					<div className="gv-cat-empty">
+						<p className="gv-cat-empty__title">
+							{getAgentGamesLoading ? 'Loading games…' : `No ${searchFilter.search.gameStatus === GameStatus.ACTIVE ? 'active' : 'upcoming'} games.`}
+						</p>
+						{!getAgentGamesLoading && (
+							<Link href={{ pathname: '/mypage', query: { category: 'addGame' } }} scroll={false} className="gv-cat-empty__reset">
+								List a game
+							</Link>
+						)}
+					</div>
+				) : (
+					agentGames.map((game: Game) => {
+						return (
+							<MyGameCard
+								key={game._id}
+								game={game}
+								deleteGameHandler={deleteGameHandler}
+								updateGameHandler={updateGameHandler}
+							/>
+						);
+					})
+				)}
+			</div>
+
+			{agentGames.length !== 0 && (
+				<nav className="gv-cat-pagination" aria-label="Game pages">
+					{pageCount > 1 ? (
+						<Pagination count={pageCount} page={searchFilter.page} shape="rounded" onChange={paginationHandler} />
+					) : (
+						<span />
+					)}
+					<p className="gv-cat-pagination__total">
+						{total} game{total > 1 ? 's' : ''} available
+					</p>
+				</nav>
+			)}
+		</div>
+	);
 };
 
 MyGames.defaultProps = {

@@ -17,6 +17,7 @@ import { userVar } from '../../../apollo/store';
 import { CREATE_GAME, UPDATE_GAME } from '../../../apollo/user/mutation';
 import { GET_GAME } from '../../../apollo/user/query';
 import { formatEnumLabel, validateGamePricing } from '../../utils';
+import MyPageHead from './MyPageHead';
 import { T } from '../../types/common';
 
 const MAX_IMAGES = 10;
@@ -252,10 +253,6 @@ const AddNewGame = ({ initialValues, ...props }: any) => {
 		</Stack>
 	);
 
-	if (device === 'mobile') {
-		return <div>ADD NEW GAME MOBILE PAGE</div>;
-	}
-
 	if (gameId && getGameLoading) {
 		return (
 			<Stack sx={{ alignItems: 'center', padding: '120px 0' }}>
@@ -265,11 +262,16 @@ const AddNewGame = ({ initialValues, ...props }: any) => {
 	}
 
 	return (
-		<div id="add-game-page">
-			<Stack className="main-title-box">
-				<Typography className="main-title">{gameId ? 'Edit Game' : 'Add New Game'}</Typography>
-				<Typography className="sub-title">We are glad to see you again!</Typography>
-			</Stack>
+		<div id="add-game-page" className="gv-mp-section gv-mp-addgame">
+			<MyPageHead
+				kicker="Studio"
+				title={gameId ? 'Edit game' : 'Add a game'}
+				desc={
+					gameId
+						? 'Update the listing. Changes go live when you save.'
+						: 'Fill in the listing, pick platforms, genres and modes, and upload a cover. Fields mirror the catalog page.'
+				}
+			/>
 
 			<div>
 				<Stack className="config">
@@ -331,8 +333,6 @@ const AddNewGame = ({ initialValues, ...props }: any) => {
 									<option value={GameStatus.ACTIVE}>Active</option>
 									<option value={GameStatus.UPCOMING}>Upcoming</option>
 								</select>
-								<div className={'divider'}></div>
-								<img src={'/img/icons/Vector.svg'} className={'arrow-down'} />
 							</Stack>
 						</Stack>
 
@@ -350,8 +350,6 @@ const AddNewGame = ({ initialValues, ...props }: any) => {
 										</option>
 									))}
 								</select>
-								<div className={'divider'}></div>
-								<img src={'/img/icons/Vector.svg'} className={'arrow-down'} />
 							</Stack>
 							<Stack className="price-year-after-price">
 								<Typography className="title">Price ($)</Typography>
@@ -457,7 +455,7 @@ const AddNewGame = ({ initialValues, ...props }: any) => {
 					<Typography className="upload-title">Upload images of your game</Typography>
 					<Stack className="images-box">
 						<Stack className="upload-box">
-							<CloudUploadOutlinedIcon sx={{ fontSize: 100, color: '#DDDDDD' }} />
+							<CloudUploadOutlinedIcon className="upload-icon" aria-hidden />
 							<Stack className="text-box">
 								<Typography className="drag-title">Upload cover and screenshots</Typography>
 								<Typography className="format-title">

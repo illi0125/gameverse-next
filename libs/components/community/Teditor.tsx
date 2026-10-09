@@ -1,5 +1,4 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Box, Button, FormControl, MenuItem, Stack, Typography, Select, TextField } from '@mui/material';
 import { BoardArticleCategory } from '../../enums/board-article.enum';
 import { Editor } from '@toast-ui/react-editor';
 import { getJwtToken } from '../../auth';
@@ -111,78 +110,72 @@ const TuiEditor = () => {
 		}
 	};
 
+	const boards = [
+		{ value: BoardArticleCategory.FREE, label: 'Free' },
+		{ value: BoardArticleCategory.RECOMMEND, label: 'Recommendation' },
+		{ value: BoardArticleCategory.NEWS, label: 'News' },
+		{ value: BoardArticleCategory.HUMOR, label: 'Humor' },
+	];
+
 	return (
-		<Stack>
-			<Stack direction="row" style={{ margin: '40px' }} justifyContent="space-evenly">
-				<Box component={'div'} className={'form_row'} style={{ width: '300px' }}>
-					<Typography style={{ color: '#7f838d', margin: '10px' }} variant="h3">
-						Category
-					</Typography>
-					<FormControl sx={{ width: '100%', background: 'white' }}>
-						<Select
-							value={articleCategory}
-							onChange={changeCategoryHandler}
-							displayEmpty
-							inputProps={{ 'aria-label': 'Without label' }}
-						>
-							<MenuItem value={BoardArticleCategory.FREE}>
-								<span>Free</span>
-							</MenuItem>
-							<MenuItem value={BoardArticleCategory.HUMOR}>Humor</MenuItem>
-							<MenuItem value={BoardArticleCategory.NEWS}>News</MenuItem>
-							<MenuItem value={BoardArticleCategory.RECOMMEND}>Recommendation</MenuItem>
-						</Select>
-					</FormControl>
-				</Box>
-				<Box component={'div'} style={{ width: '300px', flexDirection: 'column' }}>
-					<Typography style={{ color: '#7f838d', margin: '10px' }} variant="h3">
-						Title
-					</Typography>
-					<TextField
-						onChange={articleTitleHandler}
-						id="filled-basic"
-						label="Type Title"
-						style={{ width: '300px', background: 'white' }}
-					/>
-				</Box>
-			</Stack>
+		<div className="gv-editor">
+			<fieldset className="gv-editor__boards">
+				<legend className="gv-mp-field__label">Board</legend>
+				<div className="gv-editor__chips">
+					{boards.map((board) => (
+						<label key={board.value} className={`gv-editor__chip ${articleCategory === board.value ? 'is-on' : ''}`}>
+							<input
+								type="radio"
+								name="article-board"
+								value={board.value}
+								checked={articleCategory === board.value}
+								onChange={changeCategoryHandler}
+							/>
+							{board.label}
+						</label>
+					))}
+				</div>
+			</fieldset>
 
-			<Editor
-				initialValue={'Type here'}
-				placeholder={'Type here'}
-				previewStyle={'vertical'}
-				height={'640px'}
-				// @ts-ignore
-				initialEditType={'WYSIWYG'}
-				toolbarItems={[
-					['heading', 'bold', 'italic', 'strike'],
-					['image', 'table', 'link'],
-					['ul', 'ol', 'task'],
-				]}
-				ref={editorRef}
-				hooks={{
-					addImageBlobHook: async (image: any, callback: any) => {
-						const uploadedImageURL = await uploadImage(image);
-						callback(uploadedImageURL);
-						return false;
-					},
-				}}
-				events={{
-					load: function (param: any) {},
-				}}
-			/>
+			<label className="gv-editor__title">
+				<span className="gv-mp-field__label">Title</span>
+				<input type="text" placeholder="Type title" maxLength={50} onChange={articleTitleHandler} />
+			</label>
 
-			<Stack direction="row" justifyContent="center">
-				<Button
-					variant="contained"
-					color="primary"
-					style={{ margin: '30px', width: '250px', height: '45px' }}
-					onClick={handleRegisterButton}
-				>
-					Register
-				</Button>
-			</Stack>
-		</Stack>
+			<div className="gv-editor__body">
+				<Editor
+					initialValue={'Type here'}
+					placeholder={'Type here'}
+					previewStyle={'vertical'}
+					height={'560px'}
+					// @ts-ignore
+					initialEditType={'WYSIWYG'}
+					toolbarItems={[
+						['heading', 'bold', 'italic', 'strike'],
+						['image', 'table', 'link'],
+						['ul', 'ol', 'task'],
+					]}
+					ref={editorRef}
+					hooks={{
+						addImageBlobHook: async (image: any, callback: any) => {
+							const uploadedImageURL = await uploadImage(image);
+							callback(uploadedImageURL);
+							return false;
+						},
+					}}
+					events={{
+						load: function (param: any) {},
+					}}
+				/>
+			</div>
+
+			<div className="gv-editor__foot">
+				<p className="gv-mp-field__hint">Titles are 3–50 characters. Your post appears on the board right after you publish.</p>
+				<button type="button" className="gv-mp-btn gv-mp-btn--solid" onClick={handleRegisterButton}>
+					Publish
+				</button>
+			</div>
+		</div>
 	);
 };
 

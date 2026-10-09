@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { NextPage } from 'next';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Pagination, Stack, Typography } from '@mui/material';
+import { Pagination } from '@mui/material';
+import Link from 'next/link';
+import MyPageHead from './MyPageHead';
 import GameCard from '../game/GameCard';
 import { Game } from '../../types/game/game';
 import { T } from '../../types/common';
@@ -34,50 +36,43 @@ const RecentlyVisited: NextPage = () => {
 		setSearchVisited({ ...searchVisited, page: value });
 	};
 
-	if (device === 'mobile') {
-		return <div>GAMEVERSE RECENTLY VISITED MOBILE</div>;
-	} else {
-		return (
-			<div id="my-favorites-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">Recently Visited</Typography>
-						<Typography className="sub-title">We are glad to see you again!</Typography>
-					</Stack>
-				</Stack>
-				<Stack className="favorites-list-box">
-					{recentlyVisited?.length ? (
-						recentlyVisited?.map((game: Game) => {
-							return <GameCard game={game} recentlyVisited={true} key={game._id} />;
-						})
-					) : (
-						<div className={'no-data'}>
-							<img src="/img/icons/icoAlert.svg" alt="" />
-							<p>No recently visited games found!</p>
-						</div>
+	const pageCount = Math.ceil(total / searchVisited.limit);
+
+	return (
+		<div className="gv-mp-section gv-mp-library">
+			<MyPageHead kicker="Library" title="Recently visited" desc="Games you opened lately, newest first." />
+			{recentlyVisited?.length ? (
+				<ul className="gv-cat-grid gv-mp-grid" aria-label="Recently visited games">
+					{recentlyVisited?.map((game: Game) => (
+						<li key={game._id}>
+							<GameCard game={game} recentlyVisited={true} />
+						</li>
+					))}
+				</ul>
+			) : (
+				<div className="gv-cat-empty">
+					<p className="gv-cat-empty__title">{getVisitedLoading ? 'Loading…' : 'Nothing visited yet.'}</p>
+					{!getVisitedLoading && (
+						<Link href="/game" className="gv-cat-empty__reset">
+							Explore the catalog
+						</Link>
 					)}
-				</Stack>
-				{recentlyVisited?.length ? (
-					<Stack className="pagination-config">
-						<Stack className="pagination-box">
-							<Pagination
-								count={Math.ceil(total / searchVisited.limit)}
-								page={searchVisited.page}
-								shape="circular"
-								color="primary"
-								onChange={paginationHandler}
-							/>
-						</Stack>
-						<Stack className="total-result">
-							<Typography>
-								Total {total} recently visited game{total > 1 ? 's' : ''}
-							</Typography>
-						</Stack>
-					</Stack>
-				) : null}
-			</div>
-		);
-	}
+				</div>
+			)}
+			{recentlyVisited?.length ? (
+				<nav className="gv-cat-pagination" aria-label="Visited pages">
+					{pageCount > 1 ? (
+						<Pagination count={pageCount} page={searchVisited.page} shape="rounded" onChange={paginationHandler} />
+					) : (
+						<span />
+					)}
+					<p className="gv-cat-pagination__total">
+						Total {total} recently visited game{total > 1 ? 's' : ''}
+					</p>
+				</nav>
+			) : null}
+		</div>
+	);
 };
 
 export default RecentlyVisited;

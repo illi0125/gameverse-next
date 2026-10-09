@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { NextPage } from 'next';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Pagination, Stack, Typography } from '@mui/material';
+import { Pagination } from '@mui/material';
+import Link from 'next/link';
+import MyPageHead from './MyPageHead';
 import GameCard from '../game/GameCard';
 import { Game } from '../../types/game/game';
 import { T } from '../../types/common';
@@ -53,50 +55,43 @@ const MyFavorites: NextPage = () => {
 		}
 	};
 
-	if (device === 'mobile') {
-		return <div>GAMEVERSE MY FAVORITES MOBILE</div>;
-	} else {
-		return (
-			<div id="my-favorites-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">My Favorites</Typography>
-						<Typography className="sub-title">We are glad to see you again!</Typography>
-					</Stack>
-				</Stack>
-				<Stack className="favorites-list-box">
-					{myFavorites?.length ? (
-						myFavorites?.map((game: Game) => {
-							return <GameCard game={game} likeGameHandler={likeGameHandler} myFavorites={true} key={game._id} />;
-						})
-					) : (
-						<div className={'no-data'}>
-							<img src="/img/icons/icoAlert.svg" alt="" />
-							<p>No Favorites found!</p>
-						</div>
+	const pageCount = Math.ceil(total / searchFavorites.limit);
+
+	return (
+		<div className="gv-mp-section gv-mp-library">
+			<MyPageHead kicker="Library" title="Favorites" desc="Games you liked. Tap the heart to remove one." />
+			{myFavorites?.length ? (
+				<ul className="gv-cat-grid gv-mp-grid" aria-label="Favorite games">
+					{myFavorites?.map((game: Game) => (
+						<li key={game._id}>
+							<GameCard game={game} likeGameHandler={likeGameHandler} myFavorites={true} />
+						</li>
+					))}
+				</ul>
+			) : (
+				<div className="gv-cat-empty">
+					<p className="gv-cat-empty__title">{getFavoritesLoading ? 'Loading favorites…' : 'No favorites yet.'}</p>
+					{!getFavoritesLoading && (
+						<Link href="/game" className="gv-cat-empty__reset">
+							Browse games
+						</Link>
 					)}
-				</Stack>
-				{myFavorites?.length ? (
-					<Stack className="pagination-config">
-						<Stack className="pagination-box">
-							<Pagination
-								count={Math.ceil(total / searchFavorites.limit)}
-								page={searchFavorites.page}
-								shape="circular"
-								color="primary"
-								onChange={paginationHandler}
-							/>
-						</Stack>
-						<Stack className="total-result">
-							<Typography>
-								Total {total} favorite game{total > 1 ? 's' : ''}
-							</Typography>
-						</Stack>
-					</Stack>
-				) : null}
-			</div>
-		);
-	}
+				</div>
+			)}
+			{myFavorites?.length ? (
+				<nav className="gv-cat-pagination" aria-label="Favorite pages">
+					{pageCount > 1 ? (
+						<Pagination count={pageCount} page={searchFavorites.page} shape="rounded" onChange={paginationHandler} />
+					) : (
+						<span />
+					)}
+					<p className="gv-cat-pagination__total">
+						Total {total} favorite game{total > 1 ? 's' : ''}
+					</p>
+				</nav>
+			) : null}
+		</div>
+	);
 };
 
 export default MyFavorites;

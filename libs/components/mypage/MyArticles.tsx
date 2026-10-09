@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { NextPage } from 'next';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Pagination, Stack, Typography } from '@mui/material';
-import CommunityCard from '../common/CommunityCard';
+import { Pagination } from '@mui/material';
+import Link from 'next/link';
+import MyPageHead from './MyPageHead';
+import PostEntry from '../community/PostEntry';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 import { T } from '../../types/common';
@@ -59,55 +61,46 @@ const MyArticles: NextPage = ({ initialInput, ...props }: T) => {
 		}
 	};
 
-	if (device === 'mobile') {
-		return <>ARTICLE PAGE MOBILE</>;
-	} else
-		return (
-			<div id="my-articles-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">Article</Typography>
-						<Typography className="sub-title">We are glad to see you again!</Typography>
-					</Stack>
-				</Stack>
-				<Stack className="article-list-box">
-					{boardArticles?.length > 0 ? (
-						boardArticles?.map((boardArticle: BoardArticle) => {
-							return (
-								<CommunityCard
-									boardArticle={boardArticle}
-									key={boardArticle?._id}
-									size={'small'}
-									likeArticleHandler={likeBoardArticleHandler}
-								/>
-							);
-						})
-					) : (
-						<div className={'no-data'}>
-							<img src="/img/icons/icoAlert.svg" alt="" />
-							<p>No Articles found!</p>
-						</div>
-					)}
-				</Stack>
+	const pageCount = Math.ceil((totalCount ?? 0) / searchCommunity.limit);
 
-				{boardArticles?.length > 0 && (
-					<Stack className="pagination-conf">
-						<Stack className="pagination-box">
-							<Pagination
-								count={Math.ceil(totalCount / searchCommunity.limit)}
-								page={searchCommunity.page}
-								shape="circular"
-								color="primary"
-								onChange={paginationHandler}
-							/>
-						</Stack>
-						<Stack className="total">
-							<Typography>Total {totalCount ?? 0} article(s) available</Typography>
-						</Stack>
-					</Stack>
-				)}
-			</div>
-		);
+	return (
+		<div className="gv-mp-section gv-mp-articles gv-cm">
+			<MyPageHead kicker="Community" title="My articles" desc="Everything you posted on the boards, newest first.">
+				<Link href={{ pathname: '/mypage', query: { category: 'writeArticle' } }} scroll={false} className="gv-mp-btn gv-mp-btn--solid">
+					Write article
+				</Link>
+			</MyPageHead>
+			{boardArticles?.length > 0 ? (
+				<ol className="gv-cm-feed" aria-label="My articles">
+					{boardArticles?.map((boardArticle: BoardArticle) => (
+						<li key={boardArticle?._id}>
+							<PostEntry article={boardArticle} likeArticleHandler={likeBoardArticleHandler} />
+						</li>
+					))}
+				</ol>
+			) : (
+				<div className="gv-cat-empty">
+					<p className="gv-cat-empty__title">{boardArticlesLoading ? 'Loading articles…' : 'No articles yet.'}</p>
+					{!boardArticlesLoading && (
+						<Link href={{ pathname: '/mypage', query: { category: 'writeArticle' } }} scroll={false} className="gv-cat-empty__reset">
+							Write your first post
+						</Link>
+					)}
+				</div>
+			)}
+
+			{boardArticles?.length > 0 && (
+				<nav className="gv-cat-pagination" aria-label="Article pages">
+					{pageCount > 1 ? (
+						<Pagination count={pageCount} page={searchCommunity.page} shape="rounded" onChange={paginationHandler} />
+					) : (
+						<span />
+					)}
+					<p className="gv-cat-pagination__total">Total {totalCount ?? 0} article(s) available</p>
+				</nav>
+			)}
+		</div>
+	);
 };
 
 MyArticles.defaultProps = {

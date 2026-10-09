@@ -57,10 +57,7 @@ export const MyGameCard = (props: MyGameCardProps) => {
 		setAnchorEl(null);
 	};
 
-	if (device === 'mobile') {
-		return <div>MOBILE GAME CARD</div>;
-	} else
-		return (
+	return (
 			<Stack className="game-card-box">
 				<Stack className="image-box" onClick={() => pushGameDetail(game?._id)}>
 					<img src={imagePath} alt={game.gameTitle} />
@@ -80,6 +77,7 @@ export const MyGameCard = (props: MyGameCardProps) => {
 				<Stack className="status-box">
 					<Stack
 						className="coloured-box"
+						data-status={game.gameStatus}
 						sx={{ background: statusColors[game.gameStatus]?.background, cursor: canManage ? 'pointer' : 'default' }}
 						onClick={handleClick}
 					>

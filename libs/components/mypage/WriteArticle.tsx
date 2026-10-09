@@ -1,28 +1,17 @@
 import React from 'react';
 import { NextPage } from 'next';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Stack, Typography } from '@mui/material';
 import dynamic from 'next/dynamic';
+import MyPageHead from './MyPageHead';
 //@ts-ignore
 const TuiEditor = dynamic(() => import('../community/Teditor'), { ssr: false });
 
 const WriteArticle: NextPage = () => {
-	const device = useDeviceDetect();
-
-	if (device === 'mobile') {
-		return <>ARTICLE PAGE MOBILE</>;
-	} else
-		return (
-			<div id="write-article-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">Write an Article</Typography>
-						<Typography className="sub-title">Feel free to write your ideas!</Typography>
-					</Stack>
-				</Stack>
-				<TuiEditor />
-			</div>
-		);
+	return (
+		<div className="gv-mp-section gv-mp-write">
+			<MyPageHead kicker="Community" title="Write an article" desc="Pick a board, give it a title, and write. Images upload as you add them." />
+			<TuiEditor />
+		</div>
+	);
 };
 
 export default WriteArticle;
