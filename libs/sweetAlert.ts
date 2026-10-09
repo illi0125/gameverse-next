@@ -1,19 +1,51 @@
-import Swal from 'sweetalert2';
-import 'animate.css';
+import Swal, { SweetAlertIcon } from 'sweetalert2';
 import { Messages } from './config';
 
+/**
+ * GameVerse look for every SweetAlert in the app (styles: scss/pc/common/gvAlert.scss).
+ * Only presentation options live here; each export below keeps its name, parameters and result.
+ */
+const GvSwal = Swal.mixin({
+	buttonsStyling: false,
+	customClass: {
+		popup: 'gv-alert',
+		title: 'gv-alert__title',
+		htmlContainer: 'gv-alert__text',
+		icon: 'gv-alert__icon',
+		actions: 'gv-alert__actions',
+		confirmButton: 'gv-alert__btn gv-alert__btn--solid',
+		cancelButton: 'gv-alert__btn',
+		timerProgressBar: 'gv-alert__timer',
+	},
+	showClass: { popup: 'gv-alert--in' },
+	hideClass: { popup: 'gv-alert--out' },
+});
+
+/** Square GameVerse icon chips instead of SweetAlert's round animated icons **/
+const iconGlyphs: Record<SweetAlertIcon, string> = {
+	success: '✓',
+	error: '!',
+	warning: '!',
+	info: 'i',
+	question: '?',
+};
+const gvIcon = (icon: SweetAlertIcon) => ({
+	icon,
+	iconHtml: `<span class="gv-alert__glyph" aria-hidden="true">${iconGlyphs[icon]}</span>`,
+});
+
 export const sweetErrorHandling = async (err: any) => {
-	await Swal.fire({
-		icon: 'error',
+	await GvSwal.fire({
+		...gvIcon('error'),
 		text: err.message,
 		showConfirmButton: false,
 	});
 };
 
 export const sweetTopSuccessAlert = async (msg: string, duration: number = 2000) => {
-	await Swal.fire({
+	await GvSwal.fire({
 		position: 'center',
-		icon: 'success',
+		...gvIcon('success'),
 		title: msg.replace('Definer: ', ''),
 		showConfirmButton: false,
 		timer: duration,
@@ -21,11 +53,8 @@ export const sweetTopSuccessAlert = async (msg: string, duration: number = 2000)
 };
 
 export const sweetContactAlert = async (msg: string, duration: number = 10000) => {
-	await Swal.fire({
+	await GvSwal.fire({
 		title: msg,
-		showClass: {
-			popup: 'animate__bounceIn',
-		},
 		showConfirmButton: false,
 		timer: duration,
 	}).then();
@@ -33,16 +62,13 @@ export const sweetContactAlert = async (msg: string, duration: number = 10000) =
 
 export const sweetConfirmAlert = (msg: string) => {
 	return new Promise(async (resolve, reject) => {
-		await Swal.fire({
-			icon: 'question',
+		await GvSwal.fire({
+			...gvIcon('question'),
 			text: msg,
-			showClass: {
-				popup: 'animate__bounceIn',
-			},
 			showCancelButton: true,
 			showConfirmButton: true,
-			confirmButtonColor: '#e92C28',
-			cancelButtonColor: '#bdbdbd',
+			confirmButtonText: 'Confirm',
+			cancelButtonText: 'Cancel',
 		}).then((response) => {
 			if (response?.isConfirmed) resolve(true);
 			else resolve(false);
@@ -52,14 +78,12 @@ export const sweetConfirmAlert = (msg: string) => {
 
 export const sweetLoginConfirmAlert = (msg: string) => {
 	return new Promise(async (resolve, reject) => {
-		await Swal.fire({
+		await GvSwal.fire({
 			text: msg,
 			showCancelButton: true,
 			showConfirmButton: true,
-			color: '#212121',
-			confirmButtonColor: '#e92C28',
-			cancelButtonColor: '#bdbdbd',
 			confirmButtonText: 'Login',
+			cancelButtonText: 'Cancel',
 		}).then((response) => {
 			if (response?.isConfirmed) resolve(true);
 			else resolve(false);
@@ -68,8 +92,8 @@ export const sweetLoginConfirmAlert = (msg: string) => {
 };
 
 export const sweetErrorAlert = async (msg: string, duration: number = 3000) => {
-	await Swal.fire({
-		icon: 'error',
+	await GvSwal.fire({
+		...gvIcon('error'),
 		title: msg,
 		showConfirmButton: false,
 		timer: duration,
@@ -77,8 +101,8 @@ export const sweetErrorAlert = async (msg: string, duration: number = 3000) => {
 };
 
 export const sweetMixinErrorAlert = async (msg: string, duration: number = 3000) => {
-	await Swal.fire({
-		icon: 'error',
+	await GvSwal.fire({
+		...gvIcon('error'),
 		title: msg,
 		showConfirmButton: false,
 		timer: duration,
@@ -86,8 +110,8 @@ export const sweetMixinErrorAlert = async (msg: string, duration: number = 3000)
 };
 
 export const sweetMixinSuccessAlert = async (msg: string, duration: number = 2000) => {
-	await Swal.fire({
-		icon: 'success',
+	await GvSwal.fire({
+		...gvIcon('success'),
 		title: msg,
 		showConfirmButton: false,
 		timer: duration,
@@ -95,13 +119,13 @@ export const sweetMixinSuccessAlert = async (msg: string, duration: number = 200
 };
 
 export const sweetBasicAlert = async (text: string) => {
-	Swal.fire(text);
+	GvSwal.fire(text);
 };
 
 export const sweetErrorHandlingForAdmin = async (err: any) => {
 	const errorMessage = err.message ?? Messages.error1;
-	await Swal.fire({
-		icon: 'error',
+	await GvSwal.fire({
+		...gvIcon('error'),
 		text: errorMessage,
 		showConfirmButton: false,
 	});
@@ -112,16 +136,22 @@ export const sweetTopSmallSuccessAlert = async (
 	duration: number = 2000,
 	enable_forward: boolean = false,
 ) => {
-	const Toast = Swal.mixin({
+	const Toast = GvSwal.mixin({
 		toast: true,
 		position: 'top-end',
 		showConfirmButton: false,
 		timer: duration,
 		timerProgressBar: true,
+		customClass: {
+			popup: 'gv-alert gv-alert--toast',
+			title: 'gv-alert__title',
+			icon: 'gv-alert__icon',
+			timerProgressBar: 'gv-alert__timer',
+		},
 	});
 
 	Toast.fire({
-		icon: 'success',
+		...gvIcon('success'),
 		title: msg,
 	}).then((data) => {
 		if (enable_forward) {

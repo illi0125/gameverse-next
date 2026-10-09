@@ -1,0 +1,307 @@
+/** ALERTS — GameVerse skin for SweetAlert2 (libs/sweetAlert.ts sets the classes via a Swal.mixin)
+ *  docs/GAMEVERSE_DESIGN_SYSTEM.md: paper plate with the cartridge notch, ink border, square icon chips,
+ *  mono uppercase buttons (solid ink with the cut / ink outline), ink toast with a Signal progress bar.
+ *  Popups are portalled to <body>, so the tokens are declared here. Selectors pair `.swal2-*` with our classes
+ *  to win over SweetAlert's injected CSS without !important. Stacking: Swal's default 1060 (above the live chat).
+ */
+
+.gv-alert {
+	--gv-ink: #000000;
+	--gv-uv: #6f5bff;
+	--gv-signal: #d7ff3a;
+	--gv-haze: #c9c4dc;
+	--gv-rule: rgba(0, 0, 0, 0.14);
+	--gv-muted: rgba(0, 0, 0, 0.62);
+	--gv-error: #c4001a;
+	--gv-display: 'Archivo', #{$font};
+	--gv-mono: 'JetBrains Mono', ui-monospace, monospace;
+	--gv-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Backdrop */
+.swal2-container.swal2-backdrop-show:has(.gv-alert:not(.gv-alert--toast)) {
+	background: rgba(0, 0, 0, 0.55);
+}
+
+/** Modal popup **/
+
+.swal2-popup.gv-alert {
+	width: min(440px, calc(100vw - 32px));
+	padding: calc(22px + 20px) 28px 26px;
+	border: 1.5px solid var(--gv-ink);
+	border-radius: 0;
+	background: #ffffff;
+	color: var(--gv-ink);
+	font-family: var(--gv-display);
+	box-shadow: none;
+	@include gv-cut(22px, 60%);
+
+	.swal2-title.gv-alert__title {
+		margin: 0;
+		padding: 0;
+		font-family: var(--gv-display);
+		font-size: clamp(1.25rem, 2.4vw, 1.625rem);
+		font-weight: 850;
+		line-height: 1.05;
+		letter-spacing: -0.03em;
+		text-align: left;
+		text-transform: uppercase;
+		color: var(--gv-ink);
+		overflow-wrap: anywhere;
+	}
+
+	.swal2-html-container.gv-alert__text {
+		margin: 0;
+		padding: 0;
+		font-family: var(--gv-display);
+		font-size: 1rem;
+		font-weight: 500;
+		line-height: 1.5;
+		text-align: left;
+		color: rgba(0, 0, 0, 0.78);
+		overflow-wrap: anywhere;
+	}
+
+	/* Title and text together: the text reads as the description */
+	.swal2-title.gv-alert__title + .swal2-html-container.gv-alert__text {
+		margin-top: 10px;
+		font-weight: 400;
+		color: var(--gv-muted);
+	}
+
+	/* Square icon chip with a mono glyph (iconHtml) — replaces the round animated icons */
+	.swal2-icon.gv-alert__icon {
+		justify-self: start;
+		width: 44px;
+		height: 44px;
+		margin: 0 0 16px;
+		border: 1.5px solid var(--gv-ink);
+		border-radius: 0;
+		background: var(--gv-ink);
+		color: #ffffff;
+		font-family: var(--gv-mono);
+		line-height: 1;
+		animation: none;
+
+		.swal2-icon-content {
+			font-size: 1.25rem;
+			font-weight: 500;
+		}
+
+		&.swal2-success {
+			border-color: var(--gv-ink);
+			background: var(--gv-signal);
+			color: var(--gv-ink);
+		}
+
+		&.swal2-error {
+			border-color: var(--gv-error);
+			background: var(--gv-error);
+			color: #ffffff;
+		}
+
+		&.swal2-question {
+			border-color: var(--gv-uv);
+			background: var(--gv-uv);
+			color: #ffffff;
+		}
+
+		&.swal2-warning,
+		&.swal2-info {
+			background: #ffffff;
+			color: var(--gv-ink);
+		}
+	}
+
+	.swal2-actions.gv-alert__actions {
+		justify-content: flex-start;
+		gap: 10px;
+		width: 100%;
+		margin: 24px 0 0;
+		padding: 0;
+	}
+
+	.gv-alert__btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 120px;
+		height: 48px;
+		margin: 0;
+		padding: 0 22px;
+		border: 1.5px solid var(--gv-ink);
+		border-radius: 0;
+		background: transparent;
+		color: var(--gv-ink);
+		font-family: var(--gv-mono);
+		font-size: 0.75rem;
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		line-height: 1;
+		text-transform: uppercase;
+		cursor: pointer;
+		box-shadow: none;
+		transition:
+			background-color 160ms ease,
+			color 160ms ease,
+			transform 140ms var(--gv-ease);
+
+		&:hover {
+			background: var(--gv-ink);
+			color: #ffffff;
+		}
+
+		&:active {
+			transform: scale(0.96);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-ink);
+			outline-offset: 3px;
+		}
+
+		/* Solid = primary: ink with the cut; clipped, so focus is a fill */
+		&--solid {
+			order: 2;
+			border-color: var(--gv-ink);
+			background: var(--gv-ink);
+			color: #ffffff;
+			@include gv-cut-btn(10px);
+
+			&:hover {
+				border-color: var(--gv-uv);
+				background: var(--gv-uv);
+			}
+
+			&:focus-visible {
+				outline: none;
+				border-color: var(--gv-ink);
+				background: var(--gv-signal);
+				color: var(--gv-ink);
+			}
+		}
+	}
+
+	/* Cancel first, primary last (DOM order stays Swal's, so Enter / keyboard behaviour is unchanged) */
+	.swal2-cancel.gv-alert__btn {
+		order: 1;
+	}
+
+	.swal2-timer-progress-bar-container {
+		border-radius: 0;
+	}
+
+	.swal2-timer-progress-bar.gv-alert__timer {
+		height: 3px;
+		background: var(--gv-ink);
+	}
+}
+
+/** Toast (sweetTopSmallSuccessAlert) **/
+
+.swal2-popup.gv-alert.gv-alert--toast {
+	/* Swal keeps its own toast grid (inline display: grid; the icon spans grid-row 1/99), so only a column gap */
+	align-items: center;
+	column-gap: 12px;
+	row-gap: 0;
+	/* Swal's toast container is a stretching grid: keep the bar its own size in the top-end corner */
+	align-self: start;
+	justify-self: end;
+	width: auto;
+	height: auto;
+	min-height: 0;
+	max-width: min(380px, calc(100vw - 24px));
+	margin: 12px;
+	padding: 12px 18px 14px 12px;
+	border: 0;
+	background: var(--gv-ink);
+	color: #ffffff;
+	clip-path: none;
+	@include gv-cut-btn(12px);
+
+	.swal2-icon.gv-alert__icon {
+		flex: none;
+		width: 30px;
+		height: 30px;
+		margin: 0;
+		border: 0;
+
+		.swal2-icon-content {
+			font-size: 0.9375rem;
+		}
+	}
+
+	.swal2-title.gv-alert__title {
+		align-self: center;
+		margin: 0;
+		font-size: 0.9375rem;
+		font-weight: 800;
+		letter-spacing: -0.01em;
+		color: #ffffff;
+	}
+
+	.swal2-timer-progress-bar.gv-alert__timer {
+		background: var(--gv-signal);
+	}
+}
+
+/** Motion: a short scale-in; out is a fade (reduced motion: fades only) **/
+
+.gv-alert.gv-alert--in {
+	animation: gv-alert-in 220ms var(--gv-ease) both;
+}
+
+.gv-alert.gv-alert--out {
+	animation: gv-alert-out 160ms ease both;
+}
+
+@keyframes gv-alert-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes gv-alert-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes gv-alert-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@media (max-width: 479px) {
+	.swal2-popup.gv-alert:not(.gv-alert--toast) {
+		padding: calc(22px + 16px) 20px 22px;
+
+		.swal2-actions.gv-alert__actions {
+			flex-direction: column-reverse;
+			align-items: stretch;
+		}
+
+		.gv-alert__btn {
+			width: 100%;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-alert.gv-alert--in {
+		animation: gv-alert-fade 160ms ease both;
+	}
+
+	.gv-alert .gv-alert__btn {
+		transition: none;
+	}
+}
