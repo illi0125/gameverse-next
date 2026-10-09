@@ -7,6 +7,7 @@
 @import '/scss/pc/homepage/homeMobile.scss';
 @import '/scss/pc/common/gvAlert.scss';
 @import '/scss/pc/common/gvCursor.scss';
+@import '/scss/pc/common/gvScrollbar.scss';
 @import '/scss/pc/common/gvNavDrawer.scss';
 
 @import '/scss/pc/game/game.scss';
@@ -36,14 +37,9 @@
 @import '/scss/pc/member/memberArticles.scss';
 @import '/scss/pc/member/memberGames.scss';
 
+/* The page scrollbar is always present (no jump between short and long pages); its look lives in common/gvScrollbar.scss */
 body {
-	-ms-overflow-style: none; /* for Internet Explorer, Edge */
-	scrollbar-width: none; /* for Firefox */
 	overflow-y: scroll;
-}
-
-body::-webkit-scrollbar {
-	display: none; /* for Chrome, Safari, and Opera */
 }
 
 #pc-wrap {

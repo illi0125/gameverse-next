@@ -1,0 +1,91 @@
+/** PAGE SCROLLBAR — the window scrollbar only, on mouse / trackpad devices **/
+/*
+ * Void track, Ultraviolet thumb: hover lifts it to the hero's light UV, dragging turns it Signal.
+ * The thumb is inset by a track-coloured border, so the bar reads slimmer than its 10px hit area.
+ * Touch screens keep their native overlay scrollbar (no rules apply there).
+ *
+ * Scope: the viewport scrollbar comes from <html> / <body> (body's overflow-y: scroll propagates to
+ * the viewport; while the intro locks <html>, body scrolls itself). Inner scrollers — chat, menus,
+ * modals, rails, admin tables — keep their own styles: scrollbar-color is reset below body.
+ */
+
+$gv-scroll-track: #000000; /* --gv-void */
+$gv-scroll-thumb: #6f5bff; /* --gv-uv */
+$gv-scroll-thumb-hover: #8b78ff; /* hero duotone light UV */
+$gv-scroll-thumb-active: #d7ff3a; /* --gv-signal */
+
+@media (hover: hover) and (pointer: fine) {
+	/* The gutter stays reserved while a dialog locks the page, so nothing moves sideways.
+	   MUI modals and SweetAlert2 pad <body> to make up for a vanished scrollbar; with the gutter kept
+	   that padding would itself shift the page, so it is cancelled. */
+	html {
+		scrollbar-gutter: stable;
+	}
+
+	body {
+		padding-right: 0 !important;
+	}
+
+	/* While a dialog locks the page the empty gutter shows the canvas; make it Void instead of white.
+	   <body> keeps its own white background (CssBaseline), so the page itself does not change. */
+	html:has(> body[style*='overflow: hidden']),
+	html:has(> body.swal2-shown:not(.swal2-no-backdrop):not(.swal2-toast-shown)) {
+		background-color: $gv-scroll-track;
+	}
+
+	/* The homepage intro locks <html> inline; body must not grow a second bar beside the reserved gutter */
+	html[style*='overflow: hidden'] > body {
+		overflow-y: hidden;
+	}
+
+	/* Firefox and other engines without ::-webkit-scrollbar. Chrome 121+ would let these standard
+	   properties override the pseudo-elements below (and lose the hover / drag states), so they only
+	   apply where the pseudo-elements are unsupported. */
+	@supports not selector(::-webkit-scrollbar) {
+		html {
+			scrollbar-width: thin;
+			scrollbar-color: $gv-scroll-thumb $gv-scroll-track;
+		}
+
+		/* scrollbar-color inherits; inner scrollers fall back to their own or the native colours */
+		body {
+			scrollbar-color: auto;
+		}
+	}
+
+	/* Chrome, Edge, Safari */
+	html::-webkit-scrollbar,
+	body::-webkit-scrollbar {
+		width: 10px;
+		height: 10px;
+	}
+
+	html::-webkit-scrollbar-track,
+	body::-webkit-scrollbar-track {
+		background: $gv-scroll-track;
+	}
+
+	html::-webkit-scrollbar-thumb,
+	body::-webkit-scrollbar-thumb {
+		min-height: 48px;
+		border: 2px solid $gv-scroll-track;
+		border-radius: 4px;
+		background: $gv-scroll-thumb;
+		background-clip: padding-box;
+	}
+
+	html::-webkit-scrollbar-thumb:hover,
+	body::-webkit-scrollbar-thumb:hover {
+		background-color: $gv-scroll-thumb-hover;
+	}
+
+	html::-webkit-scrollbar-thumb:active,
+	body::-webkit-scrollbar-thumb:active {
+		background-color: $gv-scroll-thumb-active;
+	}
+
+	html::-webkit-scrollbar-corner,
+	body::-webkit-scrollbar-corner {
+		background: $gv-scroll-track;
+	}
+}
