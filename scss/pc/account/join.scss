@@ -1,194 +1,648 @@
-#pc-wrap {
-  .join-page {
-    position: relative;
-    padding: 90px 0px;
-    width: 100%;
-    height: auto;
-   .container {
-     align-items: center;
-     .main {
-       width: 1200px;
-       height: 900px;
-       display: flex;
-       flex-direction: row;
-       border-radius: 12px 0px 0px 12px;
-       background: #FFF;
-       box-shadow: 0px 1px 4px 0px rgba(24, 26, 32, 0.07);
-       .left {
-         width: 50%;
-         height: 100%;
-         display: flex;
-         flex-direction: column;
-         align-items: center;
-         justify-content: center;
-         .logo {
-           display: flex;
-           flex-direction: row;
-           align-items: center;
-           img {
-             width: 40px;
-             height: 40px;
-           }
-           span {
-             margin-left: 10px;
-             font-family: $font ;
-             font-size: 22px;
-             font-style: normal;
-             font-weight: 600;
-             line-height: normal;
-             letter-spacing: 0.44px;
-             color:#181A20;
-           }
-         }
-         .info {
-           margin-top: 30px;
-           display: flex;
-           flex-direction: column;
-           align-items: center;
-           span {
-             font-family: $font;
-             font-size: 20px;
-             font-style: normal;
-             font-weight: 600;
-             line-height: normal;
-             text-transform: uppercase;
-             color:  #181A20;
-           }
-           p {
-             margin-top: 5px;
-             font-family: $font;
-             font-size: 14px;
-             font-style: normal;
-             font-weight: 400;
-             line-height: 26px;
-             color: #181A20;
+/** LOG IN / SIGN UP — redesigned /account/join (docs/GAMEVERSE_DESIGN_SYSTEM.md)
+ *  Root is `.gv-catalog.gv-auth` inside LayoutCatalog's `.gv-catalog-shell`: tokens, header/footer skin, `.gv-chapter`
+ *  and the hero atmosphere (`gv-cat-hero__*`) come from catalog.scss; mixins from homepage.scss.
+ *  One night scene: the top-ranked cover as duotone atmosphere and a sharp cut plate, the headline left,
+ *  the form on a paper plate right.
+ */
 
-           }
-         }
-         .input-wrap {
-           margin-top: 45px;
-           width: 470px;
-           display: flex;
-           flex-direction: column;
+.gv-auth {
+	/* app.scss gives every span line-height 1.2; display lines inherit their heading's */
+	.gv-auth__line,
+	.gv-auth__word {
+		display: block;
+		line-height: inherit;
+	}
+}
 
-          .input-box {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            &:first-child {
-              margin-top: 0px;
-            }
-            span {
-              margin-bottom: 8px;
-              font-family: $font;
-              font-size: 14px;
-              font-style: normal;
-              font-weight: 600;
-              line-height: normal;
-              color:  #181A20;
-            }
-            input {
-              padding: 0px 15px;
-              width: 100%;
-              height: 55px;
-              border-radius: 8px;
-              border: 1px solid #DDD;
-              background:  #FFF;
-              font-family: $font;
-              font-size: 14px;
-              font-style: normal;
-              font-weight: 400;
-              line-height: 26px;
-              color: #717171;
-            }
-          }
-         }
-         .register {
-           margin-top: 45px;
-           width: 470px;
-           display: flex;
-           flex-direction: column;
-           align-items: center;
-           .type-option {
-             display: flex;
-             flex-direction: row;
-             align-items: center;
-             span.text {
-               font-family: $font;
-               font-size: 14px;
-               font-style: normal;
-               font-weight: 600;
-               line-height: normal;
-               color:  #181A20;
-             }
-             div {
-               margin-left: 20px;
-               display: flex;
-               flex-direction: row;
-               &:nth-child(1){
-                 margin-right: 25px;
-               }
-             }
-           }
-           .remember-info {
-             width: 100%;
-             display: flex;
-             flex-direction: row;
-             justify-content: space-between;
-             align-items: center;
-             a {
-               font-family: $font;
-               font-size: 14px;
-               font-style: normal;
-               font-weight: 400;
-               line-height: 26px;
-               cursor: pointer;
-               color:  #181A20;
-             }
-           }
-           button {
-             margin-top: 25px;
-             width: 100%;
-             height: 55px;
-             border-radius: 12px;
-             background:  #EB6753;
-             font-family: $font;
-             font-size: 15px;
-             font-style: normal;
-             font-weight: 600;
-             line-height: normal;
-             color:  #FFF;
-             img {
-               filter: brightness(0) invert(1);
-             }
-           }
-         }
-         .ask-info {
-           margin-top: 90px;
-           p {
-             font-family: $font;
-             font-size: 20px;
-             font-style: normal;
-             line-height: normal;
-             font-weight: 400;
-             color:  #181A20;
-             b {
-               margin-left: 10px;
-               font-weight: 600;
-               font-size: 32px;
-               cursor: pointer;
-               text-decoration: underline;
-             }
-           }
-         }
-       }
-       .right {
-         width: 50%;
-         height: 100%;
-         background-image: url("/img/gameverse/join.svg");
-         background-size: cover;
-       }
-     }
-   }
-  }
+.gv-auth .gv-auth__stage {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1.1fr) minmax(380px, 0.9fr);
+	align-items: center;
+	gap: clamp(32px, 5vw, 96px);
+	min-height: max(100svh, 760px);
+	padding: calc(87px + clamp(40px, 6vh, 72px)) 6vw clamp(56px, 8vh, 96px) var(--gv-inset);
+	overflow: hidden;
+	background: var(--gv-void);
+	color: #ffffff;
+}
+
+/* Atmosphere, tint, grain, frame and rules: shared `.gv-cat-hero__*` from catalog.scss (absolute, behind both columns) */
+
+/** Intro: chapter, headline (swaps with the mode), lead, readout, top-ranked plate **/
+
+.gv-auth .gv-auth__intro {
+	position: relative;
+	z-index: 2;
+	display: grid;
+	justify-items: start;
+	align-content: center;
+}
+
+.gv-auth .gv-auth__title {
+	margin: 20px 0 0;
+	font-family: var(--gv-display);
+	font-size: min(8.4vw, 15vh);
+	font-weight: 850;
+	line-height: 0.84;
+	letter-spacing: -0.055em;
+	text-transform: uppercase;
+}
+
+.gv-auth .gv-auth__line {
+	/* The mask is as wide as its word, so the indented second line is never cut on the right */
+	width: max-content;
+	max-width: 100%;
+	overflow: hidden;
+	padding-top: 0.08em;
+	margin-top: -0.08em;
+
+	&--2 {
+		margin-left: 21%;
+	}
+}
+
+/* Each mode change remounts the headline: the words rise out of their masks */
+.gv-auth .gv-auth__word {
+	animation: gv-auth-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.gv-auth .gv-auth__line--2 .gv-auth__word {
+	animation-delay: 80ms;
+}
+
+.gv-auth .gv-auth__lead {
+	max-width: 40ch;
+	margin-top: clamp(20px, 3vh, 32px);
+	font-size: 0.9375rem;
+	line-height: 1.5;
+	color: var(--gv-haze);
+}
+
+.gv-auth .gv-auth__readout {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 24px;
+	margin-top: 18px;
+	font-family: var(--gv-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--gv-haze);
+
+	span:first-child {
+		color: var(--gv-signal);
+	}
+}
+
+/* Sharp cut plate with a paper-label title (two-layer artwork) */
+.gv-auth .gv-auth__plate {
+	position: relative;
+	display: grid;
+	width: clamp(220px, 20vw, 300px);
+	margin-top: clamp(28px, 5vh, 52px);
+	color: #ffffff;
+
+	&-art {
+		display: block;
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
+		background: #120a33;
+		@include gv-cut(16px, 54%);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transition: transform 700ms var(--gv-ease);
+		}
+	}
+
+	&-tag {
+		position: absolute;
+		top: 24px;
+		left: 0;
+		padding: 5px 8px;
+		background: var(--gv-signal);
+		color: var(--gv-ink);
+		font-family: var(--gv-mono);
+		font-size: 0.625rem;
+		letter-spacing: 0.08em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	&-title {
+		position: relative;
+		justify-self: start;
+		max-width: 100%;
+		margin-top: -0.6em;
+		padding: 0.08em 0.2em 0 0;
+		background: #ffffff;
+		color: var(--gv-ink);
+		font-family: var(--gv-display);
+		font-size: 1.125rem;
+		font-weight: 850;
+		line-height: 1.05;
+		letter-spacing: -0.03em;
+		text-transform: uppercase;
+		-webkit-box-decoration-break: clone;
+		box-decoration-break: clone;
+	}
+
+	&:hover .gv-auth__plate-art img {
+		transform: scale(1.05);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--gv-signal);
+		outline-offset: 4px;
+	}
+}
+
+/** Card: paper plate holding the mode switch and the form **/
+
+.gv-auth .gv-auth__card {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	max-width: 520px;
+	justify-self: end;
+	padding: calc(28px + 26px) clamp(24px, 3vw, 40px) clamp(26px, 3vw, 36px);
+	background: #ffffff;
+	color: var(--gv-ink);
+	@include gv-cut(28px, 58%);
+}
+
+.gv-auth .gv-auth__switch {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	border: 1.5px solid var(--gv-ink);
+
+	button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		height: 48px;
+		border: 0;
+		background: #ffffff;
+		color: var(--gv-ink);
+		font-family: var(--gv-mono);
+		font-size: 0.75rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition:
+			background-color 180ms ease,
+			color 180ms ease;
+
+		span {
+			padding: 3px 6px;
+			background: var(--gv-ink);
+			color: #ffffff;
+			font-size: 0.625rem;
+			line-height: 1;
+		}
+
+		& + button {
+			border-left: 1.5px solid var(--gv-ink);
+		}
+
+		&:hover:not(.is-on) {
+			background: rgba(0, 0, 0, 0.05);
+		}
+
+		&.is-on {
+			background: var(--gv-ink);
+			color: #ffffff;
+
+			span {
+				background: var(--gv-signal);
+				color: var(--gv-ink);
+			}
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-uv);
+			outline-offset: 2px;
+		}
+	}
+}
+
+.gv-auth .gv-auth__form {
+	display: grid;
+	gap: 6px;
+	margin-top: 26px;
+	animation: gv-auth-in 420ms var(--gv-ease) both;
+}
+
+.gv-auth .gv-auth__form-title {
+	margin-bottom: 14px;
+	font-family: var(--gv-display);
+	font-size: clamp(1.375rem, 2vw, 1.75rem);
+	font-weight: 850;
+	line-height: 1;
+	letter-spacing: -0.035em;
+	text-transform: uppercase;
+}
+
+.gv-auth .gv-auth__field {
+	display: grid;
+	gap: 8px;
+
+	label {
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--gv-muted);
+	}
+
+	input {
+		width: 100%;
+		height: 52px;
+		padding: 0 16px;
+		border: 1.5px solid rgba(0, 0, 0, 0.24);
+		border-radius: 0;
+		background: #ffffff;
+		font-family: var(--gv-display);
+		font-size: 1rem;
+		color: var(--gv-ink);
+		outline: none;
+		transition:
+			border-color 160ms ease,
+			box-shadow 160ms ease;
+
+		&::placeholder {
+			color: rgba(0, 0, 0, 0.38);
+		}
+
+		&:hover {
+			border-color: rgba(0, 0, 0, 0.5);
+		}
+
+		&:focus {
+			border-color: var(--gv-ink);
+			box-shadow: inset 0 0 0 1px var(--gv-ink);
+		}
+
+		&[aria-invalid='true'] {
+			border-color: #c4001a;
+			box-shadow: inset 0 0 0 1px #c4001a;
+		}
+	}
+
+	&--enter {
+		animation: gv-auth-in 420ms var(--gv-ease) both;
+	}
+}
+
+/* Password with a reveal button inside the field */
+.gv-auth .gv-auth__secret {
+	position: relative;
+
+	input {
+		padding-right: 56px;
+	}
+}
+
+.gv-auth .gv-auth__reveal {
+	position: absolute;
+	top: 1.5px;
+	right: 1.5px;
+	bottom: 1.5px;
+	display: grid;
+	place-items: center;
+	width: 50px;
+	border: 0;
+	border-left: 1px solid var(--gv-rule);
+	background: #ffffff;
+	color: var(--gv-muted);
+	cursor: pointer;
+	transition:
+		color 160ms ease,
+		background-color 160ms ease;
+
+	svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	&:hover {
+		color: var(--gv-ink);
+	}
+
+	&[aria-pressed='true'] {
+		background: var(--gv-signal);
+		color: var(--gv-ink);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--gv-uv);
+		outline-offset: -2px;
+	}
+}
+
+.gv-auth .gv-auth__note {
+	min-height: 1.4em;
+	margin: 0 0 6px;
+	font-family: var(--gv-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.03em;
+	line-height: 1.4;
+	color: var(--gv-muted);
+
+	&.is-error {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-family: var(--gv-display);
+		font-size: 0.8125rem;
+		letter-spacing: 0;
+		color: #c4001a;
+
+		&::before {
+			content: '!';
+			display: grid;
+			place-items: center;
+			flex: none;
+			width: 16px;
+			height: 16px;
+			background: #c4001a;
+			color: #ffffff;
+			font-family: var(--gv-mono);
+			font-size: 0.6875rem;
+		}
+	}
+}
+
+/* Member type: two selectable plates */
+.gv-auth .gv-auth__types {
+	margin: 4px 0 10px;
+	padding: 0;
+	border: 0;
+
+	legend {
+		margin-bottom: 8px;
+		padding: 0;
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--gv-muted);
+	}
+
+	> div {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 10px;
+	}
+
+	label {
+		position: relative;
+		display: grid;
+		align-content: start;
+		gap: 4px;
+		padding: 14px 14px 16px;
+		border: 1.5px solid rgba(0, 0, 0, 0.24);
+		cursor: pointer;
+		transition:
+			border-color 160ms ease,
+			background-color 160ms ease;
+
+		&:hover {
+			border-color: var(--gv-ink);
+		}
+
+		&.is-on {
+			border-color: var(--gv-ink);
+			background: var(--gv-signal);
+			box-shadow: inset 0 0 0 1px var(--gv-ink);
+		}
+
+		&:focus-within {
+			outline: 2px solid var(--gv-uv);
+			outline-offset: 2px;
+		}
+	}
+
+	input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+}
+
+.gv-auth .gv-auth__type-name {
+	font-size: 1rem;
+	font-weight: 850;
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+}
+
+.gv-auth .gv-auth__type-desc {
+	font-size: 0.8125rem;
+	line-height: 1.4;
+	color: rgba(0, 0, 0, 0.66);
+}
+
+/* Primary action: solid ink with the cut, Ultraviolet on hover */
+.gv-auth .gv-auth__submit {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	height: 56px;
+	margin-top: 8px;
+	padding: 0 22px;
+	border: 0;
+	background: var(--gv-ink);
+	color: #ffffff;
+	font-family: var(--gv-mono);
+	font-size: 0.8125rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	cursor: pointer;
+	@include gv-cut-btn(12px);
+	transition:
+		background-color 160ms ease,
+		transform 140ms var(--gv-ease);
+
+	&-arrow {
+		font-size: 1.125rem;
+		transition: transform 180ms var(--gv-ease);
+	}
+
+	&:hover:not(:disabled),
+	&:focus-visible {
+		outline: none;
+		background: var(--gv-uv);
+
+		.gv-auth__submit-arrow {
+			transform: translateX(4px);
+		}
+	}
+
+	&:active:not(:disabled) {
+		transform: scale(0.98);
+	}
+
+	&:disabled {
+		background: rgba(0, 0, 0, 0.28);
+		cursor: not-allowed;
+	}
+
+	&[aria-busy='true'] {
+		cursor: progress;
+	}
+}
+
+.gv-auth .gv-auth__help {
+	margin-top: 14px;
+	font-size: 0.875rem;
+	color: var(--gv-muted);
+
+	a {
+		color: var(--gv-ink);
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+
+		&:hover {
+			color: var(--gv-uv);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-ink);
+			outline-offset: 2px;
+		}
+	}
+}
+
+.gv-auth .gv-auth__ask {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-top: 22px;
+	padding-top: 18px;
+	border-top: 1px solid var(--gv-rule);
+	font-size: 0.9375rem;
+
+	button {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--gv-ink);
+		font-family: var(--gv-mono);
+		font-size: 0.75rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--gv-uv);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-ink);
+			outline-offset: 3px;
+		}
+	}
+}
+
+@keyframes gv-auth-rise {
+	from {
+		transform: translateY(110%);
+	}
+	to {
+		transform: none;
+	}
+}
+
+@keyframes gv-auth-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/** RESPONSIVE **/
+
+@media (max-width: 1099px) {
+	.gv-auth .gv-auth__stage {
+		grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);
+	}
+
+	.gv-auth .gv-auth__plate {
+		display: none;
+	}
+}
+
+@media (max-width: 899px) {
+	.gv-auth .gv-auth__stage {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 32px;
+		min-height: 0;
+		padding: calc(87px + 32px) var(--gv-gutter) 56px;
+	}
+
+	.gv-auth .gv-auth__title {
+		font-size: 17vw;
+	}
+
+	.gv-auth .gv-auth__card {
+		max-width: none;
+		justify-self: stretch;
+	}
+
+	.gv-auth .gv-cat-hero__rule--v,
+	.gv-auth .gv-cat-hero__mark {
+		display: none;
+	}
+
+	.gv-auth .gv-cat-hero__grid {
+		inset: 10px;
+	}
+}
+
+@media (max-width: 479px) {
+	.gv-auth .gv-auth__types > div {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.gv-auth .gv-auth__card {
+		padding-inline: 18px;
+	}
+}
+
+/* On phones the header is not fixed, so the stage needs no header offset */
+#mobile-wrap.gv-catalog-shell .gv-auth .gv-auth__stage {
+	padding-top: 40px;
+}
+
+#mobile-wrap.gv-catalog-shell .gv-auth .gv-cat-hero__rule--h {
+	display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-auth .gv-auth__word,
+	.gv-auth .gv-auth__form,
+	.gv-auth .gv-auth__field--enter,
+	.gv-auth .gv-cat-hero__atmos img {
+		animation: none;
+	}
+
+	.gv-auth .gv-auth__plate-art img,
+	.gv-auth .gv-auth__submit,
+	.gv-auth .gv-auth__submit-arrow {
+		transition: none;
+	}
 }

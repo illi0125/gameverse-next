@@ -2,7 +2,6 @@ import decodeJWT from 'jwt-decode';
 import { initializeApollo } from '../../apollo/client';
 import { userVar } from '../../apollo/store';
 import { CustomJwtPayload } from '../types/customJwtPayload';
-import { sweetMixinErrorAlert } from '../sweetAlert';
 import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
 
 export function getJwtToken(): any {
@@ -15,6 +14,27 @@ export function setJwtToken(token: string) {
 	localStorage.setItem('accessToken', token);
 }
 
+/** Readable text for the API's auth errors (libs/enums/common.enum.ts › Message on the backend) **/
+const authErrorMessages: Record<string, string> = {
+	'No member with that member nick!': 'No account with that nickname. Check it or sign up.',
+	'Wrong password, try again!': 'Wrong password. Please try again.',
+	'You have been blocked!': 'This account has been blocked.',
+	'Already used member nick or phone': 'That nickname or phone number is already in use.',
+};
+
+const authErrorMessage = (err: any): string => {
+	const serverMessage: string | undefined = err?.graphQLErrors?.[0]?.message;
+	if (serverMessage) {
+		// class-validator rejections arrive as "Bad Request" with the details in the original error
+		const details = err?.graphQLErrors?.[0]?.extensions?.originalError?.message;
+		if (authErrorMessages[serverMessage]) return authErrorMessages[serverMessage];
+		if (Array.isArray(details) && details.length) return String(details[0]);
+		return serverMessage;
+	}
+	if (err?.networkError) return 'Cannot reach the server. Check your connection and try again.';
+	return 'Something went wrong. Please try again.';
+};
+
 export const logIn = async (nick: string, password: string): Promise<void> => {
 	try {
 		const { jwtToken } = await requestJwtToken({ nick, password });
@@ -24,9 +44,8 @@ export const logIn = async (nick: string, password: string): Promise<void> => {
 			updateUserInfo(jwtToken);
 		}
 	} catch (err) {
-		console.warn('login err', err);
-		logOut();
-		// throw new Error('Login Err');
+		// The page shows the message and stays put (it used to call logOut(), which reloaded the page)
+		throw err;
 	}
 };
 
@@ -46,21 +65,11 @@ const requestJwtToken = async ({
 			fetchPolicy: 'network-only',
 		});
 
-		console.log('---------- login ----------');
 		const { accessToken } = result?.data?.login;
 
 		return { jwtToken: accessToken };
 	} catch (err: any) {
-		console.log('request token err', err.graphQLErrors);
-		switch (err.graphQLErrors[0].message) {
-			case 'Definer: login and password do not match':
-				await sweetMixinErrorAlert('Please check your password again');
-				break;
-			case 'Definer: user has been blocked!':
-				await sweetMixinErrorAlert('User has been blocked!');
-				break;
-		}
-		throw new Error('token error');
+		throw new Error(authErrorMessage(err));
 	}
 };
 
@@ -73,9 +82,7 @@ export const signUp = async (nick: string, password: string, phone: string, type
 			updateUserInfo(jwtToken);
 		}
 	} catch (err) {
-		console.warn('login err', err);
-		logOut();
-		// throw new Error('Login Err');
+		throw err;
 	}
 };
 
@@ -101,21 +108,11 @@ const requestSignUpJwtToken = async ({
 			fetchPolicy: 'network-only',
 		});
 
-		console.log('---------- login ----------');
 		const { accessToken } = result?.data?.signup;
 
 		return { jwtToken: accessToken };
 	} catch (err: any) {
-		console.log('request token err', err.graphQLErrors);
-		switch (err.graphQLErrors[0].message) {
-			case 'Definer: login and password do not match':
-				await sweetMixinErrorAlert('Please check your password again');
-				break;
-			case 'Definer: user has been blocked!':
-				await sweetMixinErrorAlert('User has been blocked!');
-				break;
-		}
-		throw new Error('token error');
+		throw new Error(authErrorMessage(err));
 	}
 };
 

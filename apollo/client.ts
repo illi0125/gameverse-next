@@ -89,11 +89,13 @@ function createIsomorphicLink() {
 			webSocketImpl: LoggingWebSocket,
 		});
 
-		const errorLink = onError(({ graphQLErrors, networkError, response }) => {
+		const errorLink = onError(({ graphQLErrors, networkError, response, operation }) => {
+			// The log in / sign up form shows its own readable message (libs/auth), so no second alert here
+			const handledByForm = ['Login', 'Signup'].includes(operation.operationName);
 			if (graphQLErrors) {
 				graphQLErrors.map(({ message, locations, path, extensions }) => {
 					console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
-					if (!message.includes('input')) sweetErrorAlert(message);
+					if (!message.includes('input') && !handledByForm) sweetErrorAlert(message);
 				});
 			}
 			if (networkError) console.log(`[Network error]: ${networkError}`);
