@@ -1,0 +1,137 @@
+/** SITE CURSOR — dot + easing cut-corner ring + afterglow (GvCursor.tsx, reference2.mov) **/
+
+/* Only while a fine pointer is attached (GvCursor adds .gv-cursor-on) */
+html.gv-cursor-on,
+html.gv-cursor-on * {
+	cursor: none !important;
+}
+
+/* Typing keeps the native I-beam; the custom cursor steps aside (.gv-cursor-text) */
+html.gv-cursor-on input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='button']):not([type='submit']),
+html.gv-cursor-on textarea,
+html.gv-cursor-on [contenteditable=''],
+html.gv-cursor-on [contenteditable='true'] {
+	cursor: text !important;
+}
+
+html.gv-cursor-on select {
+	cursor: default !important;
+}
+
+/* The wrapper is not positioned, so each part blends against the page itself */
+.gv-cursor__dot,
+.gv-cursor__ring,
+.gv-cursor__glow {
+	position: fixed;
+	top: 0;
+	left: 0;
+	pointer-events: none;
+	opacity: 0;
+	will-change: transform;
+	transition: opacity 200ms ease;
+}
+
+/* White + difference: ink on paper, paper on void, readable on Signal and UV */
+.gv-cursor__dot,
+.gv-cursor__ring {
+	z-index: 2147483001;
+	mix-blend-mode: difference;
+	color: #ffffff;
+}
+
+.gv-cursor__dot::before {
+	content: '';
+	position: absolute;
+	top: -3px;
+	left: -3px;
+	width: 6px;
+	height: 6px;
+	background: currentColor;
+	transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.gv-cursor__frame {
+	position: absolute;
+	top: -18px;
+	left: -18px;
+	width: 36px;
+	height: 36px;
+	overflow: visible;
+	transition: transform 260ms cubic-bezier(0.23, 1, 0.32, 1);
+
+	path {
+		fill: transparent;
+		stroke: currentColor;
+		stroke-width: 1.5px;
+		vector-effect: non-scaling-stroke;
+		transition: fill 180ms ease;
+	}
+}
+
+.gv-cursor__glow {
+	z-index: 2147483000;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: -120px;
+		left: -120px;
+		width: 240px;
+		height: 240px;
+		background: radial-gradient(closest-side, rgba(111, 91, 255, 0.22), rgba(111, 91, 255, 0));
+	}
+}
+
+html.gv-cursor-visible:not(.gv-cursor-text) {
+	.gv-cursor__dot,
+	.gv-cursor__ring {
+		opacity: 1;
+	}
+
+	/* The afterglow only lives while the pointer travels, then fades like the reference trail */
+	&.gv-cursor-moving .gv-cursor__glow {
+		opacity: 1;
+		transition-duration: 120ms;
+	}
+
+	.gv-cursor__glow {
+		transition-duration: 700ms;
+	}
+}
+
+/* Over something clickable: the ring locks on, fills (inverting what's under it) and the dot steps back */
+html.gv-cursor-hover {
+	.gv-cursor__frame {
+		transform: scale(1.55);
+
+		path {
+			fill: currentColor;
+		}
+	}
+
+	.gv-cursor__dot::before {
+		transform: scale(0);
+	}
+}
+
+/* Press */
+html.gv-cursor-down {
+	.gv-cursor__frame {
+		transform: scale(0.8);
+	}
+
+	&.gv-cursor-hover .gv-cursor__frame {
+		transform: scale(1.3);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-cursor__glow {
+		display: none;
+	}
+
+	.gv-cursor__frame,
+	.gv-cursor__dot::before {
+		transition: none;
+	}
+}

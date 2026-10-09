@@ -184,6 +184,7 @@ Rules:
 | Marquee | Banner, Credits | Banner `xPercent 3 → -18` scrubbed; credits loop `xPercent -50 / 28s`, `timeScale` = 1 + velocity/300 (max 9), eases back to 1 |
 | Load reveal | Hero only | Masked lines rise; frame rules draw. **One per page** |
 | Intro | Homepage, once per session (`HomeIntro`, `introGate`) | Void overlay: `PRESS / START / GAMEVERSE` typed 70ms/letter with a 3-letter Signal/UV/Haze/paper flicker trail; mono `PLAYER 1` · `READY`; Signal ■ and Haze + sparks twinkle; cut-corner UV then Signal plates flood (`power2.in`); the stage lifts (`yPercent -100`) and hands over to the hero load reveal. Any key/press skips; reduced motion = static 0.8s + fade. Not a second load reveal: the hero reveal waits for it |
+| Cursor | Site-wide, fine pointer only (`GvCursor` in `_app`, `scss/pc/common/gvCursor.scss`) | 6px square dot on the pointer + 36px cut-corner ring easing after it (0.16/frame) + UV afterglow (0.07/frame, fades ~0.7s after rest); white with `mix-blend-mode: difference` so it reads on void, paper, Signal and UV. Clickables (`a`, `button`, roles, `.MuiButtonBase-root`, `[data-cursor="hover"]`): ring scales 1.55 and fills, dot hides. Press: 0.8 (1.3 on clickables). Text fields: native I-beam. Touch: native. Reduced motion: no lag, no glow |
 
 Fallbacks: below 900px wide, below 560px tall, or with reduced motion, there's no pinning. Stages become normal flow, tracks become scroll-snap rails (`useHomeRail` with arrow controls), fans become snap rows, and hero covers auto-advance every 5s (narrow screens, motion allowed).
 
