@@ -11,13 +11,14 @@ import Menu, { MenuProps } from '@mui/material/Menu';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { CaretDown } from 'phosphor-react';
 import Link from 'next/link';
-import NotificationsOutlinedIcon from '@mui/icons-material/NotificationsOutlined';
 import { useReactiveVar } from '@apollo/client';
 import { userVar } from '../../apollo/store';
 import { Logout } from '@mui/icons-material';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { REACT_APP_API_URL } from '../config';
+import NotificationBell from './notification/NotificationBell';
+import { useNotificationFeed } from '../hooks/useNotificationFeed';
 
 const Top = () => {
 	const user = useReactiveVar(userVar);
@@ -33,6 +34,7 @@ const Top = () => {
 	const [logoutAnchor, setLogoutAnchor] = React.useState<null | HTMLElement>(null);
 	const logoutOpen = Boolean(logoutAnchor);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
+	const { unread } = useNotificationFeed();
 
 	const navLinks = [
 		{ href: '/', label: t('Home'), match: (path: string) => path === '/' },
@@ -197,6 +199,7 @@ const Top = () => {
 					<Box component={'div'} className={'user-box'}>
 						{user?._id ? (
 							<>
+								<NotificationBell unread={unread} />
 								<div className={'login-user'} onClick={(event: any) => setLogoutAnchor(event.currentTarget)}>
 									<img
 										src={
@@ -233,7 +236,6 @@ const Top = () => {
 						)}
 
 						<div className={'lan-box'}>
-							{user?._id && <NotificationsOutlinedIcon className={'notification-icon'} />}
 							<Button
 								disableRipple
 								className="btn-lang"
@@ -331,6 +333,17 @@ const Top = () => {
 							</Link>
 						);
 					})}
+					{user?._id && (
+						<Link
+							href={'/notifications'}
+							className={`gv-nav-drawer__sublink ${router.pathname === '/notifications' ? 'is-active' : ''}`}
+							aria-current={router.pathname === '/notifications' ? 'page' : undefined}
+							onClick={() => setMenuOpen(false)}
+						>
+							{t('Notifications')}
+							{unread > 0 && <span className={'gv-nav-drawer__count'}>{unread > 9 ? '9+' : unread}</span>}
+						</Link>
+					)}
 					<Link
 						href={'/about'}
 						className={`gv-nav-drawer__sublink ${router.pathname === '/about' ? 'is-active' : ''}`}

@@ -1,0 +1,588 @@
+/** NOTIFICATIONS — navbar bell, dropdown (MUI Popover, rendered in a portal) and the shared entry row.
+ *  The page (/notifications) lives in scss/pc/notifications/notifications.scss. Tokens are the homepage's.
+ */
+
+%gv-note-tokens {
+	--gv-void: #000000;
+	--gv-ink: #000000;
+	--gv-uv: #6f5bff;
+	--gv-signal: #d7ff3a;
+	--gv-haze: #c9c4dc;
+	--gv-hair: rgba(255, 255, 255, 0.18);
+	--gv-rule: rgba(0, 0, 0, 0.14);
+	--gv-muted: rgba(0, 0, 0, 0.6);
+	--gv-display: 'Archivo', sans-serif;
+	--gv-mono: 'JetBrains Mono', ui-monospace, monospace;
+	--gv-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/** BELL (inside #top .user-box, every layout) **/
+
+.gv-bell {
+	@extend %gv-note-tokens;
+	position: relative;
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	margin-right: 14px;
+	padding: 0;
+	color: #ffffff;
+	background: transparent;
+	border: 1px solid rgba(255, 255, 255, 0.24);
+	cursor: pointer;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease,
+		border-color 160ms ease,
+		transform 140ms var(--gv-ease);
+
+	svg {
+		font-size: 22px;
+	}
+
+	&:hover {
+		border-color: #ffffff;
+	}
+
+	&.is-open {
+		color: #000000;
+		background: #ffffff;
+		border-color: #ffffff;
+	}
+
+	&:active {
+		transform: scale(0.94);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--gv-signal);
+		outline-offset: 2px;
+	}
+
+	&__badge {
+		position: absolute;
+		top: -7px;
+		right: -7px;
+		min-width: 20px;
+		height: 20px;
+		padding: 0 5px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		background: var(--gv-signal);
+		color: #000000;
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		font-weight: 500;
+		line-height: 1;
+	}
+
+	&.is-pulsing {
+		animation: gv-bell-ring 700ms var(--gv-ease);
+
+		.gv-bell__badge {
+			animation: gv-bell-pop 700ms var(--gv-ease);
+		}
+	}
+
+	@media (max-width: 899px) {
+		margin-right: 0;
+	}
+}
+
+@keyframes gv-bell-ring {
+	0%,
+	100% {
+		transform: rotate(0);
+	}
+	20% {
+		transform: rotate(-10deg);
+	}
+	40% {
+		transform: rotate(8deg);
+	}
+	60% {
+		transform: rotate(-4deg);
+	}
+}
+
+@keyframes gv-bell-pop {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	35% {
+		transform: scale(1.3);
+	}
+}
+
+/** DROPDOWN (portal) **/
+
+.MuiPopover-paper.gv-note-menu {
+	@extend %gv-note-tokens;
+	box-sizing: border-box;
+	width: min(400px, calc(100vw - 32px));
+	max-height: none;
+	margin-top: 10px;
+	display: flex;
+	flex-direction: column;
+	color: #ffffff;
+	background: var(--gv-void);
+	border: 1px solid var(--gv-hair);
+	border-radius: 0;
+	box-shadow: none;
+	overflow: hidden;
+}
+
+.gv-note-menu {
+	&__head {
+		display: grid;
+		grid-template-columns: auto 1fr auto;
+		align-items: center;
+		gap: 12px;
+		padding: 0 16px;
+		height: 56px;
+		border-bottom: 1px solid var(--gv-hair);
+	}
+
+	&__tag {
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+
+		&::before {
+			content: '■';
+			margin-right: 8px;
+			color: var(--gv-signal);
+		}
+	}
+
+	&__count {
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--gv-haze);
+	}
+
+	&__all {
+		min-height: 44px;
+		padding: 0 4px;
+		background: none;
+		border: 0;
+		color: #ffffff;
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--gv-signal);
+		}
+
+		&:disabled {
+			color: rgba(255, 255, 255, 0.35);
+			text-decoration: none;
+			cursor: default;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-signal);
+			outline-offset: 2px;
+		}
+	}
+
+	&__body {
+		max-height: min(60vh, 520px);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	&__foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 52px;
+		padding: 0 16px;
+		border-top: 1px solid var(--gv-hair);
+		color: #ffffff;
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-decoration: none;
+		transition:
+			background-color 160ms ease,
+			color 160ms ease;
+
+		&::after {
+			content: '→';
+			transition: transform 180ms var(--gv-ease);
+		}
+
+		&:hover,
+		&:focus-visible {
+			outline: none;
+			background: var(--gv-signal);
+			color: #000000;
+
+			&::after {
+				transform: translateX(4px);
+			}
+		}
+	}
+}
+
+.gv-note-state {
+	display: grid;
+	justify-items: start;
+	gap: 6px;
+	padding: 28px 16px 32px;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--gv-haze);
+
+	&__title {
+		font-family: var(--gv-display);
+		font-size: 1.125rem;
+		font-weight: 850;
+		letter-spacing: -0.02em;
+		text-transform: uppercase;
+		color: #ffffff;
+	}
+
+	p {
+		margin: 0;
+	}
+
+	&__retry {
+		margin-top: 8px;
+		height: 44px;
+		padding: 0 18px;
+		background: #ffffff;
+		border: 0;
+		color: #000000;
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		cursor: pointer;
+		clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+
+		&:hover,
+		&:focus-visible {
+			outline: none;
+			background: var(--gv-signal);
+		}
+	}
+}
+
+/** ENTRY ROW (menu = dark, page = paper) **/
+
+.gv-note-list {
+	@extend %gv-note-tokens;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.gv-note {
+	position: relative;
+	display: grid;
+	grid-template-columns: 36px minmax(0, 1fr) auto;
+	align-items: start;
+	gap: 14px;
+	padding: 14px 16px;
+	transition: background-color 160ms ease;
+
+	p {
+		margin: 0;
+	}
+
+	p.gv-note__meta {
+		margin-top: 3px;
+	}
+
+	/* Unread marker: a bar on the left edge */
+	&.is-unread::before {
+		content: '';
+		position: absolute;
+		top: 12px;
+		bottom: 12px;
+		left: 0;
+		width: 3px;
+	}
+
+	&__glyph {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+
+		svg {
+			font-size: 19px;
+		}
+
+		&--uv {
+			background: var(--gv-uv);
+			color: #ffffff;
+		}
+
+		&--signal {
+			background: var(--gv-signal);
+			color: #000000;
+		}
+
+		&--paper {
+			background: #ffffff;
+			color: #000000;
+		}
+
+		&--haze {
+			background: var(--gv-haze);
+			color: #000000;
+		}
+	}
+
+	&__body {
+		min-width: 0;
+		display: grid;
+		gap: 3px;
+	}
+
+	&__line {
+		font-family: var(--gv-display);
+		font-size: 0.9375rem;
+		line-height: 1.35;
+
+		strong {
+			font-weight: 800;
+		}
+	}
+
+	/* The whole row is the link's hit area; the Mark read button sits above it */
+	&__link {
+		padding: 0;
+		background: none;
+		border: 0;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		text-decoration: none;
+		cursor: pointer;
+
+		&::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+		}
+
+		&:focus-visible {
+			outline: none;
+		}
+	}
+
+	&:focus-within:has(.gv-note__link:focus-visible) {
+		outline: 2px solid var(--gv-signal);
+		outline-offset: -2px;
+	}
+
+	&__title {
+		overflow: hidden;
+		font-family: var(--gv-display);
+		font-size: 0.8125rem;
+		font-weight: 800;
+		letter-spacing: 0.01em;
+		text-transform: uppercase;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__desc {
+		display: -webkit-box;
+		overflow: hidden;
+		font-size: 0.875rem;
+		line-height: 1.45;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+	}
+
+	&__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 12px;
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	&__mark {
+		position: relative;
+		z-index: 1;
+		align-self: center;
+		min-height: 44px;
+		padding: 0 12px;
+		background: none;
+		border: 0;
+		color: inherit;
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+		white-space: nowrap;
+		cursor: pointer;
+
+		&:disabled {
+			opacity: 0.45;
+			cursor: progress;
+		}
+
+		&:focus-visible {
+			outline: 2px solid currentColor;
+			outline-offset: 2px;
+		}
+	}
+
+	/* Loading placeholders */
+	&--skeleton {
+		pointer-events: none;
+
+		.gv-note__glyph {
+			background: currentColor;
+			opacity: 0.12;
+		}
+	}
+
+	&__bar {
+		display: block;
+		height: 12px;
+		width: 82%;
+		margin: 4px 0;
+		background: currentColor;
+		opacity: 0.12;
+		animation: gv-note-wait 1.2s ease-in-out infinite alternate;
+
+		&--short {
+			width: 46%;
+		}
+	}
+
+	/* Dark dropdown */
+	&--menu {
+		color: var(--gv-haze);
+		border-bottom: 1px solid var(--gv-hair);
+
+		&.is-unread {
+			color: #ffffff;
+
+			&::before {
+				background: var(--gv-signal);
+			}
+
+			.gv-note__desc,
+			.gv-note__meta {
+				color: var(--gv-haze);
+			}
+		}
+
+		.gv-note__meta span:first-child {
+			color: var(--gv-signal);
+		}
+
+		&.is-linked:hover {
+			background: rgba(255, 255, 255, 0.06);
+		}
+
+		&:last-child {
+			border-bottom: 0;
+		}
+	}
+
+	/* Paper page */
+	&--page {
+		padding: 18px 12px 18px 18px;
+		color: rgba(0, 0, 0, 0.62);
+		border-bottom: 1px solid var(--gv-rule);
+
+		.gv-note__line {
+			font-size: 1rem;
+		}
+
+		.gv-note__glyph--paper {
+			background: var(--gv-ink);
+			color: #ffffff;
+		}
+
+		.gv-note__meta {
+			color: var(--gv-muted);
+
+			span:first-child {
+				color: var(--gv-ink);
+			}
+		}
+
+		&.is-unread {
+			color: var(--gv-ink);
+			background: rgba(111, 91, 255, 0.06);
+
+			&::before {
+				background: var(--gv-uv);
+			}
+
+			.gv-note__desc {
+				color: rgba(0, 0, 0, 0.7);
+			}
+		}
+
+		&.is-linked:hover {
+			background: rgba(0, 0, 0, 0.04);
+		}
+
+		&:focus-within:has(.gv-note__link:focus-visible) {
+			outline-color: var(--gv-ink);
+		}
+	}
+}
+
+@keyframes gv-note-wait {
+	from {
+		opacity: 0.08;
+	}
+	to {
+		opacity: 0.18;
+	}
+}
+
+/* Phones: no sticky hover, press feedback instead */
+@media (hover: none) {
+	.gv-note.is-linked:hover {
+		background: transparent;
+	}
+
+	.gv-note.is-linked:active {
+		background: rgba(127, 127, 127, 0.12);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-bell,
+	.gv-bell.is-pulsing,
+	.gv-bell.is-pulsing .gv-bell__badge,
+	.gv-note__bar {
+		animation: none;
+		transition: none;
+	}
+}

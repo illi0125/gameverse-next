@@ -711,3 +711,47 @@ export const GET_MY_INQUIRIES = gql`
 		}
 	}
 `;
+
+/**************************
+ *     NOTIFICATIONS      *
+ *************************/
+
+export const GET_MY_NOTIFICATIONS = gql`
+	query GetMyNotifications($input: NotificationsInquiry!) {
+		getMyNotifications(input: $input) {
+			list {
+				_id
+				notificationType
+				notificationStatus
+				notificationGroup
+				notificationTitle
+				notificationDesc
+				authorId
+				receiverId
+				gameId
+				articleId
+				inquiryId
+				noticeId
+				commentId
+				readAt
+				createdAt
+				updatedAt
+				authorData {
+					_id
+					memberNick
+					memberImage
+					memberType
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_UNREAD_NOTIFICATION_COUNT = gql`
+	query GetUnreadNotificationCount {
+		getUnreadNotificationCount
+	}
+`;

@@ -116,6 +116,21 @@
 		}
 	}
 
+	&__count {
+		min-width: 20px;
+		height: 20px;
+		margin-left: 10px;
+		padding: 0 5px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		background: var(--gv-signal);
+		color: #000000;
+		font-size: 12px;
+		line-height: 1;
+	}
+
 	&__index {
 		font-family: var(--gv-mono);
 		font-size: 11px;

@@ -1,6 +1,7 @@
 import { makeVar } from '@apollo/client';
 
 import { CustomJwtPayload } from '../libs/types/customJwtPayload';
+import { Notification } from '../libs/types/notification/notification';
 export const themeVar = makeVar({});
 
 export const userVar = makeVar<CustomJwtPayload>({
@@ -26,3 +27,5 @@ export const userVar = makeVar<CustomJwtPayload>({
 
 // @ts-ignore
 export const socketVar = makeVar<WebSocket>();
+/** The latest notification delivered over the socket (the Notification Center prepends it) **/
+export const liveNotificationVar = makeVar<Notification | null>(null);
