@@ -22,6 +22,15 @@ span,
 p {
 	line-height: 1.2;
 }
+/* Replaces the inline pre-paint black from pages/_document.tsx once this stylesheet applies */
+html {
+	background-color: #ffffff;
+}
+
+/* Dev only: Next keeps <body> hidden (style[data-next-hide-fouc]) until all injected CSS is in; stay dark until then */
+html:has(style[data-next-hide-fouc]) {
+	background-color: #000000;
+}
 body {
 	font-family: $font;
 

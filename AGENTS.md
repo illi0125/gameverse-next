@@ -1,8 +1,4 @@
-Go outside of this project and read gameverse/docs/ai first!
-
-# Gameverse Frontend Modification Instructions
-
-This client project is being migrated from nestar-next to gameverse-next
+Go outside of this project and read gameverse/docs/ai first if you need!
 
 ## Rules
 
@@ -17,8 +13,7 @@ Before making any changes, read:
 
 - docs/ai/BACKEND_MIGRATION.md
 - docs/ai/DECISIONS.md
-- docs/ai/FRONTEND_MIGRATION.md
-  and etc inside of gameverse/docs/ai
+  and etc inside of gameverse/docs/ai if you need
 
 ## Workflow
 

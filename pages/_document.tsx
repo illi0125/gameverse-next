@@ -4,6 +4,10 @@ export default function Document() {
 	return (
 		<Html lang="en">
 			<Head>
+				{/* Dark canvas until the app's styles arrive. In dev, Next hides <body> until its injected CSS is ready,
+				    which showed the browser's white canvas before the intro; scss/app.scss sets the normal white
+				    background back once the stylesheet applies, so pages look the same afterwards. */}
+				<style>{`html{background:#000}`}</style>
 				<meta name="robots" content="index,follow" />
 				<link rel="icon" type="image/svg+xml" href="/img/logo/favicon.svg" />
 

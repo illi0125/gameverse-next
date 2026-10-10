@@ -1,0 +1,380 @@
+/** GAMEVERSE SHUTTER — page-transition overlay (libs/components/transition/PortalTransition.tsx).
+ *  Slats are CSS transitions on transform only (compositor), so they keep moving while the new page renders.
+ *  Stacking: above the header (99) and Live Chat (1040), below SweetAlert (1060), the intro (1200) and MUI dialogs (1300),
+ *  so an alert or dialog raised during a navigation is never hidden. Hidden and click-through unless `.is-active`.
+ */
+
+.gv-portal {
+	--gv-void: #000000;
+	--gv-uv: #6f5bff;
+	--gv-signal: #d7ff3a;
+	--gv-haze: #c9c4dc;
+	--gv-hair: rgba(255, 255, 255, 0.18);
+	--gv-display: 'Archivo', sans-serif;
+	--gv-mono: 'JetBrains Mono', ui-monospace, monospace;
+	--gv-portal-d: 440ms;
+	--gv-portal-ease: cubic-bezier(0.76, 0, 0.24, 1);
+
+	position: fixed;
+	inset: 0;
+	z-index: 1050;
+	visibility: hidden;
+	pointer-events: none;
+	contain: strict;
+
+	&.is-active {
+		visibility: visible;
+		/* Blocks double clicks and taps while the page changes underneath */
+		pointer-events: auto;
+		cursor: progress;
+	}
+
+	/* Shutter: five full-height Void slats, a UV leading edge and the cartridge notch on each */
+	&__slats {
+		position: absolute;
+		inset: 0;
+		display: flex;
+	}
+
+	&__slat {
+		position: relative;
+		flex: 1 0 0;
+		margin-right: -1px; // no hairline seams between slats
+		background: var(--gv-void);
+		transform: translate3d(0, 101%, 0);
+		clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+		will-change: transform;
+
+		&::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			height: 3px;
+			background: var(--gv-uv);
+		}
+	}
+
+	/* Back / Forward: the sweep comes from the top and leaves through the bottom */
+	&.is-down &__slat {
+		transform: translate3d(0, -101%, 0);
+		clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+
+		&::before {
+			top: auto;
+			bottom: 0;
+		}
+	}
+
+	&.is-covering &__slat {
+		transform: translate3d(0, 0, 0);
+		transition: transform var(--gv-portal-d) var(--gv-portal-ease) calc(var(--i) * 36ms);
+	}
+
+	&.is-revealing &__slat {
+		transform: translate3d(0, -101%, 0);
+		transition: transform var(--gv-portal-d) var(--gv-portal-ease) calc(var(--i) * 36ms);
+	}
+
+	&.is-down.is-covering &__slat {
+		transition-delay: calc(var(--j) * 36ms);
+	}
+
+	&.is-down.is-revealing &__slat {
+		transform: translate3d(0, 101%, 0);
+		transition-delay: calc(var(--j) * 36ms);
+	}
+
+	&.is-resetting &__slat {
+		transition: none !important;
+	}
+
+	/* Back/Forward and programmatic navigation: closed at once (fade), the reveal still sweeps */
+	&.is-instant.is-covering &__slat {
+		transform: translate3d(0, 0, 0);
+		transition: none;
+	}
+
+	&.is-instant.is-covering &__slats {
+		animation: gv-portal-fade var(--gv-portal-d) linear both;
+	}
+
+	/* Only while waiting longer than a moment: destination + a running Signal line, so a slow page reads as loading */
+	&__hud {
+		position: absolute;
+		z-index: 1;
+		left: calc(16px + 56px + clamp(20px, 2.4vw, 40px));
+		bottom: clamp(40px, 9vh, 96px);
+		display: grid;
+		justify-items: start;
+		gap: 18px;
+		color: #ffffff;
+		opacity: 0;
+		transition: opacity 140ms ease;
+	}
+
+	&.is-covering:not(.is-art) &__hud {
+		opacity: 1;
+		transition: opacity 260ms ease 260ms;
+	}
+
+	&__hud-kicker {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		font-family: var(--gv-mono);
+		font-size: 15px;
+		letter-spacing: 0.12em;
+		line-height: 1;
+		text-transform: uppercase;
+		color: var(--gv-haze);
+
+		&::before {
+			content: '';
+			width: 10px;
+			height: 10px;
+			background: var(--gv-signal);
+		}
+	}
+
+	&__hud-title {
+		max-width: min(80vw, 1200px);
+		overflow: hidden;
+		font-family: var(--gv-display);
+		font-size: clamp(3.5rem, 7vw, 7.5rem);
+		font-weight: 850;
+		line-height: 0.9;
+		letter-spacing: -0.04em;
+		text-overflow: ellipsis;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	&__bar {
+		position: relative;
+		width: clamp(220px, 22vw, 360px);
+		height: 3px;
+		overflow: hidden;
+		background: var(--gv-hair);
+
+		&::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			background: var(--gv-signal);
+			transform: translate3d(-100%, 0, 0);
+			animation: gv-portal-load 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+		}
+	}
+
+	/* Void backdrop of the Artwork Expansion only */
+	&__plate {
+		position: absolute;
+		inset: 0;
+		display: none;
+
+		&--void {
+			overflow: hidden;
+			background: var(--gv-void);
+		}
+	}
+
+	&.is-art &__plate {
+		display: block;
+	}
+
+	&__grain {
+		position: absolute;
+		inset: 0;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+		opacity: 0.12;
+		mix-blend-mode: overlay;
+	}
+
+	/* Artwork Expansion label: mono kicker + the game's title */
+	&__label {
+		position: absolute;
+		left: calc(16px + 56px + clamp(20px, 2.4vw, 40px));
+		right: 6vw;
+		bottom: calc(16px + 104px + 28px);
+		visibility: hidden;
+		color: #ffffff;
+	}
+
+	&__kicker {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 14px;
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.12em;
+		line-height: 1;
+		text-transform: uppercase;
+		color: var(--gv-haze);
+
+		&::before {
+			content: '';
+			width: 8px;
+			height: 8px;
+			background: var(--gv-signal);
+		}
+	}
+
+	&__mask {
+		display: block;
+		overflow: hidden;
+		padding-top: 0.08em;
+		margin-top: -0.08em;
+		line-height: 0.86;
+	}
+
+	&__word {
+		display: block;
+		overflow: hidden;
+		font-family: var(--gv-display);
+		font-size: min(9vw, 15vh);
+		font-weight: 850;
+		line-height: inherit;
+		letter-spacing: -0.055em;
+		text-overflow: ellipsis;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	/* Artwork Expansion: the card cover flies above the dimmed page */
+	&__art {
+		position: absolute;
+		top: 0;
+		left: 0;
+		display: none;
+		overflow: hidden;
+		background: #120a33;
+		will-change: transform, width, height, clip-path;
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			transform-origin: 50% 40%;
+		}
+	}
+
+	/* Same scrims as the hero duotone, so the full-screen art reads like the page it is about to become */
+	&__tint {
+		position: absolute;
+		inset: 0;
+		visibility: hidden;
+		background:
+			linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, transparent 46%),
+			linear-gradient(to right, rgba(0, 0, 0, 0.55) 0%, transparent 40%);
+	}
+
+	&.is-art {
+		.gv-portal__label {
+			z-index: 1;
+			bottom: clamp(32px, 7vh, 72px);
+		}
+
+		.gv-portal__word {
+			font-size: min(6.4vw, 11vh);
+		}
+	}
+
+	/* Phones and touch screens: three slats, smaller labels */
+	&.is-light {
+		.gv-portal__slat:nth-child(n + 4) {
+			display: none;
+		}
+
+		.gv-portal__hud {
+			left: clamp(16px, 4vw, 40px);
+			bottom: max(32px, env(safe-area-inset-bottom));
+		}
+
+		.gv-portal__hud-kicker {
+			font-size: 13px;
+		}
+
+		.gv-portal__hud-title {
+			max-width: calc(100vw - 32px);
+			font-size: min(16vw, 4.5rem);
+		}
+
+		.gv-portal__bar {
+			width: min(60vw, 260px);
+		}
+
+		.gv-portal__label {
+			left: clamp(16px, 4vw, 40px);
+			right: clamp(16px, 4vw, 40px);
+			bottom: max(32px, env(safe-area-inset-bottom));
+		}
+
+		.gv-portal__word {
+			font-size: min(15vw, 12vh);
+		}
+
+		/* Game titles wrap to two lines on narrow screens instead of losing their end */
+		&.is-art .gv-portal__word {
+			display: -webkit-box;
+			font-size: min(11vw, 9vh);
+			white-space: normal;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+		}
+	}
+}
+
+@keyframes gv-portal-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes gv-portal-load {
+	from {
+		transform: translate3d(-100%, 0, 0);
+	}
+	to {
+		transform: translate3d(100%, 0, 0);
+	}
+}
+
+/* Reduced motion: no sweep, the slats simply fade in and out together */
+@media (prefers-reduced-motion: reduce) {
+	.gv-portal .gv-portal__slat,
+	.gv-portal.is-down .gv-portal__slat {
+		transform: none;
+		opacity: 0;
+		clip-path: none;
+
+		&::before {
+			display: none;
+		}
+	}
+
+	.gv-portal.is-covering .gv-portal__slat {
+		transform: none;
+		opacity: 1;
+		transition: opacity var(--gv-portal-d) linear;
+	}
+
+	.gv-portal.is-revealing .gv-portal__slat,
+	.gv-portal.is-down.is-revealing .gv-portal__slat {
+		transform: none;
+		opacity: 0;
+		transition: opacity var(--gv-portal-d) linear;
+	}
+
+	.gv-portal__bar::after {
+		animation: none;
+		transform: none;
+		opacity: 0.6;
+	}
+}
