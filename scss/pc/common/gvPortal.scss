@@ -114,7 +114,7 @@
 		transition: opacity 140ms ease;
 	}
 
-	&.is-covering:not(.is-art) &__hud {
+	&.is-covering &__hud {
 		opacity: 1;
 		transition: opacity 260ms ease 260ms;
 	}
@@ -168,121 +168,6 @@
 		}
 	}
 
-	/* Void backdrop of the Artwork Expansion only */
-	&__plate {
-		position: absolute;
-		inset: 0;
-		display: none;
-
-		&--void {
-			overflow: hidden;
-			background: var(--gv-void);
-		}
-	}
-
-	&.is-art &__plate {
-		display: block;
-	}
-
-	&__grain {
-		position: absolute;
-		inset: 0;
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-		opacity: 0.12;
-		mix-blend-mode: overlay;
-	}
-
-	/* Artwork Expansion label: mono kicker + the game's title */
-	&__label {
-		position: absolute;
-		left: calc(16px + 56px + clamp(20px, 2.4vw, 40px));
-		right: 6vw;
-		bottom: calc(16px + 104px + 28px);
-		visibility: hidden;
-		color: #ffffff;
-	}
-
-	&__kicker {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		margin-bottom: 14px;
-		font-family: var(--gv-mono);
-		font-size: 12px;
-		letter-spacing: 0.12em;
-		line-height: 1;
-		text-transform: uppercase;
-		color: var(--gv-haze);
-
-		&::before {
-			content: '';
-			width: 8px;
-			height: 8px;
-			background: var(--gv-signal);
-		}
-	}
-
-	&__mask {
-		display: block;
-		overflow: hidden;
-		padding-top: 0.08em;
-		margin-top: -0.08em;
-		line-height: 0.86;
-	}
-
-	&__word {
-		display: block;
-		overflow: hidden;
-		font-family: var(--gv-display);
-		font-size: min(9vw, 15vh);
-		font-weight: 850;
-		line-height: inherit;
-		letter-spacing: -0.055em;
-		text-overflow: ellipsis;
-		text-transform: uppercase;
-		white-space: nowrap;
-	}
-
-	/* Artwork Expansion: the card cover flies above the dimmed page */
-	&__art {
-		position: absolute;
-		top: 0;
-		left: 0;
-		display: none;
-		overflow: hidden;
-		background: #120a33;
-		will-change: transform, width, height, clip-path;
-
-		img {
-			display: block;
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-			transform-origin: 50% 40%;
-		}
-	}
-
-	/* Same scrims as the hero duotone, so the full-screen art reads like the page it is about to become */
-	&__tint {
-		position: absolute;
-		inset: 0;
-		visibility: hidden;
-		background:
-			linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, transparent 46%),
-			linear-gradient(to right, rgba(0, 0, 0, 0.55) 0%, transparent 40%);
-	}
-
-	&.is-art {
-		.gv-portal__label {
-			z-index: 1;
-			bottom: clamp(32px, 7vh, 72px);
-		}
-
-		.gv-portal__word {
-			font-size: min(6.4vw, 11vh);
-		}
-	}
-
 	/* Phones and touch screens: three slats, smaller labels */
 	&.is-light {
 		.gv-portal__slat:nth-child(n + 4) {
@@ -298,32 +183,18 @@
 			font-size: 13px;
 		}
 
+		/* Long names (game titles, post titles) wrap to two lines instead of losing their end */
 		.gv-portal__hud-title {
+			display: -webkit-box;
 			max-width: calc(100vw - 32px);
 			font-size: min(16vw, 4.5rem);
+			white-space: normal;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
 		}
 
 		.gv-portal__bar {
 			width: min(60vw, 260px);
-		}
-
-		.gv-portal__label {
-			left: clamp(16px, 4vw, 40px);
-			right: clamp(16px, 4vw, 40px);
-			bottom: max(32px, env(safe-area-inset-bottom));
-		}
-
-		.gv-portal__word {
-			font-size: min(15vw, 12vh);
-		}
-
-		/* Game titles wrap to two lines on narrow screens instead of losing their end */
-		&.is-art .gv-portal__word {
-			display: -webkit-box;
-			font-size: min(11vw, 9vh);
-			white-space: normal;
-			-webkit-line-clamp: 2;
-			-webkit-box-orient: vertical;
 		}
 	}
 }
