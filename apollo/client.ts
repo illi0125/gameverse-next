@@ -4,11 +4,12 @@ import createUploadLink from 'apollo-upload-client/public/createUploadLink.js';
 import { WebSocketLink } from '@apollo/client/link/ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { onError } from '@apollo/client/link/error';
-import { getJwtToken } from '../libs/auth';
+import { getJwtToken, logOut } from '../libs/auth';
 import { TokenRefreshLink } from 'apollo-link-token-refresh';
 import { sweetErrorAlert } from '../libs/sweetAlert';
 import { socketVar } from './store';
 let apolloClient: ApolloClient<NormalizedCacheObject>;
+let signingOut = false;
 
 function getHeaders() {
 	const headers = {} as HeadersInit;
@@ -109,6 +110,18 @@ function createIsomorphicLink() {
 		const errorLink = onError(({ graphQLErrors, networkError, response, operation }) => {
 			// The log in / sign up form shows its own readable message (libs/auth), so no second alert here
 			const handledByForm = ['Login', 'Signup'].includes(operation.operationName);
+			// A stored token the server no longer accepts (re-keyed secret, deleted or blocked account): sign out once
+			const sessionRejected =
+				!handledByForm &&
+				Boolean(getJwtToken()) &&
+				graphQLErrors?.some(({ extensions }) => extensions?.code === 'UNAUTHENTICATED');
+			if (sessionRejected) {
+				if (!signingOut) {
+					signingOut = true;
+					logOut();
+				}
+				return;
+			}
 			if (graphQLErrors) {
 				graphQLErrors.map(({ message, locations, path, extensions }) => {
 					console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
