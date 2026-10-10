@@ -5,10 +5,13 @@ import TwitterIcon from '@mui/icons-material/Twitter';
 import { Stack, Box } from '@mui/material';
 import moment from 'moment';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { GamePlatform } from '../enums/game.enum';
 import { formatEnumLabel } from '../utils';
 
 const Footer = () => {
+	const { t } = useTranslation('common');
+
 	return (
 		<Stack className={'footer-container'}>
 			<Stack className={'main'}>
@@ -55,12 +58,18 @@ const Footer = () => {
 						</div>
 						<div>
 							<strong>Quick Links</strong>
-							<span>Terms of Use</span>
-							<span>Privacy Policy</span>
-							<span>Pricing Plans</span>
-							<span>Our Services</span>
-							<span>Contact Support</span>
-							<span>FAQs</span>
+							<Link href={'/about'}>
+								<span>{t('About Us')}</span>
+							</Link>
+							<Link href={'/cs?tab=faq'}>
+								<span>FAQs</span>
+							</Link>
+							<Link href={'/cs?tab=notice'}>
+								<span>Notices</span>
+							</Link>
+							<Link href={'/cs?tab=inquiry'}>
+								<span>Contact Support</span>
+							</Link>
 						</div>
 						<div>
 							<strong>Discover</strong>

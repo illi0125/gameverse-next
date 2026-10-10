@@ -86,6 +86,36 @@
 		}
 	}
 
+	/* Secondary page (About): mono, under the numbered links */
+	&__sublink {
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+		margin-top: 8px;
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--gv-haze);
+
+		&::before {
+			content: '';
+			width: 7px;
+			height: 7px;
+			margin-right: 10px;
+			background: currentColor;
+		}
+
+		&.is-active {
+			color: var(--gv-signal);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--gv-signal);
+			outline-offset: 2px;
+		}
+	}
+
 	&__index {
 		font-family: var(--gv-mono);
 		font-size: 11px;

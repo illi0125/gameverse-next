@@ -331,6 +331,14 @@ const Top = () => {
 							</Link>
 						);
 					})}
+					<Link
+						href={'/about'}
+						className={`gv-nav-drawer__sublink ${router.pathname === '/about' ? 'is-active' : ''}`}
+						aria-current={router.pathname === '/about' ? 'page' : undefined}
+						onClick={() => setMenuOpen(false)}
+					>
+						{t('About Us')}
+					</Link>
 				</nav>
 
 				<div className={'gv-nav-drawer__foot'}>

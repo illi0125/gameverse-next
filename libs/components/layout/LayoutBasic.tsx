@@ -67,11 +67,6 @@ const withLayoutBasic = (Component: any) => {
 					bgImage = '/img/gameverse/banner-account.svg';
 					setAuthHeader(true);
 					break;
-				case '/about':
-					title = 'About Us';
-					desc = 'Learn more about Gameverse';
-					bgImage = '/img/gameverse/banner-games.svg';
-					break;
 				case '/member':
 					title = 'Member Page';
 					desc = 'Games, articles and followers';
