@@ -2,6 +2,13 @@ import React, { useEffect, useState } from 'react';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { Viewer } from '@toast-ui/react-editor';
 
+/** "https://www.youtube.com/embed/<id>" or the youtube-nocookie host → a clean embed URL; anything else → null **/
+export const youtubeEmbedSrc = (raw: unknown): string | null => {
+	if (typeof raw !== 'string') return null;
+	const match = raw.trim().match(/^https:\/\/www\.youtube(-nocookie)?\.com\/embed\/([\w-]{11})(?:[?#].*)?$/);
+	return match ? `https://www.youtube${match[1] ?? ''}.com/embed/${match[2]}` : null;
+};
+
 const TViewer = (props: any) => {
 	const [editorLoaded, setEditorLoaded] = useState(false);
 
@@ -22,14 +29,17 @@ const TViewer = (props: any) => {
 					customHTMLRenderer={{
 						htmlBlock: {
 							iframe(node: any) {
+								// Only YouTube embeds, with fixed attributes; any other frame in a post is dropped
+								const src = youtubeEmbedSrc(node.attrs?.src);
+								if (!src) return [];
 								return [
 									{
 										type: 'openTag',
 										tagName: 'iframe',
 										outerNewLine: true,
-										attributes: node.attrs,
+										// The viewer's sanitizer keeps only these attributes (sandbox/allow would be stripped)
+										attributes: { src, title: 'YouTube video', width: '560', height: '315' },
 									},
-									{ type: 'html', content: node.childrenHTML ?? '' },
 									{ type: 'closeTag', tagName: 'iframe', outerNewLine: true },
 								];
 							},

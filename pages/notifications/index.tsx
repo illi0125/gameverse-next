@@ -178,6 +178,7 @@ const Notifications: NextPage = () => {
 	return (
 		<div className="gv-catalog gv-nc" ref={rootRef}>
 			<Head>
+				<meta name="robots" content="noindex, nofollow" key="robots" />
 				<title>{unread ? `(${unread}) ` : ''}Notifications | Gameverse</title>
 			</Head>
 

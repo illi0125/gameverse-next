@@ -26,6 +26,12 @@ export const getStaticProps = async ({ locale }: any) => ({
 /** Same request as the homepage hero (shared cache): the top-ranked cover is the scene's artwork **/
 const sceneInput: GamesInquiry = { page: 1, limit: 8, sort: 'gameRank', direction: Direction.DESC, search: {} };
 
+/** Where to go after log in / sign up: same-site paths only ("//host", "/\host", "https:", "javascript:" → home) **/
+const safeReferrer = (value: unknown): string =>
+	typeof value === 'string' && value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\')
+		? value
+		: '/';
+
 /** API limits (MemberInput / LoginInput): nickname 3–12, password 5–12, phone required **/
 const NICK_MIN = 3;
 const NICK_MAX = 12;
@@ -85,7 +91,7 @@ const Join: NextPage = () => {
 	const doLogin = useCallback(async () => {
 		try {
 			await logIn(input.nick, input.password);
-			await router.push(`${router.query.referrer ?? '/'}`);
+			await router.push(safeReferrer(router.query.referrer));
 		} catch (err: any) {
 			// Not awaited: the form is usable again while the alert is showing
 			sweetMixinErrorAlert(err.message).then();
@@ -95,7 +101,7 @@ const Join: NextPage = () => {
 	const doSignUp = useCallback(async () => {
 		try {
 			await signUp(input.nick, input.password, input.phone, input.type);
-			await router.push(`${router.query.referrer ?? '/'}`);
+			await router.push(safeReferrer(router.query.referrer));
 		} catch (err: any) {
 			// Not awaited: the form is usable again while the alert is showing
 			sweetMixinErrorAlert(err.message).then();
@@ -177,6 +183,7 @@ const Join: NextPage = () => {
 	return (
 		<div className="gv-catalog gv-auth" ref={rootRef}>
 			<Head>
+				<meta name="robots" content="noindex, nofollow" key="robots" />
 				<title>{`${loginView ? 'Log in' : 'Sign up'} | Gameverse`}</title>
 			</Head>
 

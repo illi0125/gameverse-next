@@ -36,19 +36,8 @@ class LoggingWebSocket {
 
 	constructor(url: string) {
 		this.socket = new WebSocket(`${url}?token=${getJwtToken()}`);
+		// No logging here: frames carry chat and notification payloads. Chat and useNotificationFeed attach their own handlers
 		socketVar(this.socket);
-
-		this.socket.onopen = () => {
-			console.log('WebSocket connection');
-		};
-
-		this.socket.onmessage = (msg) => {
-			console.log('WebSocket message:', msg.data);
-		};
-
-		this.socket.onerror = (error) => {
-			console.log('WebSocket error:', error);
-		};
 	}
 
 	send(data: string | ArrayBuffer | SharedArrayBuffer | Blob | ArrayBufferView) {
@@ -85,7 +74,7 @@ function createIsomorphicLink() {
 					...getHeaders(),
 				},
 			}));
-			console.warn('requesting.. ', operation);
+			// Never log the operation: its variables include passwords (Login, Signup)
 			return forward(operation);
 		});
 

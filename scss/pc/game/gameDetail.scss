@@ -1234,8 +1234,11 @@
 
 /** LOADING / NOT FOUND **/
 
+/* Loading / not-found / error states fill the screen, so the footer starts below the fold and is not
+   pushed down when the page's data arrives (it caused a 0.199 layout shift on game detail) */
 .gv-gd .gv-gd-state {
-	min-height: max(80vh, 560px);
+	min-height: max(100vh, 560px);
+	min-height: max(100svh, 560px);
 	overflow: hidden;
 	background: var(--gv-void);
 	color: #ffffff;
@@ -1264,6 +1267,17 @@
 		font-size: 1rem;
 		line-height: 1.5;
 		color: var(--gv-haze);
+	}
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+
+		button {
+			border: 0;
+			cursor: pointer;
+		}
 	}
 
 	&__readout {

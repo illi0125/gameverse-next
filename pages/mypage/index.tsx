@@ -127,6 +127,7 @@ const MyPage: NextPage = () => {
 	return (
 		<div className="gv-catalog gv-gd gv-mp">
 			<Head>
+				<meta name="robots" content="noindex, nofollow" key="robots" />
 				<title>{`${sectionLabels[category] ?? 'My page'} | Gameverse`}</title>
 			</Head>
 

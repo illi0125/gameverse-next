@@ -41,6 +41,17 @@ const sortOptions = [
 	{ id: 'views', label: 'Views', sort: 'memberViews', direction: 'DESC' },
 ];
 
+/** A malformed or hand-edited ?input= falls back to the defaults instead of crashing the page **/
+const parseInput = (raw: string | string[] | undefined, fallback: any) => {
+	if (typeof raw !== 'string') return fallback;
+	try {
+		const parsed = JSON.parse(raw);
+		return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : fallback;
+	} catch (err: any) {
+		return fallback;
+	}
+};
+
 const AgentList: NextPage = ({ initialInput, ...props }: any) => {
 	const device = useDeviceDetect();
 	const router = useRouter();
@@ -49,9 +60,7 @@ const AgentList: NextPage = ({ initialInput, ...props }: any) => {
 	const [filterSortName, setFilterSortName] = useState('Recent');
 	const [sortingOpen, setSortingOpen] = useState(false);
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const [searchFilter, setSearchFilter] = useState<any>(
-		router?.query?.input ? JSON.parse(router?.query?.input as string) : initialInput,
-	);
+	const [searchFilter, setSearchFilter] = useState<any>(parseInput(router?.query?.input, initialInput));
 	const [agents, setAgents] = useState<Member[]>([]);
 	const [total, setTotal] = useState<number>(0);
 	const [currentPage, setCurrentPage] = useState<number>(1);
@@ -80,7 +89,7 @@ const AgentList: NextPage = ({ initialInput, ...props }: any) => {
 	/** LIFECYCLES **/
 	useEffect(() => {
 		if (router.query.input) {
-			const input_obj = JSON.parse(router?.query?.input as string);
+			const input_obj = parseInput(router?.query?.input, initialInput);
 			setSearchFilter(input_obj);
 		} else
 			router.replace(`/developer?input=${JSON.stringify(searchFilter)}`, `/developer?input=${JSON.stringify(searchFilter)}`);

@@ -8,7 +8,6 @@ export default function Document() {
 				    which showed the browser's white canvas before the intro; scss/app.scss sets the normal white
 				    background back once the stylesheet applies, so pages look the same afterwards. */}
 				<style>{`html{background:#000}`}</style>
-				<meta name="robots" content="index,follow" />
 				<link rel="icon" type="image/svg+xml" href="/img/logo/favicon.svg" />
 
 				{/* Homepage display + HUD faces (used only inside .gv-home) */}

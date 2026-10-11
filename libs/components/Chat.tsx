@@ -92,7 +92,12 @@ const Chat = () => {
 	useEffect(() => {
 		if (!socket) return;
 		socket.onmessage = (msg) => {
-			const data = JSON.parse(msg.data);
+			let data: any;
+			try {
+				data = JSON.parse(msg.data);
+			} catch (err) {
+				return; // not a JSON frame: ignore it instead of throwing
+			}
 
 			switch (data.event) {
 				case 'info':
@@ -109,14 +114,13 @@ const Chat = () => {
 						sentRef.current.shift();
 						mineRef.current.add(newMessage);
 					}
-					messagesList.push(newMessage);
-					setMessagesList([...messagesList]);
+					setMessagesList((prev) => [...prev, newMessage]);
 					// Unread: other people's messages that arrive while the window is closed
 					if (!openRef.current && !isMine(newMessage)) setUnread((count) => count + 1);
 					break;
 			}
 		};
-	}, [socket, messagesList, user]);
+	}, [socket, user]);
 
 	// Connection readout: listeners only, the socket's own handlers stay as they are
 	useEffect(() => {
@@ -348,6 +352,7 @@ const Chat = () => {
 						value={messageInput}
 						onChange={getInputMessageHandler}
 						onKeyDown={getKeyHandler}
+						maxLength={500}
 						autoComplete="off"
 						enterKeyHint="send"
 					/>

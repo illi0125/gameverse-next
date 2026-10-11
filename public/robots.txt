@@ -1,0 +1,10 @@
+# Private and account areas stay out of search results (also for the /kr and /ru locales)
+User-agent: *
+Disallow: /_admin
+Disallow: /*/_admin
+Disallow: /mypage
+Disallow: /*/mypage
+Disallow: /notifications
+Disallow: /*/notifications
+Disallow: /account
+Disallow: /*/account

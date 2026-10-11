@@ -47,7 +47,8 @@ function Pages() {
 export default function FiberContainer() {
 	return (
 		<div className="gv-shelf-canvas">
-			<Canvas gl={{ antialias: false }} dpr={[1, 1.5]}>
+			{/* Renders only when something changes (scroll damping calls invalidate()), not 60fps for the whole visit */}
+			<Canvas frameloop="demand" gl={{ antialias: false }} dpr={[1, 1.5]}>
 				<Suspense fallback={null}>
 					<ScrollControls infinite horizontal damping={4} pages={4} distance={1}>
 						<Scroll>

@@ -46,7 +46,7 @@ export const sweetTopSuccessAlert = async (msg: string, duration: number = 2000)
 	await GvSwal.fire({
 		position: 'center',
 		...gvIcon('success'),
-		title: msg.replace('Definer: ', ''),
+		titleText: msg.replace('Definer: ', ''),
 		showConfirmButton: false,
 		timer: duration,
 	});
@@ -54,7 +54,7 @@ export const sweetTopSuccessAlert = async (msg: string, duration: number = 2000)
 
 export const sweetContactAlert = async (msg: string, duration: number = 10000) => {
 	await GvSwal.fire({
-		title: msg,
+		titleText: msg,
 		showConfirmButton: false,
 		timer: duration,
 	}).then();
@@ -94,7 +94,7 @@ export const sweetLoginConfirmAlert = (msg: string) => {
 export const sweetErrorAlert = async (msg: string, duration: number = 3000) => {
 	await GvSwal.fire({
 		...gvIcon('error'),
-		title: msg,
+		titleText: msg,
 		showConfirmButton: false,
 		timer: duration,
 	});
@@ -103,7 +103,7 @@ export const sweetErrorAlert = async (msg: string, duration: number = 3000) => {
 export const sweetMixinErrorAlert = async (msg: string, duration: number = 3000) => {
 	await GvSwal.fire({
 		...gvIcon('error'),
-		title: msg,
+		titleText: msg,
 		showConfirmButton: false,
 		timer: duration,
 	});
@@ -112,14 +112,14 @@ export const sweetMixinErrorAlert = async (msg: string, duration: number = 3000)
 export const sweetMixinSuccessAlert = async (msg: string, duration: number = 2000) => {
 	await GvSwal.fire({
 		...gvIcon('success'),
-		title: msg,
+		titleText: msg,
 		showConfirmButton: false,
 		timer: duration,
 	});
 };
 
 export const sweetBasicAlert = async (text: string) => {
-	GvSwal.fire(text);
+	GvSwal.fire({ titleText: text });
 };
 
 export const sweetErrorHandlingForAdmin = async (err: any) => {
@@ -152,7 +152,7 @@ export const sweetTopSmallSuccessAlert = async (
 
 	Toast.fire({
 		...gvIcon('success'),
-		title: msg,
+		titleText: msg,
 	}).then((data) => {
 		if (enable_forward) {
 			window.location.reload();

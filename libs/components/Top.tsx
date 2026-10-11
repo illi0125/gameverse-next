@@ -78,6 +78,12 @@ const Top = () => {
 		if (jwt) updateUserInfo(jwt);
 	}, []);
 
+	// One listener per mount, removed on unmount (it used to be added on every render and never removed)
+	useEffect(() => {
+		window.addEventListener('scroll', changeNavbarColor, { passive: true });
+		return () => window.removeEventListener('scroll', changeNavbarColor);
+	}, []);
+
 	// The small-screen menu closes whenever a link changes the route
 	useEffect(() => {
 		setMenuOpen(false);
@@ -122,9 +128,6 @@ const Top = () => {
 		}
 	};
 
-	if (typeof window !== 'undefined') {
-		window.addEventListener('scroll', changeNavbarColor);
-	}
 
 	return (
 		<Stack className={'navbar'}>

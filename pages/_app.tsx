@@ -8,11 +8,12 @@ import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
 import GvCursor from '../libs/components/common/GvCursor';
 import PortalTransition from '../libs/components/transition/PortalTransition';
+import AppErrorBoundary from '../libs/components/common/AppErrorBoundary';
 import '../scss/app.scss';
 import '../scss/pc/main.scss';
 import '../scss/mobile/main.scss';
 
-const App = ({ Component, pageProps }: AppProps) => {
+const App = ({ Component, pageProps, router }: AppProps) => {
 	// @ts-ignore
 	const [theme, setTheme] = useState(createTheme(light));
 	const client = useApollo(pageProps.initialApolloState);
@@ -21,7 +22,9 @@ const App = ({ Component, pageProps }: AppProps) => {
 		<ApolloProvider client={client}>
 			<ThemeProvider theme={theme}>
 				<CssBaseline />
-				<Component {...pageProps} />
+				<AppErrorBoundary resetKey={router.pathname}>
+					<Component {...pageProps} />
+				</AppErrorBoundary>
 				<PortalTransition />
 				<GvCursor />
 			</ThemeProvider>

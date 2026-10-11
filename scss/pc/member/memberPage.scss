@@ -199,3 +199,52 @@
 		}
 	}
 }
+
+/** Phones and narrow windows: the same page, stacked (menu above the list) instead of the fixed 1260px frame,
+ *  which otherwise widened the phone's layout viewport to 1260px. Desktop rules above are unchanged. **/
+@media (max-width: 899px) {
+	#pc-wrap #member-page .container .member-page {
+		padding-top: 24px;
+
+		.back-frame {
+			width: 100%;
+			flex-direction: column;
+			margin: 24px 0 64px;
+
+			.left-config {
+				width: auto;
+				height: auto;
+				margin: 16px;
+				padding-bottom: 16px;
+
+				.sections .section .sub-section {
+					width: 100%;
+				}
+			}
+
+			.main-config {
+				width: auto;
+				min-width: 0;
+				margin: 0 16px 40px;
+				gap: 32px;
+
+				// The lists inside (games, followers, articles) were sized for the 936px column
+				* {
+					max-width: 100%;
+				}
+
+				// Followers / followings: header columns had a 110px gap; rows wrap instead of overflowing
+				.listing-title-box {
+					gap: 12px;
+					padding: 14px 16px;
+				}
+
+				.follows-card-box {
+					flex-wrap: wrap;
+					row-gap: 8px;
+					padding-right: 0;
+				}
+			}
+		}
+	}
+}

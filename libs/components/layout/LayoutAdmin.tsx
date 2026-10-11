@@ -51,7 +51,13 @@ const withAdminLayout = (Component: ComponentType) => {
 			router.push('/').then();
 		};
 
-		if (!user || user?.memberType !== MemberType.ADMIN) return null;
+		// Nothing visible for visitors (the redirect above runs), but crawlers still get noindex
+		if (!user || user?.memberType !== MemberType.ADMIN)
+			return (
+				<Head>
+					<meta name="robots" content="noindex, nofollow" key="robots" />
+				</Head>
+			);
 
 		const { section, title: pageTitle } = adminPageTitle(router.pathname);
 		const avatar = user?.memberImage ? `${REACT_APP_API_URL}/${user?.memberImage}` : '/img/profile/defaultUser.svg';
@@ -59,6 +65,7 @@ const withAdminLayout = (Component: ComponentType) => {
 		return (
 			<main id="pc-wrap" className="gv-admin">
 				<Head>
+					<meta name="robots" content="noindex, nofollow" key="robots" />
 					<title>{`${pageTitle} · Admin | Gameverse`}</title>
 				</Head>
 				<a href="#bunker" className="gv-admin-skip">
