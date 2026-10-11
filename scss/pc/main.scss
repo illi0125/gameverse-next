@@ -10,6 +10,7 @@
 @import '/scss/pc/common/gvScrollbar.scss';
 @import '/scss/pc/common/gvNavDrawer.scss';
 @import '/scss/pc/common/gvNotifications.scss';
+@import '/scss/pc/common/gvLangMenu.scss';
 @import '/scss/pc/common/gvPortal.scss';
 
 @import '/scss/pc/game/game.scss';
@@ -147,25 +148,11 @@ body {
 						}
 					}
 					.lan-box {
-						margin-left: 28px;
+						margin-left: 14px;
 						display: flex;
 						align-items: center;
 						.notification-icon {
 							color: white;
-						}
-						.btn-lang {
-							border-radius: 4px;
-							img {
-								width: 24px;
-								height: 17px;
-								border-radius: 2px;
-							}
-						}
-						.img-flag {
-							width: 24px;
-							height: 17px;
-							border-radius: 2px;
-							margin-right: 8px;
 						}
 					}
 				}

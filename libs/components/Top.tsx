@@ -6,8 +6,7 @@ import { getJwtToken, logOut, updateUserInfo } from '../auth';
 import { Stack, Box, Drawer } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
-import { alpha, styled } from '@mui/material/styles';
-import Menu, { MenuProps } from '@mui/material/Menu';
+import Menu from '@mui/material/Menu';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { CaretDown } from 'phosphor-react';
 import Link from 'next/link';
@@ -123,44 +122,6 @@ const Top = () => {
 		}
 	};
 
-	const StyledMenu = styled((props: MenuProps) => (
-		<Menu
-			elevation={0}
-			anchorOrigin={{
-				vertical: 'bottom',
-				horizontal: 'right',
-			}}
-			transformOrigin={{
-				vertical: 'top',
-				horizontal: 'right',
-			}}
-			{...props}
-		/>
-	))(({ theme }) => ({
-		'& .MuiPaper-root': {
-			top: '109px',
-			borderRadius: 6,
-			marginTop: theme.spacing(1),
-			minWidth: 160,
-			color: theme.palette.mode === 'light' ? 'rgb(55, 65, 81)' : theme.palette.grey[300],
-			boxShadow:
-				'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
-			'& .MuiMenu-list': {
-				padding: '4px 0',
-			},
-			'& .MuiMenuItem-root': {
-				'& .MuiSvgIcon-root': {
-					fontSize: 18,
-					color: theme.palette.text.secondary,
-					marginRight: theme.spacing(1.5),
-				},
-				'&:active': {
-					backgroundColor: alpha(theme.palette.primary.main, theme.palette.action.selectedOpacity),
-				},
-			},
-		},
-	}));
-
 	if (typeof window !== 'undefined') {
 		window.addEventListener('scroll', changeNavbarColor);
 	}
@@ -238,51 +199,54 @@ const Top = () => {
 						<div className={'lan-box'}>
 							<Button
 								disableRipple
-								className="btn-lang"
+								className={`btn-lang gv-lang-btn ${drop ? 'is-open' : ''}`}
 								onClick={langClick}
-								endIcon={<CaretDown size={14} color="#616161" weight="fill" />}
+								aria-label={t('Language')}
+								aria-haspopup="menu"
+								aria-expanded={drop}
+								aria-controls="gv-lang-menu"
+								endIcon={<CaretDown size={12} weight="bold" className="gv-lang-btn__caret" />}
 							>
-								<Box component={'div'} className={'flag'}>
-									{lang !== null ? (
-										<img src={`/img/flag/lang${lang}.png`} alt={'usaFlag'} />
-									) : (
-										<img src={`/img/flag/langen.png`} alt={'usaFlag'} />
-									)}
-								</Box>
+								<img className="gv-lang-btn__flag" src={`/img/flag/lang${lang ?? 'en'}.png`} alt="" />
+								<span className="gv-lang-btn__code">{(lang ?? 'en').toUpperCase()}</span>
 							</Button>
 
-							<StyledMenu anchorEl={anchorEl2} open={drop} onClose={langClose} sx={{ position: 'absolute' }}>
-								<MenuItem disableRipple onClick={langChoice} id="en">
-									<img
-										className="img-flag"
-										src={'/img/flag/langen.png'}
+							<Menu
+								id="gv-lang-menu"
+								anchorEl={anchorEl2}
+								open={drop}
+								onClose={langClose}
+								elevation={0}
+								disableScrollLock
+								anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+								transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+								PaperProps={{ className: 'gv-lang-menu' }}
+								MenuListProps={{
+									'aria-label': t('Language'),
+									subheader: (
+										<div className="gv-lang-menu__head" aria-hidden>
+											<span className="gv-lang-menu__tag">Language</span>
+											<span className="gv-lang-menu__count">{languages.length}</span>
+										</div>
+									),
+								}}
+							>
+								{languages.map((language, index) => (
+									<MenuItem
+										key={language.id}
+										disableRipple
 										onClick={langChoice}
-										id="en"
-										alt={'usaFlag'}
-									/>
-									{t('English')}
-								</MenuItem>
-								<MenuItem disableRipple onClick={langChoice} id="kr">
-									<img
-										className="img-flag"
-										src={'/img/flag/langkr.png'}
-										onClick={langChoice}
-										id="uz"
-										alt={'koreanFlag'}
-									/>
-									{t('Korean')}
-								</MenuItem>
-								<MenuItem disableRipple onClick={langChoice} id="ru">
-									<img
-										className="img-flag"
-										src={'/img/flag/langru.png'}
-										onClick={langChoice}
-										id="ru"
-										alt={'russiaFlag'}
-									/>
-									{t('Russian')}
-								</MenuItem>
-							</StyledMenu>
+										id={language.id}
+										selected={lang === language.id}
+										className="gv-lang-menu__item"
+									>
+										<span className="gv-lang-menu__index">{String(index + 1).padStart(2, '0')}</span>
+										<img className="gv-lang-menu__flag" src={`/img/flag/lang${language.id}.png`} alt="" />
+										<span className="gv-lang-menu__label">{language.label}</span>
+										<span className="gv-lang-menu__code">{language.id.toUpperCase()}</span>
+									</MenuItem>
+								))}
+							</Menu>
 						</div>
 
 						<button

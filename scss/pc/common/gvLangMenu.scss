@@ -1,0 +1,226 @@
+/** LANGUAGE SWITCH — navbar trigger (#top .lan-box, ≥ 900px) and its menu (MUI Menu, rendered in a portal).
+ *  Same Void panel and HUD head as the notification dropdown. Below 900px the drawer's language row is used.
+ */
+
+%gv-lang-tokens {
+	--gv-void: #000000;
+	--gv-uv: #6f5bff;
+	--gv-signal: #d7ff3a;
+	--gv-haze: #c9c4dc;
+	--gv-hair: rgba(255, 255, 255, 0.18);
+	--gv-display: 'Archivo', sans-serif;
+	--gv-mono: 'JetBrains Mono', ui-monospace, monospace;
+	--gv-ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/** TRIGGER **/
+
+.MuiButton-root.gv-lang-btn {
+	@extend %gv-lang-tokens;
+	min-width: 0;
+	height: 44px;
+	padding: 0 12px;
+	gap: 10px;
+	color: #ffffff;
+	background: transparent;
+	border: 1px solid rgba(255, 255, 255, 0.24);
+	border-radius: 0;
+	font-family: var(--gv-mono);
+	font-size: 12px;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	line-height: 1;
+	text-transform: uppercase;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease,
+		border-color 160ms ease,
+		transform 140ms var(--gv-ease);
+
+	.MuiButton-endIcon {
+		margin: 0;
+	}
+
+	.gv-lang-btn__flag {
+		display: block;
+		width: 20px;
+		height: 14px;
+		object-fit: cover;
+		border-radius: 0;
+	}
+
+	.gv-lang-btn__code {
+		line-height: inherit;
+	}
+
+	.gv-lang-btn__caret {
+		transition: transform 180ms var(--gv-ease);
+	}
+
+	&:hover {
+		background: transparent;
+		border-color: #ffffff;
+	}
+
+	&.is-open {
+		color: #000000;
+		background: #ffffff;
+		border-color: #ffffff;
+
+		.gv-lang-btn__caret {
+			transform: rotate(180deg);
+		}
+	}
+
+	&:active {
+		transform: scale(0.96);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--gv-signal);
+		outline-offset: 2px;
+	}
+}
+
+/** MENU (portal) **/
+
+.MuiPaper-root.MuiPopover-paper.gv-lang-menu {
+	@extend %gv-lang-tokens;
+	box-sizing: border-box;
+	width: 240px;
+	margin-top: 10px;
+	padding: 0;
+	color: #ffffff;
+	background: var(--gv-void);
+	border: 1px solid var(--gv-hair);
+	border-radius: 0;
+	box-shadow: none;
+
+	.MuiMenu-list {
+		padding: 0 0 6px;
+	}
+}
+
+.gv-lang-menu {
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		height: 44px;
+		padding: 0 16px;
+		margin-bottom: 6px;
+		border-bottom: 1px solid var(--gv-hair);
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
+	&__tag,
+	&__count {
+		font-family: var(--gv-mono);
+	}
+
+	&__tag::before {
+		content: '■';
+		margin-right: 8px;
+		color: var(--gv-signal);
+	}
+
+	&__count {
+		color: var(--gv-haze);
+		letter-spacing: 0.06em;
+	}
+
+	.MuiMenuItem-root.gv-lang-menu__item {
+		position: relative;
+		display: grid;
+		grid-template-columns: 22px 20px 1fr auto;
+		align-items: center;
+		gap: 12px;
+		min-height: 48px;
+		padding: 0 16px;
+		color: rgba(255, 255, 255, 0.72);
+		background: transparent;
+		transition:
+			background-color 160ms ease,
+			color 160ms ease;
+
+		// langChoice reads e.target.id, so every click must land on the item itself
+		> * {
+			pointer-events: none;
+		}
+
+		&::before {
+			content: '';
+			position: absolute;
+			left: 0;
+			top: 10px;
+			bottom: 10px;
+			width: 3px;
+			background: var(--gv-signal);
+			transform: scaleY(0);
+			transition: transform 180ms var(--gv-ease);
+		}
+
+		&:hover,
+		&.Mui-focusVisible {
+			color: #ffffff;
+			background: rgba(255, 255, 255, 0.08);
+		}
+
+		&.Mui-focusVisible {
+			outline: 2px solid var(--gv-signal);
+			outline-offset: -2px;
+		}
+
+		&.Mui-selected,
+		&.Mui-selected:hover,
+		&.Mui-selected.Mui-focusVisible {
+			color: #ffffff;
+			background: rgba(255, 255, 255, 0.1);
+
+			&::before {
+				transform: scaleY(1);
+			}
+
+			.gv-lang-menu__index,
+			.gv-lang-menu__code {
+				color: var(--gv-signal);
+			}
+		}
+	}
+
+	&__index,
+	&__code {
+		font-family: var(--gv-mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
+		color: var(--gv-haze);
+		line-height: 1;
+	}
+
+	&__flag {
+		display: block;
+		width: 20px;
+		height: 14px;
+		object-fit: cover;
+	}
+
+	&__label {
+		font-family: var(--gv-display);
+		font-size: 0.9375rem;
+		font-weight: 800;
+		letter-spacing: -0.01em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.MuiButton-root.gv-lang-btn,
+	.MuiButton-root.gv-lang-btn .gv-lang-btn__caret,
+	.gv-lang-menu .MuiMenuItem-root.gv-lang-menu__item::before {
+		transition: none;
+	}
+}
