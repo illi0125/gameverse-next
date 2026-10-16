@@ -7,6 +7,8 @@ export const csTabs = [
 	{ key: 'faq', label: 'FAQ', short: 'FAQ', desc: 'Answers to the questions players ask most.' },
 	{ key: 'notice', label: 'Notices', short: 'Notices', desc: 'Announcements and events from the GameVerse team.' },
 	{ key: 'inquiry', label: 'Ask us', short: 'Ask us', desc: 'Send a question to the team and follow its status.' },
+	/** Shown only while the API reports the assistant enabled (getAssistantStatus) **/
+	{ key: 'ai', label: 'Ask AI', short: 'Ask AI', desc: 'Instant answers from the FAQ and notices.' },
 ] as const;
 
 export type CsTabKey = (typeof csTabs)[number]['key'];

@@ -13,10 +13,20 @@ import withLayoutCatalog from '../../libs/components/layout/LayoutCatalog';
 import Notice from '../../libs/components/cs/Notice';
 import Faq from '../../libs/components/cs/Faq';
 import Inquiry from '../../libs/components/cs/Inquiry';
-import { CsTabKey, csTabs, faqInquiry, faqTopics, isCsTab, noticesInquiry } from '../../libs/components/cs/csMeta';
+import Assistant from '../../libs/components/cs/Assistant';
+import {
+	CsTabKey,
+	csTabs,
+	faqInquiry,
+	faqTopics,
+	isCsTab,
+	noticesInquiry,
+	topicMeta,
+} from '../../libs/components/cs/csMeta';
 import { MOTION_QUERY, pad } from '../../libs/components/homepage/homeMotion';
-import { GET_NOTICES } from '../../apollo/user/query';
+import { GET_ASSISTANT_STATUS, GET_NOTICES } from '../../apollo/user/query';
 import { Notice as NoticeItem } from '../../libs/types/notice/notice';
+import { NoticeCategory } from '../../libs/enums/notice.enum';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export const getStaticProps = async ({ locale }: any) => ({
@@ -42,7 +52,16 @@ const CS: NextPage = () => {
 			{ scroll: false },
 		);
 	};
-	const tab: CsTabKey = isCsTab(router.query.tab) ? router.query.tab : 'notice';
+	/** AI assistant: its tab exists only while the API reports it enabled (off switch on the server) **/
+	const { data: assistantData, error: assistantError } = useQuery(GET_ASSISTANT_STATUS, {
+		fetchPolicy: 'cache-and-network',
+	});
+	const assistantEnabled = assistantData?.getAssistantStatus?.enabled === true;
+	const assistantKnown = Boolean(assistantData || assistantError);
+	const visibleTabs = csTabs.filter((entry) => entry.key !== 'ai' || assistantEnabled);
+
+	const requestedTab: CsTabKey = isCsTab(router.query.tab) ? router.query.tab : 'notice';
+	const tab: CsTabKey = requestedTab === 'ai' && assistantKnown && !assistantEnabled ? 'notice' : requestedTab;
 
 	/** APOLLO REQUESTS (public, ACTIVE only; managed in Admin › Support) **/
 	const { loading: faqLoading, data: faqData, error: faqError } = useQuery(GET_NOTICES, {
@@ -86,6 +105,15 @@ const CS: NextPage = () => {
 		openTab('faq', true);
 	};
 
+	/** An answer's source: the FAQ entry (its topic, searched by title) or the notices list **/
+	const openSource = (source: NoticeItem) => {
+		if (source.noticeCategory === NoticeCategory.FAQ) {
+			setTopicKey(topicMeta(source.noticeTopic).key);
+			setSearchText(source.noticeTitle);
+			openTab('faq', true);
+		} else openTab('notice', true);
+	};
+
 	/** PRESENTATION **/
 	const latest = notices.find((notice) => notice.noticeEvent) ?? notices[0];
 	const readoutReady = Boolean(faqData && noticesData);
@@ -93,6 +121,7 @@ const CS: NextPage = () => {
 		faq: faqData ? `${faqs.length} answer${faqs.length === 1 ? '' : 's'}` : '—',
 		notice: noticesData ? `${notices.length} posted` : '—',
 		inquiry: 'Reply in your history',
+		ai: 'Answers in seconds',
 	};
 
 	useEffect(() => {
@@ -237,7 +266,7 @@ const CS: NextPage = () => {
 			<section className="gv-cs-desk" ref={contentRef} aria-label="Help sections">
 				<div className="gv-cs-desk__inner">
 					<div className="gv-cs-tabs" role="tablist" aria-label="Help sections">
-						{csTabs.map((entry, index) => {
+						{visibleTabs.map((entry, index) => {
 							const selected = tab === entry.key;
 							return (
 								<button
@@ -278,6 +307,19 @@ const CS: NextPage = () => {
 						)}
 
 						{tab === 'inquiry' && <Inquiry />}
+
+						{tab === 'ai' &&
+							(assistantEnabled ? (
+								<Assistant
+									sources={[...faqs, ...notices]}
+									onOpenSource={openSource}
+									onAskTeam={() => openTab('inquiry', true)}
+								/>
+							) : (
+								<div className="gv-cs-empty" role="status">
+									<p className="gv-cs-empty__title">Loading the assistant…</p>
+								</div>
+							))}
 					</div>
 				</div>
 			</section>
@@ -287,7 +329,7 @@ const CS: NextPage = () => {
 				<section className="gv-cs-stuck" aria-labelledby="cs-stuck-title">
 					<div className="gv-cs-stuck__inner">
 						<p className="gv-chapter" aria-hidden>
-							<span>04</span>Still stuck
+							<span>{pad(visibleTabs.length + 1)}</span>Still stuck
 						</p>
 						<h2 className="gv-cs-stuck__title" id="cs-stuck-title">
 							<span className="gv-cs-stuck__line">No answer</span>
@@ -299,6 +341,11 @@ const CS: NextPage = () => {
 								<button type="button" className="gv-cs-cta gv-cs-cta--solid" onClick={() => openTab('inquiry', true)}>
 									Ask the team
 								</button>
+								{assistantEnabled && tab !== 'ai' && (
+									<button type="button" className="gv-cs-cta" onClick={() => openTab('ai', true)}>
+										Ask AI
+									</button>
+								)}
 								<Link href={{ pathname: '/community', query: { articleCategory: 'FREE' } }} className="gv-cs-cta">
 									Ask the community
 								</Link>

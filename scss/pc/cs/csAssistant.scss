@@ -1,0 +1,269 @@
+/** HELP › Ask AI — assistant tab on /cs (Assistant.tsx). Imported after cs.scss; uses its tokens, chips, fields and CTAs. **/
+
+/* Tabs: as many equal columns as there are tabs (3, or 4 while the assistant is on) */
+.gv-cs .gv-cs-tabs {
+	grid-template-columns: none;
+	grid-auto-flow: column;
+	grid-auto-columns: minmax(0, 1fr);
+}
+
+.gv-cs .gv-cs-ai {
+	display: grid;
+	gap: clamp(24px, 3vw, 40px);
+}
+
+.gv-cs .gv-cs-ai__box {
+	display: grid;
+	max-width: 880px;
+	border: 2px solid var(--gv-ink);
+	background: #ffffff;
+}
+
+.gv-cs .gv-cs-ai__log {
+	display: grid;
+	align-content: start;
+	gap: 18px;
+	min-height: 280px;
+	max-height: min(56vh, 560px);
+	margin: 0;
+	padding: clamp(18px, 2.4vw, 28px);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	list-style: none;
+}
+
+.gv-cs .gv-cs-ai__intro {
+	display: grid;
+	gap: 14px;
+
+	p {
+		max-width: 52ch;
+		line-height: 1.5;
+		color: var(--gv-muted);
+	}
+}
+
+.gv-cs .gv-cs-ai__starters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+
+	.gv-cs-chip {
+		cursor: pointer;
+	}
+}
+
+.gv-cs .gv-cs-ai__turn {
+	display: grid;
+	gap: 6px;
+	max-width: min(640px, 88%);
+	padding: 14px 16px;
+	background: rgba(0, 0, 0, 0.04);
+	animation: gv-cs-ai-in 260ms var(--gv-ease) both;
+
+	&.is-mine {
+		justify-self: end;
+		background: var(--gv-ink);
+		color: #ffffff;
+
+		.gv-cs-ai__who {
+			color: var(--gv-signal);
+		}
+	}
+
+	&.is-off {
+		border-left: 3px solid var(--gv-uv);
+	}
+}
+
+.gv-cs .gv-cs-ai__who {
+	font-family: var(--gv-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--gv-muted);
+}
+
+.gv-cs .gv-cs-ai__text {
+	line-height: 1.55;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+.gv-cs .gv-cs-ai__sources {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin-top: 4px;
+
+	span {
+		font-family: var(--gv-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--gv-muted);
+	}
+
+	button {
+		padding: 5px 9px;
+		border: 1px solid var(--gv-rule);
+		background: #ffffff;
+		color: var(--gv-ink);
+		font-size: 0.8125rem;
+		text-align: left;
+		cursor: pointer;
+		transition: border-color 160ms ease;
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--gv-ink);
+		}
+	}
+}
+
+.gv-cs .gv-cs-ai__handoff {
+	justify-self: start;
+	margin-top: 4px;
+	padding: 0;
+	border: 0;
+	border-bottom: 1.5px solid var(--gv-uv);
+	background: transparent;
+	color: var(--gv-ink);
+	font-family: var(--gv-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	cursor: pointer;
+
+	&:hover,
+	&:focus-visible {
+		color: var(--gv-uv);
+	}
+}
+
+.gv-cs .gv-cs-ai__dots {
+	display: flex;
+	gap: 5px;
+	padding: 6px 0;
+
+	span {
+		width: 7px;
+		height: 7px;
+		background: var(--gv-ink);
+		animation: gv-cs-ai-dot 1s ease-in-out infinite;
+
+		&:nth-child(2) {
+			animation-delay: 0.15s;
+		}
+
+		&:nth-child(3) {
+			animation-delay: 0.3s;
+		}
+	}
+}
+
+.gv-cs .gv-cs-ai__form {
+	padding: 16px clamp(18px, 2.4vw, 28px) 18px;
+	border-top: 2px solid var(--gv-ink);
+}
+
+.gv-cs .gv-cs-ai__input {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 52px;
+	gap: 8px;
+
+	textarea {
+		min-height: 52px;
+		max-height: 160px;
+		resize: vertical;
+	}
+}
+
+.gv-cs .gv-cs-ai__send {
+	display: grid;
+	place-items: center;
+	align-self: stretch;
+	border: 0;
+	background: var(--gv-ink);
+	color: #ffffff;
+	cursor: pointer;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+
+	&:hover:not(:disabled),
+	&:focus-visible {
+		background: var(--gv-signal);
+		color: var(--gv-ink);
+	}
+
+	&:disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+}
+
+.gv-cs .gv-cs-ai__note {
+	font-size: 0.8125rem;
+	line-height: 1.45;
+	color: var(--gv-muted);
+
+	button {
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--gv-ink);
+		font: inherit;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+}
+
+@keyframes gv-cs-ai-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes gv-cs-ai-dot {
+	0%,
+	100% {
+		opacity: 0.25;
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+@media (max-width: 639px) {
+	/* Four tabs on a phone: smaller names so "Notices" still fits */
+	.gv-cs .gv-cs-tab__name {
+		font-size: 0.875rem;
+	}
+
+	.gv-cs .gv-cs-ai__log {
+		max-height: 60vh;
+		padding: 16px 14px;
+	}
+
+	.gv-cs .gv-cs-ai__turn {
+		max-width: 94%;
+	}
+
+	.gv-cs .gv-cs-ai__form {
+		padding: 14px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gv-cs .gv-cs-ai__turn,
+	.gv-cs .gv-cs-ai__dots span {
+		animation: none;
+	}
+}

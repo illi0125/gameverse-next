@@ -689,6 +689,18 @@ export const GET_NOTICES = gql`
 	}
 `;
 
+/**************************
+ *       ASSISTANT        *
+ *************************/
+
+export const GET_ASSISTANT_STATUS = gql`
+	query GetAssistantStatus {
+		getAssistantStatus {
+			enabled
+		}
+	}
+`;
+
 export const GET_MY_INQUIRIES = gql`
 	query GetMyInquiries($input: MyInquiriesInquiry!) {
 		getMyInquiries(input: $input) {

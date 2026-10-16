@@ -388,6 +388,21 @@ export const CREATE_INQUIRY = gql`
 `;
 
 /**************************
+ *       ASSISTANT        *
+ *************************/
+
+export const ASK_ASSISTANT = gql`
+	mutation AskAssistant($input: AssistantInput!) {
+		askAssistant(input: $input) {
+			status
+			answer
+			sourceIds
+			suggestInquiry
+		}
+	}
+`;
+
+/**************************
  *     NOTIFICATIONS      *
  *************************/
 
